@@ -1,0 +1,476 @@
+<title>Beanie Studio</title>
+<style>
+  :root {
+    --bg: #0D0F0E;
+    --bg-well: #0A0C0B;
+    --surface: #151815;
+    --surface-2: #1D211D;
+    --line: #2B302B;
+    --line-soft: #1F231F;
+    --ink: #ECEAE2;
+    --ink-muted: #9C9C8F;
+    --ink-faint: #63645A;
+    --accent: #E8A93B;
+    --accent-dim: #B98A32;
+    --accent-wash: rgba(232,169,59,0.10);
+    --signal: #4FAE7A;
+    --signal-wash: rgba(79,174,122,0.14);
+    --rust: #A8402E;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", "Liberation Mono", monospace;
+    --font-sans: -apple-system, "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ambient scanline texture — static, not animated */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(236,234,226,0.028) 0px,
+      rgba(236,234,226,0.028) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(ellipse at 50% -10%, rgba(232,169,59,0.05), transparent 55%);
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .stripe {
+    height: 5px;
+    background-image: repeating-linear-gradient(
+      -45deg,
+      var(--accent-dim) 0px, var(--accent-dim) 9px,
+      var(--bg-well) 9px, var(--bg-well) 18px
+    );
+    opacity: 0.85;
+  }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .hero {
+    padding: 72px 0 56px;
+    text-align: center;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .hero .eyebrow { margin-bottom: 22px; }
+
+  .wordmark {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: clamp(56px, 14vw, 108px);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin: 0;
+    color: var(--ink);
+    text-shadow: 0 0 26px rgba(232,169,59,0.22);
+    animation: crtBoot 820ms steps(24) 1 both;
+  }
+
+  .wordmark span { color: var(--accent); }
+
+  @keyframes crtBoot {
+    0%   { opacity: 0;   filter: brightness(2.6) blur(3px); transform: scaleY(1.15); }
+    8%   { opacity: 1;   filter: brightness(3) blur(0);      transform: scaleY(0.96); }
+    14%  { opacity: 0.15;}
+    20%  { opacity: 1; }
+    27%  { opacity: 0.35;}
+    34%  { opacity: 1;   filter: brightness(1); transform: scaleY(1); }
+    100% { opacity: 1;   filter: brightness(1); transform: scaleY(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wordmark { animation: none; filter: none; transform: none; opacity: 1; }
+  }
+
+  .tagline {
+    font-size: 17px;
+    color: var(--ink-muted);
+    max-width: 46ch;
+    margin: 22px auto 0;
+    text-wrap: balance;
+  }
+
+  .status-readout {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 30px;
+    padding: 8px 16px;
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: var(--ink-muted);
+  }
+
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--signal);
+    box-shadow: 0 0 8px 1px var(--signal-wash);
+    flex-shrink: 0;
+  }
+
+  /* ---------- Sections ---------- */
+
+  section.panel { padding: 56px 0; border-bottom: 1px solid var(--line-soft); }
+  section.panel:last-of-type { border-bottom: none; }
+
+  h2 {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::before {
+    content: "";
+    width: 18px; height: 1px;
+    background: var(--accent-dim);
+    flex-shrink: 0;
+  }
+
+  .lede {
+    font-size: 16px;
+    color: var(--ink-muted);
+    max-width: 62ch;
+    margin: 0;
+  }
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Mission file ---------- */
+
+  .dossier {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 26px 26px 22px;
+  }
+
+  .dossier-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--line);
+  }
+
+  .dossier-title {
+    font-size: 20px;
+    font-weight: 750;
+    margin: 0;
+    letter-spacing: -0.005em;
+  }
+
+  .dossier-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--rust);
+    letter-spacing: 0.08em;
+    border: 1px solid var(--rust);
+    border-radius: 3px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+
+  .dossier p {
+    font-size: 15px;
+    color: var(--ink-muted);
+    margin: 0 0 18px;
+  }
+  .dossier p:last-of-type { margin-bottom: 0; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+  .stat { background: var(--surface-2); padding: 12px 14px; }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 5px;
+  }
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Comm channels ---------- */
+
+  .channels { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+
+  .channel {
+    display: grid;
+    grid-template-columns: 108px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    transition: background 120ms ease;
+  }
+  .channel:last-child { border-bottom: none; }
+  .channel:hover { background: var(--surface-2); }
+
+  .channel-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--signal);
+    background: var(--signal-wash);
+    border-radius: 3px;
+    padding: 4px 8px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .channel-desc { font-size: 14px; color: var(--ink-muted); min-width: 0; }
+  .channel-desc a { color: var(--ink); font-weight: 600; }
+  .channel-desc a:hover { color: var(--accent); }
+  .channel-sub { display: block; color: var(--ink-faint); font-size: 12.5px; margin-top: 2px; }
+
+  .channel-go {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+  .channel:hover .channel-go { color: var(--accent); }
+
+  /* ---------- Contact ---------- */
+
+  .contact-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 20px 24px;
+  }
+  .contact-addr {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .contact-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 9px 16px;
+    border-radius: 3px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .contact-btn:hover { background: var(--ink); text-decoration: none; }
+
+  /* ---------- Footer ---------- */
+
+  footer {
+    padding: 32px 0 56px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 560px) {
+    .hero { padding: 52px 0 40px; }
+    section.panel { padding: 40px 0; }
+    .dossier { padding: 20px; }
+    .stats { grid-template-columns: 1fr; }
+    .channel { grid-template-columns: 1fr; gap: 6px; }
+    .channel-tag { justify-self: start; }
+    .channel-go { display: none; }
+    .contact-line { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<div class="stripe"></div>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Beanie Studio</p>
+    <h1 class="wordmark">STAT<span>I</span>C</h1>
+    <p class="tagline">Salvage the scrap. Outlast the Hunter. Try not to get caught in the static.</p>
+    <div class="status-readout">
+      <span class="dot" aria-hidden="true"></span>
+      MISSION STATUS · IN DEVELOPMENT — TARGETING Q4 2026
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="panel">
+    <h2>Studio</h2>
+    <p class="lede">
+      <strong>Beanie Studio</strong> is a small team building for Roblox. Our first release is
+      <strong>STATIC: Salvage vs Hunter</strong> — an asymmetrical 5-vs-1 horror game where a team of
+      Scrappers salvage fuel from a wrecked shuttle while one Hunter stalks the wreck looking for them.
+      Tense when you're hiding, chaotic when you're not — the ragdolls, shoves, and clumsy escapes are
+      half the point.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2>Mission File</h2>
+    <div class="dossier">
+      <div class="dossier-head">
+        <p class="dossier-title">STATIC: Salvage vs Hunter</p>
+        <span class="dossier-tag">CLASSIFIED — PRE-LAUNCH</span>
+      </div>
+      <p>
+        One player takes the Hunter — faster, stronger, built to dominate the map. Four to five
+        Scrappers play the other side: outmatched, working together, and relying on stealth over
+        strength. Sprint, drop something heavy, or yell over comms and the Hunter's radar lights up
+        exactly where you are.
+      </p>
+      <p>
+        Rounds are short and built to replay. No player can carry the heavy scrap alone — someone's
+        always got to come help, right when the Hunter is closest.
+      </p>
+      <div class="stats">
+        <div class="stat">
+          <p class="stat-label">Match</p>
+          <p class="stat-value">5 Scrappers vs 1 Hunter</p>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Round length</p>
+          <p class="stat-value">5–10 minutes</p>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Platform</p>
+          <p class="stat-value">Mobile · PC · Console</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Comm Channels</h2>
+    <div class="channels">
+      <div class="channel">
+        <span class="channel-tag">DISCORD</span>
+        <span class="channel-desc">
+          <a href="https://discord.gg/z8kPT6cRbG">Join the server</a>
+          <span class="channel-sub">Dev chat, live updates, first look at builds</span>
+        </span>
+        <span class="channel-go">→</span>
+      </div>
+      <div class="channel">
+        <span class="channel-tag">ROBLOX</span>
+        <span class="channel-desc">
+          <a href="https://www.roblox.com/communities/1108819917/Beanies-studios">Follow the community</a>
+          <span class="channel-sub">Catch it the moment it's playable</span>
+        </span>
+        <span class="channel-go">→</span>
+      </div>
+      <div class="channel">
+        <span class="channel-tag">YOUTUBE</span>
+        <span class="channel-desc">
+          <a href="https://www.youtube.com/@anandx.1">Watch devlogs</a>
+          <span class="channel-sub">Gameplay clips and build progress</span>
+        </span>
+        <span class="channel-go">→</span>
+      </div>
+      <div class="channel">
+        <span class="channel-tag">INSTAGRAM</span>
+        <span class="channel-desc">
+          <a href="https://www.instagram.com/anandxgame/">See the art</a>
+          <span class="channel-sub">Behind the scenes</span>
+        </span>
+        <span class="channel-go">→</span>
+      </div>
+      <div class="channel">
+        <span class="channel-tag">X</span>
+        <span class="channel-desc">
+          <a href="https://x.com/BeanieStudiosHQ">@BeanieStudiosHQ</a>
+          <span class="channel-sub">Fastest updates</span>
+        </span>
+        <span class="channel-go">→</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Direct Line</h2>
+    <div class="contact-line">
+      <span class="contact-addr">static@beaniestudio.site</span>
+      <a class="contact-btn" href="mailto:static@beaniestudio.site">Send a message</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>Beanie Studio — beaniestudio.site</footer>
