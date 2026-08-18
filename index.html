@@ -90,16 +90,35 @@
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 13px 24px; }
   .nav-brand { font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.04em; color: var(--ink); font-size: 14px; }
   .nav-brand:hover { color: var(--accent); text-decoration: none; }
-  .nav-links { display: flex; gap: 20px; align-items: center; }
-  .nav-links a { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); }
+  .nav-links { display: flex; gap: 18px; align-items: center; }
+  .nav-links a { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); position: relative; }
   .nav-links a:hover { color: var(--accent); text-decoration: none; }
+  .nav-links a:not(.nav-cta)::after {
+    content: ""; position: absolute; left: 0; right: 100%; bottom: -4px; height: 1px;
+    background: var(--accent); transition: right 180ms ease;
+  }
+  .nav-links a:not(.nav-cta):hover::after { right: 0; }
+
+  .nav-sound {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 27px; height: 27px; border-radius: 50%; flex-shrink: 0;
+    background: transparent; border: 1px solid var(--line); color: var(--ink-faint);
+    cursor: pointer; padding: 0; transition: color 150ms ease, border-color 150ms ease, transform 100ms ease;
+  }
+  .nav-sound .ic { width: 12px; height: 12px; }
+  .nav-sound:hover { color: var(--accent); border-color: var(--accent-dim); }
+  .nav-sound[aria-pressed="true"] { color: var(--signal); border-color: var(--signal); }
+  .nav-sound:active { transform: scale(0.92); }
+
   .nav-cta {
     display: inline-flex; align-items: center; gap: 6px;
     background: var(--accent); color: var(--bg) !important; padding: 6px 12px; border-radius: 3px; font-weight: 700;
+    transition: background 130ms ease, transform 100ms ease;
   }
   .nav-cta .ic { width: 13px; height: 13px; }
   .nav-cta:hover { background: var(--ink); }
-  @media (max-width: 640px) { .nav-links a:not(.nav-cta) { display: none; } }
+  .nav-cta:active { transform: scale(0.95); }
+  @media (max-width: 640px) { .nav-links a:not(.nav-cta):not(.nav-sound) { display: none; } }
 
   /* ---------- Hero ---------- */
 
@@ -135,16 +154,25 @@
     background: var(--accent); color: var(--bg);
     font-family: var(--font-mono); font-weight: 700; font-size: 12.5px; letter-spacing: 0.05em; text-transform: uppercase;
     padding: 11px 18px; border-radius: 3px;
+    transition: background 130ms ease, transform 100ms ease;
+  }
+  @media (prefers-reduced-motion: no-preference) { .cta-primary { animation: ctaGlow 3.2s ease-in-out infinite; } }
+  @keyframes ctaGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232,169,59,0); }
+    50% { box-shadow: 0 0 0 6px rgba(232,169,59,0.10); }
   }
   .cta-primary:hover { background: var(--ink); text-decoration: none; }
+  .cta-primary:active { transform: scale(0.96); }
   .cta-primary .ic { width: 15px; height: 15px; }
   .cta-secondary {
     display: inline-flex; align-items: center;
     border: 1px solid var(--line); color: var(--ink-muted);
     font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase;
     padding: 11px 16px; border-radius: 3px;
+    transition: border-color 130ms ease, color 130ms ease, transform 100ms ease;
   }
   .cta-secondary:hover { border-color: var(--accent-dim); color: var(--accent); text-decoration: none; }
+  .cta-secondary:active { transform: scale(0.96); }
 
   .status-readout {
     display: inline-flex; align-items: center; gap: 9px; margin-top: 26px;
@@ -153,6 +181,11 @@
     font-variant-numeric: tabular-nums;
   }
   .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 8px 1px var(--signal-wash); flex-shrink: 0; }
+  @media (prefers-reduced-motion: no-preference) { .dot { animation: dotPulse 2.6s ease-in-out infinite; } }
+  @keyframes dotPulse {
+    0%, 100% { box-shadow: 0 0 8px 1px var(--signal-wash); }
+    50% { box-shadow: 0 0 13px 4px var(--signal-wash); }
+  }
 
   /* ---------- Ticker ---------- */
 
@@ -190,9 +223,7 @@
 
   /* ---------- Expandable brief (details/summary) ---------- */
 
-  .brief {
-    background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 2px 18px;
-  }
+  .brief { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 2px 18px; }
   .brief summary {
     list-style: none; cursor: pointer; padding: 15px 0;
     display: flex; align-items: center; justify-content: space-between; gap: 14px;
@@ -207,6 +238,10 @@
   .brief-body { padding: 0 0 16px; font-size: 14px; color: var(--ink-muted); }
   .brief-body p { margin: 0 0 12px; }
   .brief-body p:last-child { margin-bottom: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    details[open] > :last-child { animation: chipIn 220ms ease; }
+  }
+  @keyframes chipIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
   .brief-inline { border: none; padding: 0; margin-bottom: 18px; }
   .brief-inline summary { padding: 0 0 4px; font-size: 13px; }
@@ -225,7 +260,7 @@
   }
 
   .facts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .fact-chip { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .fact-chip { background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; transition: border-color 130ms ease; }
   .fact-chip summary {
     list-style: none; cursor: pointer; padding: 12px 13px;
     font-family: var(--font-mono); font-weight: 700; font-size: 12px; color: var(--ink);
@@ -244,10 +279,11 @@
   .channel {
     display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 14px;
     padding: 14px 18px; background: var(--surface); border-bottom: 1px solid var(--line);
-    transition: background 120ms ease; color: inherit;
+    transition: background 120ms ease, transform 100ms ease; color: inherit;
   }
   .channel:last-child { border-bottom: none; }
   .channel:hover { background: var(--surface-2); text-decoration: none; }
+  .channel:active { transform: scale(0.99); }
   .channel-icon {
     width: 34px; height: 34px; border-radius: 50%; background: var(--signal-wash);
     display: flex; align-items: center; justify-content: center; color: var(--signal); flex-shrink: 0;
@@ -274,14 +310,17 @@
     font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase;
     color: var(--ink-muted); background: transparent; border: 1px solid var(--line);
     padding: 9px 14px; border-radius: 3px; cursor: pointer; min-width: 76px;
-    transition: color 120ms ease, border-color 120ms ease;
+    transition: color 120ms ease, border-color 120ms ease, transform 100ms ease;
   }
   .contact-copy:hover { color: var(--accent); border-color: var(--accent-dim); }
+  .contact-copy:active { transform: scale(0.95); }
   .contact-btn {
     font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
     color: var(--bg); background: var(--accent); padding: 9px 16px; border-radius: 3px; font-weight: 700; white-space: nowrap;
+    transition: background 130ms ease, transform 100ms ease; display: inline-block;
   }
   .contact-btn:hover { background: var(--ink); text-decoration: none; }
+  .contact-btn:active { transform: scale(0.96); }
 
   /* ---------- Footer ---------- */
 
@@ -313,6 +352,8 @@
   }
 </style>
 
+<canvas id="staticCanvas" aria-hidden="true"></canvas>
+
 <!-- icon sprite -->
 <svg style="display:none" aria-hidden="true">
   <symbol id="i-discord" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="5"></rect><circle class="ic-fill" cx="9" cy="12" r="1.3"></circle><circle class="ic-fill" cx="15" cy="12" r="1.3"></circle></symbol>
@@ -321,6 +362,8 @@
   <symbol id="i-x" viewBox="0 0 24 24"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></symbol>
   <symbol id="i-roblox" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" transform="rotate(45 12 12)"></rect></symbol>
   <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><polyline points="3,7 12,13 21,7"></polyline></symbol>
+  <symbol id="i-sound-on" viewBox="0 0 24 24"><polygon class="ic-fill" points="4,9 8,9 13,5 13,19 8,15 4,15"></polygon><path d="M16,9 Q19,12 16,15"></path><path d="M18.5,6.5 Q23,12 18.5,17.5"></path></symbol>
+  <symbol id="i-sound-off" viewBox="0 0 24 24"><polygon class="ic-fill" points="4,9 8,9 13,5 13,19 8,15 4,15"></polygon><line x1="17" y1="9" x2="22" y2="15"></line><line x1="22" y1="9" x2="17" y2="15"></line></symbol>
 </svg>
 
 <div id="scrollBar"></div>
@@ -332,6 +375,9 @@
       <a href="#mission">Mission</a>
       <a href="#comms">Comms</a>
       <a href="#contact">Contact</a>
+      <button type="button" class="nav-sound" id="soundToggle" aria-pressed="false" aria-label="Toggle sound effects">
+        <svg class="ic" aria-hidden="true"><use href="#i-sound-off"></use></svg>
+      </button>
       <a href="https://discord.gg/z8kPT6cRbG" class="nav-cta"><svg class="ic" aria-hidden="true"><use href="#i-discord"></use></svg>Join</a>
     </div>
   </div>
@@ -475,7 +521,78 @@
   "use strict";
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* Nav reveal on scroll past hero */
+  /* ---------------- Sound effects (opt-in, muted by default) ---------------- */
+  var soundBtn = document.getElementById("soundToggle");
+  var soundOn = false;
+  try { soundOn = localStorage.getItem("bs_sound") === "on"; } catch (e) {}
+  var audioCtx = null;
+
+  function ensureAudio() {
+    if (!audioCtx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) { try { audioCtx = new AC(); } catch (e) {} }
+    }
+    if (audioCtx && audioCtx.state === "suspended") { try { audioCtx.resume(); } catch (e) {} }
+    return audioCtx;
+  }
+
+  function playBlip(freq, dur, type, vol) {
+    if (!soundOn) return;
+    var ctx = ensureAudio();
+    if (!ctx) return;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || "sine";
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol || 0.05, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + dur);
+  }
+
+  function playCrackle() {
+    if (!soundOn) return;
+    var ctx = ensureAudio();
+    if (!ctx) return;
+    var size = Math.floor(ctx.sampleRate * 0.07);
+    var buffer = ctx.createBuffer(1, size, ctx.sampleRate);
+    var data = buffer.getChannelData(0);
+    for (var i = 0; i < size; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / size);
+    var src = ctx.createBufferSource();
+    src.buffer = buffer;
+    var gain = ctx.createGain();
+    gain.gain.value = 0.05;
+    src.connect(gain).connect(ctx.destination);
+    src.start();
+  }
+
+  function updateSoundBtn() {
+    if (!soundBtn) return;
+    soundBtn.setAttribute("aria-pressed", soundOn ? "true" : "false");
+    var use = soundBtn.querySelector("use");
+    if (use) use.setAttribute("href", soundOn ? "#i-sound-on" : "#i-sound-off");
+  }
+  updateSoundBtn();
+
+  if (soundBtn) {
+    soundBtn.addEventListener("click", function () {
+      soundOn = !soundOn;
+      try { localStorage.setItem("bs_sound", soundOn ? "on" : "off"); } catch (e) {}
+      updateSoundBtn();
+      if (soundOn) playBlip(660, 0.09, "sine", 0.06);
+    });
+  }
+
+  document.querySelectorAll(".nav-links a:not(.nav-cta):not(.nav-sound), .channel").forEach(function (el) {
+    el.addEventListener("mouseenter", function () { playBlip(520, 0.045, "sine", 0.03); });
+  });
+
+  document.querySelectorAll("details").forEach(function (d) {
+    d.addEventListener("toggle", function () { playBlip(d.open ? 760 : 480, 0.05, "square", 0.02); });
+  });
+
+  /* ---------------- Nav reveal on scroll past hero ---------------- */
   var hero = document.querySelector(".hero");
   var nav = document.getElementById("siteNav");
   if (hero && nav && "IntersectionObserver" in window) {
@@ -484,7 +601,7 @@
     }, { threshold: 0, rootMargin: "-40px 0px 0px 0px" }).observe(hero);
   }
 
-  /* Scroll progress bar */
+  /* ---------------- Scroll progress bar ---------------- */
   var bar = document.getElementById("scrollBar");
   if (bar) {
     window.addEventListener("scroll", function () {
@@ -495,7 +612,7 @@
     }, { passive: true });
   }
 
-  /* Live countdown to Q4 2026 window */
+  /* ---------------- Live countdown to Q4 2026 window ---------------- */
   var statusEl = document.getElementById("statusText");
   if (statusEl) {
     var target = new Date("2026-10-01T00:00:00");
@@ -505,7 +622,7 @@
       : "MISSION STATUS · IN DEVELOPMENT — Q4 2026 WINDOW OPEN";
   }
 
-  /* Scroll-triggered section reveal */
+  /* ---------------- Scroll-triggered section reveal ---------------- */
   if (!reduceMotion && "IntersectionObserver" in window) {
     document.documentElement.classList.add("reveal-ready");
     var panelObs = new IntersectionObserver(function (entries) {
@@ -516,7 +633,7 @@
     document.querySelectorAll("section.panel").forEach(function (p) { panelObs.observe(p); });
   }
 
-  /* Wordmark scramble-in on hover */
+  /* ---------------- Wordmark scramble-in on hover ---------------- */
   var wordmark = document.getElementById("wordmark");
   if (wordmark && !reduceMotion) {
     var finalHTML = wordmark.innerHTML;
@@ -526,6 +643,7 @@
     wordmark.addEventListener("mouseenter", function () {
       if (busy) return;
       busy = true;
+      playBlip(300, 0.15, "sawtooth", 0.015);
       var step = 0;
       var timer = setInterval(function () {
         var out = "";
@@ -539,13 +657,18 @@
     });
   }
 
-  /* Copy email to clipboard */
+  /* ---------------- Copy email to clipboard ---------------- */
   var copyBtn = document.getElementById("copyBtn");
   if (copyBtn) {
     copyBtn.addEventListener("click", function () {
       var text = "static@beaniestudio.site";
       var original = copyBtn.textContent;
-      function flash() { copyBtn.textContent = "Copied"; setTimeout(function () { copyBtn.textContent = original; }, 1500); }
+      function flash() {
+        copyBtn.textContent = "Copied";
+        playBlip(600, 0.08, "sine", 0.05);
+        setTimeout(function () { playBlip(900, 0.09, "sine", 0.05); }, 90);
+        setTimeout(function () { copyBtn.textContent = original; }, 1500);
+      }
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(flash).catch(function () { fallbackCopy(text, flash); });
       } else { fallbackCopy(text, flash); }
@@ -559,7 +682,7 @@
     });
   }
 
-  /* Click-anywhere static burst */
+  /* ---------------- Click-anywhere static burst ---------------- */
   if (!reduceMotion) {
     document.addEventListener("click", function (e) {
       if (e.target.closest("a,button,summary,input,textarea")) return;
@@ -569,14 +692,15 @@
       burst.style.top = e.clientY + "px";
       document.body.appendChild(burst);
       burst.addEventListener("animationend", function () { burst.remove(); });
+      playCrackle();
     });
   }
 
-  /* Footer session id */
+  /* ---------------- Footer session id ---------------- */
   var sess = document.getElementById("sessionId");
   if (sess) { sess.textContent = Math.random().toString(16).slice(2, 8).toUpperCase(); }
 
-  /* Mouse-reactive TV static canvas */
+  /* ---------------- Mouse-reactive TV static canvas ---------------- */
   var canvas = document.getElementById("staticCanvas");
   if (canvas && !reduceMotion) {
     var ctx = canvas.getContext("2d");
