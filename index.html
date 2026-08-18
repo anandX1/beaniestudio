@@ -1,4 +1,5 @@
 <title>Beanie Studio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230D0F0E'/%3E%3Ctext x='50' y='69' font-size='60' text-anchor='middle' fill='%23E8A93B' font-family='monospace' font-weight='bold'%3ES%3C/text%3E%3C/svg%3E">
 <style>
   :root {
     --bg: #0D0F0E;
@@ -22,6 +23,9 @@
 
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
 
   body {
     margin: 0;
@@ -32,6 +36,13 @@
     -webkit-font-smoothing: antialiased;
     position: relative;
     overflow-x: hidden;
+  }
+
+  #staticCanvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
   }
 
   /* ambient scanline texture — static, not animated */
@@ -75,6 +86,8 @@
       var(--bg-well) 9px, var(--bg-well) 18px
     );
     opacity: 0.85;
+    position: relative;
+    z-index: 2;
   }
 
   .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
@@ -86,6 +99,50 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-faint);
+  }
+
+  /* ---------- Nav ---------- */
+
+  .site-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 20;
+    background: rgba(13,15,14,0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    transform: translateY(-100%);
+    transition: transform 240ms ease;
+  }
+  .site-nav.visible { transform: translateY(0); }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 24px;
+  }
+  .nav-brand {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    font-size: 14px;
+  }
+  .nav-brand:hover { color: var(--accent); text-decoration: none; }
+  .nav-links { display: flex; gap: 22px; }
+  .nav-links a {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .nav-links a:hover { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 560px) {
+    .nav-links { gap: 12px; }
+    .nav-links a { font-size: 10px; }
   }
 
   /* ---------- Hero ---------- */
@@ -108,6 +165,8 @@
     color: var(--ink);
     text-shadow: 0 0 26px rgba(232,169,59,0.22);
     animation: crtBoot 820ms steps(24) 1 both;
+    cursor: default;
+    user-select: none;
   }
 
   .wordmark span { color: var(--accent); }
@@ -147,6 +206,7 @@
     font-size: 12px;
     letter-spacing: 0.05em;
     color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
   }
 
   .dot {
@@ -158,8 +218,22 @@
 
   /* ---------- Sections ---------- */
 
-  section.panel { padding: 56px 0; border-bottom: 1px solid var(--line-soft); }
+  section.panel {
+    padding: 56px 0;
+    border-bottom: 1px solid var(--line-soft);
+    scroll-margin-top: 66px;
+  }
   section.panel:last-of-type { border-bottom: none; }
+
+  html.reveal-ready section.panel {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 560ms ease, transform 560ms ease;
+  }
+  html.reveal-ready section.panel.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
 
   h2 {
     font-family: var(--font-mono);
@@ -298,8 +372,9 @@
     font-family: var(--font-mono);
     font-size: 12px;
     color: var(--ink-faint);
+    transition: transform 150ms ease, color 150ms ease;
   }
-  .channel:hover .channel-go { color: var(--accent); }
+  .channel:hover .channel-go { color: var(--accent); transform: translateX(3px); }
 
   /* ---------- Contact ---------- */
 
@@ -319,6 +394,22 @@
     font-size: 16px;
     color: var(--ink);
   }
+  .contact-actions { display: flex; gap: 10px; align-items: center; }
+  .contact-copy {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    padding: 9px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    min-width: 76px;
+    transition: color 120ms ease, border-color 120ms ease;
+  }
+  .contact-copy:hover { color: var(--accent); border-color: var(--accent-dim); }
   .contact-btn {
     font-family: var(--font-mono);
     font-size: 12px;
@@ -342,6 +433,8 @@
     font-size: 11.5px;
     color: var(--ink-faint);
     letter-spacing: 0.04em;
+    position: relative;
+    z-index: 2;
   }
 
   @media (max-width: 560px) {
@@ -353,26 +446,42 @@
     .channel-tag { justify-self: start; }
     .channel-go { display: none; }
     .contact-line { flex-direction: column; align-items: flex-start; }
+    .contact-actions { width: 100%; }
+    .contact-btn { flex: 1; text-align: center; }
   }
 </style>
+
+<canvas id="staticCanvas" aria-hidden="true"></canvas>
+
+<nav class="site-nav" id="siteNav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">STATIC</a>
+    <div class="nav-links">
+      <a href="#studio">Studio</a>
+      <a href="#mission">Mission File</a>
+      <a href="#comms">Comms</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</nav>
 
 <div class="stripe"></div>
 
 <header class="hero">
   <div class="wrap">
     <p class="eyebrow">Beanie Studio</p>
-    <h1 class="wordmark">STAT<span>I</span>C</h1>
+    <h1 class="wordmark" id="wordmark">STAT<span>I</span>C</h1>
     <p class="tagline">Salvage the scrap. Outlast the Hunter. Try not to get caught in the static.</p>
     <div class="status-readout">
       <span class="dot" aria-hidden="true"></span>
-      MISSION STATUS · IN DEVELOPMENT — TARGETING Q4 2026
+      <span id="statusText">MISSION STATUS · IN DEVELOPMENT — TARGETING Q4 2026</span>
     </div>
   </div>
 </header>
 
 <main class="wrap">
 
-  <section class="panel">
+  <section class="panel" id="studio">
     <h2>Studio</h2>
     <p class="lede">
       <strong>Beanie Studio</strong> is a small team building for Roblox. Our first release is
@@ -383,7 +492,7 @@
     </p>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="mission">
     <h2>Mission File</h2>
     <div class="dossier">
       <div class="dossier-head">
@@ -417,7 +526,7 @@
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="comms">
     <h2>Comm Channels</h2>
     <div class="channels">
       <div class="channel">
@@ -426,7 +535,7 @@
           <a href="https://discord.gg/z8kPT6cRbG">Join the server</a>
           <span class="channel-sub">Dev chat, live updates, first look at builds</span>
         </span>
-        <span class="channel-go">→</span>
+        <span class="channel-go" aria-hidden="true">→</span>
       </div>
       <div class="channel">
         <span class="channel-tag">ROBLOX</span>
@@ -434,7 +543,7 @@
           <a href="https://www.roblox.com/communities/1108819917/Beanies-studios">Follow the community</a>
           <span class="channel-sub">Catch it the moment it's playable</span>
         </span>
-        <span class="channel-go">→</span>
+        <span class="channel-go" aria-hidden="true">→</span>
       </div>
       <div class="channel">
         <span class="channel-tag">YOUTUBE</span>
@@ -442,7 +551,7 @@
           <a href="https://www.youtube.com/@anandx.1">Watch devlogs</a>
           <span class="channel-sub">Gameplay clips and build progress</span>
         </span>
-        <span class="channel-go">→</span>
+        <span class="channel-go" aria-hidden="true">→</span>
       </div>
       <div class="channel">
         <span class="channel-tag">INSTAGRAM</span>
@@ -450,7 +559,7 @@
           <a href="https://www.instagram.com/anandxgame/">See the art</a>
           <span class="channel-sub">Behind the scenes</span>
         </span>
-        <span class="channel-go">→</span>
+        <span class="channel-go" aria-hidden="true">→</span>
       </div>
       <div class="channel">
         <span class="channel-tag">X</span>
@@ -458,19 +567,179 @@
           <a href="https://x.com/BeanieStudiosHQ">@BeanieStudiosHQ</a>
           <span class="channel-sub">Fastest updates</span>
         </span>
-        <span class="channel-go">→</span>
+        <span class="channel-go" aria-hidden="true">→</span>
       </div>
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="contact">
     <h2>Direct Line</h2>
     <div class="contact-line">
       <span class="contact-addr">static@beaniestudio.site</span>
-      <a class="contact-btn" href="mailto:static@beaniestudio.site">Send a message</a>
+      <div class="contact-actions">
+        <button type="button" class="contact-copy" id="copyBtn">Copy</button>
+        <a class="contact-btn" href="mailto:static@beaniestudio.site">Send a message</a>
+      </div>
     </div>
   </section>
 
 </main>
 
 <footer>Beanie Studio — beaniestudio.site</footer>
+
+<script>
+(function () {
+  "use strict";
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- Nav reveal on scroll past hero ---- */
+  var hero = document.querySelector(".hero");
+  var nav = document.getElementById("siteNav");
+  if (hero && nav && "IntersectionObserver" in window) {
+    var navObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        nav.classList.toggle("visible", !entry.isIntersecting);
+      });
+    }, { threshold: 0, rootMargin: "-40px 0px 0px 0px" });
+    navObs.observe(hero);
+  }
+
+  /* ---- Live countdown to Q4 2026 window ---- */
+  var statusEl = document.getElementById("statusText");
+  if (statusEl) {
+    var target = new Date("2026-10-01T00:00:00");
+    var now = new Date();
+    var days = Math.ceil((target - now) / 86400000);
+    if (days > 0) {
+      statusEl.textContent = "MISSION STATUS · IN DEVELOPMENT — T-MINUS " + days + " DAYS TO Q4 2026";
+    } else {
+      statusEl.textContent = "MISSION STATUS · IN DEVELOPMENT — Q4 2026 WINDOW OPEN";
+    }
+  }
+
+  /* ---- Scroll-triggered section reveal ---- */
+  if (!reduceMotion && "IntersectionObserver" in window) {
+    document.documentElement.classList.add("reveal-ready");
+    var panels = document.querySelectorAll("section.panel");
+    var panelObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in-view");
+          panelObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    panels.forEach(function (p) { panelObs.observe(p); });
+  }
+
+  /* ---- Wordmark scramble-in on hover ---- */
+  var wordmark = document.getElementById("wordmark");
+  if (wordmark && !reduceMotion) {
+    var finalHTML = wordmark.innerHTML;
+    var finalText = wordmark.textContent;
+    var glyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&$";
+    var busy = false;
+    wordmark.addEventListener("mouseenter", function () {
+      if (busy) return;
+      busy = true;
+      var step = 0;
+      var timer = setInterval(function () {
+        var out = "";
+        for (var i = 0; i < finalText.length; i++) {
+          out += i < step ? finalText[i] : glyphs[Math.floor(Math.random() * glyphs.length)];
+        }
+        wordmark.textContent = out;
+        step++;
+        if (step > finalText.length) {
+          clearInterval(timer);
+          wordmark.innerHTML = finalHTML;
+          busy = false;
+        }
+      }, 45);
+    });
+  }
+
+  /* ---- Copy email to clipboard ---- */
+  var copyBtn = document.getElementById("copyBtn");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", function () {
+      var text = "static@beaniestudio.site";
+      var original = copyBtn.textContent;
+      function flash() {
+        copyBtn.textContent = "Copied";
+        setTimeout(function () { copyBtn.textContent = original; }, 1500);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(flash).catch(function () { fallbackCopy(text, flash); });
+      } else {
+        fallbackCopy(text, flash);
+      }
+      function fallbackCopy(t, cb) {
+        var ta = document.createElement("textarea");
+        ta.value = t;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        document.body.removeChild(ta);
+        cb();
+      }
+    });
+  }
+
+  /* ---- Mouse-reactive TV static canvas ---- */
+  var canvas = document.getElementById("staticCanvas");
+  if (canvas && !reduceMotion) {
+    var ctx = canvas.getContext("2d");
+    var W = 160, H = 90;
+    var off = document.createElement("canvas");
+    off.width = W; off.height = H;
+    var octx = off.getContext("2d");
+    var imgData = octx.createImageData(W, H);
+    var mouseX = -9999, mouseY = -9999;
+    var running = true;
+    var lastDraw = 0;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+    window.addEventListener("mousemove", function (e) {
+      mouseX = e.clientX; mouseY = e.clientY;
+    }, { passive: true });
+    document.addEventListener("visibilitychange", function () {
+      running = document.visibilityState === "visible";
+    });
+
+    function frame(ts) {
+      if (running) {
+        if (!lastDraw || ts - lastDraw > 80) {
+          lastDraw = ts;
+          var d = imgData.data;
+          for (var i = 0; i < d.length; i += 4) {
+            var v = Math.random() * 255;
+            d[i] = v; d[i + 1] = v; d[i + 2] = v; d[i + 3] = 255;
+          }
+          octx.putImageData(imgData, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.imageSmoothingEnabled = false;
+          ctx.globalAlpha = 0.045;
+          ctx.drawImage(off, 0, 0, W, H, 0, 0, canvas.width, canvas.height);
+
+          var grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 240);
+          grad.addColorStop(0, "rgba(232,169,59,0.05)");
+          grad.addColorStop(1, "rgba(232,169,59,0)");
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
