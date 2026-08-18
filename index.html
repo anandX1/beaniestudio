@@ -1,6 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
-<title>Beanie Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beanie Studio — STATIC: Salvage vs Hunter</title>
+<meta name="description" content="STATIC: Salvage vs Hunter is an asymmetrical 5v1 horror game for Roblox from Beanie Studio. Scrappers salvage fuel from a wrecked shuttle while one Hunter stalks them. Targeting Q4 2026.">
+<meta name="theme-color" content="#0D0F0E">
+<link rel="canonical" href="https://beaniestudio.site/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Beanie Studio">
+<meta property="og:title" content="STATIC: Salvage vs Hunter — Beanie Studio">
+<meta property="og:description" content="An asymmetrical 5v1 horror game for Roblox. Salvage the scrap. Outlast the Hunter. Targeting Q4 2026.">
+<meta property="og:url" content="https://beaniestudio.site/">
+<meta property="og:image" content="https://beaniestudio.site/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@BeanieStudiosHQ">
+<meta name="twitter:title" content="STATIC: Salvage vs Hunter — Beanie Studio">
+<meta name="twitter:description" content="An asymmetrical 5v1 horror game for Roblox. Salvage the scrap. Outlast the Hunter. Targeting Q4 2026.">
+<meta name="twitter:image" content="https://beaniestudio.site/og-image.jpg">
+
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230D0F0E'/%3E%3Ctext x='50' y='69' font-size='60' text-anchor='middle' fill='%23E8A93B' font-family='monospace' font-weight='bold'%3ES%3C/text%3E%3C/svg%3E">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "STATIC: Salvage vs Hunter",
+  "description": "An asymmetrical 5-vs-1 horror game for Roblox where Scrappers salvage fuel from a wrecked shuttle while one Hunter stalks them.",
+  "genre": ["Horror", "Multiplayer", "Action"],
+  "gamePlatform": ["Roblox", "Mobile", "PC", "Console"],
+  "publisher": { "@type": "Organization", "name": "Beanie Studio", "url": "https://beaniestudio.site" },
+  "url": "https://beaniestudio.site"
+}
+</script>
+
 <style>
   :root {
     --bg: #0D0F0E;
@@ -325,12 +362,28 @@
 
   /* ---------- Footer ---------- */
 
-  footer {
-    padding: 28px 0 48px; text-align: center; font-family: var(--font-mono); font-size: 11px;
-    color: var(--ink-faint); letter-spacing: 0.04em; position: relative; z-index: 2;
+  .site-footer { border-top: 1px solid var(--line-soft); margin-top: 8px; position: relative; z-index: 2; }
+  .footer-inner {
+    display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;
+    padding: 32px 0 24px;
   }
-  footer .sess { color: var(--line); }
-  footer .sess span { color: var(--ink-faint); }
+  .footer-brand p { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-faint); max-width: 34ch; }
+  .footer-social { display: flex; gap: 8px; }
+  .footer-social a {
+    width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center; color: var(--ink-muted);
+    transition: color 130ms ease, border-color 130ms ease, transform 100ms ease;
+  }
+  .footer-social a:hover { color: var(--accent); border-color: var(--accent-dim); text-decoration: none; }
+  .footer-social a:active { transform: scale(0.92); }
+  .footer-bottom {
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    padding: 14px 0 40px; border-top: 1px solid var(--line-soft);
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-faint); letter-spacing: 0.04em;
+  }
+  .footer-bottom .sess { color: var(--line); }
+  .footer-bottom .sess span { color: var(--ink-faint); }
+  @media (max-width: 480px) { .footer-inner { flex-direction: column; } }
 
   /* ---------- Click burst ---------- */
 
@@ -352,6 +405,8 @@
     .contact-btn { flex: 1; text-align: center; }
   }
 </style>
+</head>
+<body>
 
 <canvas id="staticCanvas" aria-hidden="true"></canvas>
 
@@ -379,7 +434,7 @@
       <button type="button" class="nav-sound" id="soundToggle" aria-pressed="false" aria-label="Toggle sound effects">
         <svg class="ic" aria-hidden="true"><use href="#i-sound-off"></use></svg>
       </button>
-      <a href="https://discord.gg/z8kPT6cRbG" class="nav-cta"><svg class="ic" aria-hidden="true"><use href="#i-discord"></use></svg>Join</a>
+      <a href="https://discord.gg/z8kPT6cRbG" class="nav-cta" target="_blank" rel="noopener noreferrer"><svg class="ic" aria-hidden="true"><use href="#i-discord"></use></svg>Join</a>
     </div>
   </div>
 </nav>
@@ -392,7 +447,7 @@
     <h1 class="wordmark" id="wordmark">STAT<span>I</span>C</h1>
     <p class="tagline">Salvage the scrap. Outlast the Hunter. Try not to get caught in the static.</p>
     <div class="hero-ctas">
-      <a class="cta-primary" href="https://discord.gg/z8kPT6cRbG">
+      <a class="cta-primary" href="https://discord.gg/z8kPT6cRbG" target="_blank" rel="noopener noreferrer">
         <svg class="ic" aria-hidden="true"><use href="#i-discord"></use></svg> Join Discord
       </a>
       <a class="cta-secondary" href="#mission">Mission File ↓</a>
@@ -474,27 +529,27 @@
   <section class="panel" id="comms">
     <h2>Comm Channels</h2>
     <div class="channels">
-      <a class="channel" href="https://discord.gg/z8kPT6cRbG">
+      <a class="channel" href="https://discord.gg/z8kPT6cRbG" target="_blank" rel="noopener noreferrer">
         <span class="channel-icon"><svg class="ic" aria-hidden="true"><use href="#i-discord"></use></svg></span>
         <span class="channel-text"><span class="channel-name">Discord</span><span class="channel-hook">Be first in when doors open</span></span>
         <span class="channel-go" aria-hidden="true">→</span>
       </a>
-      <a class="channel" href="https://www.roblox.com/communities/1108819917/Beanies-studios">
+      <a class="channel" href="https://www.roblox.com/communities/1108819917/Beanies-studios" target="_blank" rel="noopener noreferrer">
         <span class="channel-icon"><svg class="ic" aria-hidden="true"><use href="#i-roblox"></use></svg></span>
         <span class="channel-text"><span class="channel-name">Roblox</span><span class="channel-hook">Follow now, play the second it's live</span></span>
         <span class="channel-go" aria-hidden="true">→</span>
       </a>
-      <a class="channel" href="https://www.youtube.com/@anandx.1">
+      <a class="channel" href="https://www.youtube.com/@anandx.1" target="_blank" rel="noopener noreferrer">
         <span class="channel-icon"><svg class="ic" aria-hidden="true"><use href="#i-youtube"></use></svg></span>
         <span class="channel-text"><span class="channel-name">YouTube</span><span class="channel-hook">Devlogs and gameplay clips</span></span>
         <span class="channel-go" aria-hidden="true">→</span>
       </a>
-      <a class="channel" href="https://www.instagram.com/anandxgame/">
+      <a class="channel" href="https://www.instagram.com/anandxgame/" target="_blank" rel="noopener noreferrer">
         <span class="channel-icon"><svg class="ic" aria-hidden="true"><use href="#i-instagram"></use></svg></span>
         <span class="channel-text"><span class="channel-name">Instagram</span><span class="channel-hook">Concept art and behind the scenes</span></span>
         <span class="channel-go" aria-hidden="true">→</span>
       </a>
-      <a class="channel" href="https://x.com/BeanieStudiosHQ">
+      <a class="channel" href="https://x.com/BeanieStudiosHQ" target="_blank" rel="noopener noreferrer">
         <span class="channel-icon"><svg class="ic" aria-hidden="true"><use href="#i-x"></use></svg></span>
         <span class="channel-text"><span class="channel-name">X</span><span class="channel-hook">Fastest updates, shortest posts</span></span>
         <span class="channel-go" aria-hidden="true">→</span>
@@ -515,7 +570,26 @@
 
 </main>
 
-<footer>Beanie Studio — beaniestudio.site <span class="sess">· SESSION #<span id="sessionId">......</span></span></footer>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <span class="nav-brand">STATIC</span>
+      <p>Beanie Studio — building STATIC: Salvage vs Hunter for Roblox.</p>
+    </div>
+    <div class="footer-social">
+      <a href="https://discord.gg/z8kPT6cRbG" target="_blank" rel="noopener noreferrer" aria-label="Discord"><svg class="ic" aria-hidden="true"><use href="#i-discord"></use></svg></a>
+      <a href="https://www.roblox.com/communities/1108819917/Beanies-studios" target="_blank" rel="noopener noreferrer" aria-label="Roblox community"><svg class="ic" aria-hidden="true"><use href="#i-roblox"></use></svg></a>
+      <a href="https://www.youtube.com/@anandx.1" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><svg class="ic" aria-hidden="true"><use href="#i-youtube"></use></svg></a>
+      <a href="https://www.instagram.com/anandxgame/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg class="ic" aria-hidden="true"><use href="#i-instagram"></use></svg></a>
+      <a href="https://x.com/BeanieStudiosHQ" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><svg class="ic" aria-hidden="true"><use href="#i-x"></use></svg></a>
+      <a href="mailto:static@beaniestudio.site" aria-label="Email"><svg class="ic" aria-hidden="true"><use href="#i-mail"></use></svg></a>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© 2026 Beanie Studio</span>
+    <span class="sess">SESSION #<span id="sessionId">......</span></span>
+  </div>
+</footer>
 
 <script>
 (function () {
@@ -744,3 +818,5 @@
   }
 })();
 </script>
+</body>
+</html>
