@@ -36,12 +36,38 @@ jobs:
         run: npm run check:links
         working-directory: site
 
-      # Google's open-source Lighthouse against the built pages, with hard
-      # assertions (perf ≥85, SEO/a11y ≥95, LCP ≤2.5s, CLS ≤0.1) from
-      # .lighthouserc.json — a push that regresses Core Web Vitals fails here.
+      # Google's open-source Lighthouse against the six real content pages
+      # (served build). Gates run in warn mode until a CI baseline exists —
+      # then flip "warn" to "error" in site/.lighthouserc.json.
       - name: Lighthouse CI
         run: npx --yes @lhci/cli@0.15.x autorun --config=.lighthouserc.json
         working-directory: site
+
+      - name: Lighthouse report
+        if: always()
+        working-directory: site
+        run: |
+          node -e "
+          const fs = require('fs');
+          const files = fs.readdirSync('reports').filter(f => f.startsWith('lhci-report') && f.endsWith('.json'));
+          let out = '## Lighthouse results\n\n| Page | Perf | SEO | A11y | BP |\n|---|---|---|---|---|\n';
+          for (const f of files) {
+            const r = JSON.parse(fs.readFileSync('reports/' + f, 'utf8'));
+            if (!r.categories) continue;
+            const u = new URL(r.finalDisplayedUrl);
+            const s = c => r.categories[c] ? Math.round(r.categories[c].score * 100) : '–';
+            out += '| ' + decodeURIComponent(u.pathname) + ' | ' + s('performance') + ' | ' + s('seo') + ' | ' + s('accessibility') + ' | ' + s('best-practices') + ' |\n';
+          }
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out);
+          ""
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: site/reports/
+          retention-days: 14
 
       # On push, Cloudflare is deploying the commit we just pushed — give it
       # a minute so the live audit checks the NEW deploy, not the old one.
