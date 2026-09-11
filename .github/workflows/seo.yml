@@ -1,0 +1,60 @@
+name: SEO & performance guard
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Every day 06:00 UTC — catches regressions even when nothing was pushed.
+    - cron: "0 6 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install
+        run: npm ci
+        working-directory: site
+
+      - name: Typecheck
+        run: npm run check
+        working-directory: site
+
+      - name: Build
+        run: npm run build
+        working-directory: site
+
+      - name: Internal link check
+        run: npm run check:links
+        working-directory: site
+
+      # Google's open-source Lighthouse against the built pages, with hard
+      # assertions (perf ≥85, SEO/a11y ≥95, LCP ≤2.5s, CLS ≤0.1) from
+      # .lighthouserc.json — a push that regresses Core Web Vitals fails here.
+      - name: Lighthouse CI
+        run: npx --yes @lhci/cli@0.15.x autorun --config=.lighthouserc.json
+        working-directory: site
+
+      # On push, Cloudflare is deploying the commit we just pushed — give it
+      # a minute so the live audit checks the NEW deploy, not the old one.
+      - name: Wait for deploy
+        if: github.event_name == 'push'
+        run: sleep 60
+
+      - name: Live production audit
+        run: npm run audit:live
+        working-directory: site
+
+      # Only on push to main (skip scheduled runs and PRs): ping Bing/Yandex/Seznam.
+      - name: IndexNow ping
+        if: github.event_name == 'push'
+        run: npm run ping:indexnow
+        working-directory: site
