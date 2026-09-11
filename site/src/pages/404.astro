@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="404 — Signal lost"
+  description="This corridor doesn't exist. Head back to the mission brief."
+  path="/404"
+  noindex
+>
+  <section class="mx-auto max-w-3xl px-4 py-32 text-center sm:px-6">
+    <p class="kicker">Error 404 — signal lost</p>
+    <h1 class="mt-6 font-display text-6xl font-bold uppercase tracking-tight text-signal sm:text-8xl">
+      <span class="flicker">Static</span>
+    </h1>
+    <p class="mx-auto mt-6 max-w-md text-lg leading-relaxed text-facility-300">
+      This corridor isn't on the facility map. Whatever was here is gone — and something may have
+      heard you open the door.
+    </p>
+    <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+      <a href="/" class="btn-primary">Back to the brief <span aria-hidden="true">→</span></a>
+      <a href="/play" class="btn-secondary">How to play <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+</BaseLayout>

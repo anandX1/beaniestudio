@@ -1,0 +1,548 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import VideoCard from '../components/VideoCard.astro';
+import { SITE, LINKS } from '../site.config';
+import { FEATURED_VIDEO, VIDEOS, watchUrl } from '../data/videos';
+
+const tickerItems = [
+  'FACILITY POWER: DEGRADED',
+  'HUNTER STATUS: ACTIVE',
+  'NO RADAR. NO MINIMAP. ONLY EARS.',
+  'SALVAGE CREWS: REPORT NOISE DISCIPLINE VIOLATIONS',
+  'EXTRACTION WINDOW: 60 SECONDS',
+  'Q4 2026: DOORS OPEN',
+];
+
+const scrapperBeats = [
+  { n: '01', t: 'Salvage', b: 'Pull heavy fuel scrap from the wreck. Nobody carries the heavy stuff alone.' },
+  { n: '02', t: 'Hide', b: 'Sprint and your boots ring out. Crouch-walk if you want to live.' },
+  { n: '03', t: 'Extract', b: 'Get the fuel out before the window closes. Five to ten minutes a round.' },
+];
+
+const hunterTraits = [
+  { n: 'FASTER', b: 'You close distance no Scrapper can outrun for long.' },
+  { n: 'BLIND', b: 'Light means nothing to you. Lockers, shadows, darkness — all the same.' },
+  { n: 'LISTENING', b: 'Sprinting. Dropped scrap. Panicked breathing. You hear all of it.' },
+];
+
+const videoGameLd = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'STATIC: Salvage vs Hunter',
+  description: SITE.description,
+  url: SITE.url,
+  image: new URL('/og/home.png', SITE.url).href,
+  genre: ['Horror', 'Asymmetrical Multiplayer', 'Survival'],
+  gamePlatform: ['PC', 'Mobile', 'Console'],
+  playMode: ['MultiPlayer', 'CoOp'],
+  numberOfPlayers: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 6 },
+  applicationCategory: 'Game',
+  operatingSystem: 'Roblox',
+  inLanguage: 'en',
+  keywords: 'roblox horror game, asymmetrical horror, 5v1, hunt by sound, free roblox horror, multiplayer horror',
+  trailer: {
+    '@type': 'VideoObject',
+    name: FEATURED_VIDEO.title,
+    description: FEATURED_VIDEO.note,
+    thumbnailUrl: [new URL(`/yt/${FEATURED_VIDEO.id}.jpg`, SITE.url).href],
+    uploadDate: FEATURED_VIDEO.date,
+    embedUrl: `https://www.youtube.com/embed/${FEATURED_VIDEO.id}`,
+    contentUrl: watchUrl(FEATURED_VIDEO.id),
+  },
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+
+const featuredVideoLd = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoObject',
+  name: `${FEATURED_VIDEO.title} — STATIC: Salvage vs Hunter`,
+  description: FEATURED_VIDEO.note,
+  thumbnailUrl: [new URL(`/yt/${FEATURED_VIDEO.id}.jpg`, SITE.url).href],
+  uploadDate: FEATURED_VIDEO.date,
+  embedUrl: `https://www.youtube.com/embed/${FEATURED_VIDEO.id}`,
+  contentUrl: watchUrl(FEATURED_VIDEO.id),
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+---
+
+<BaseLayout title={SITE.title} path="/" jsonLd={[videoGameLd, featuredVideoLd]}>
+  <!-- Arms beat reveals only when JS is running — no-JS visitors see everything. -->
+  <script is:inline>document.documentElement.classList.add('js-beats');</script>
+
+  <!-- Reading-progress rail -->
+  <div class="progress-rail" aria-hidden="true"><div class="progress-rail-fill" id="progressFill"></div></div>
+  <!-- Dread vignette — driven by the noise monitor -->
+  <div class="dread-vignette" aria-hidden="true"></div>
+
+  <!-- ================= ACT 01 — SIGNAL ACQUIRED ================= -->
+  <section class="act border-t-0" aria-label="Signal acquired">
+    <canvas id="staticNoise" class="static-noise" aria-hidden="true"></canvas>
+    <div class="relative mx-auto w-full max-w-6xl px-4 py-20 sm:px-6">
+      <div class="flex items-start justify-between gap-6">
+        <p class="kicker flex items-center gap-3">
+          <span class="dot" aria-hidden="true"></span>
+          Signal intercepted — origin: wrecked shuttle, sector 7
+        </p>
+        <span class="act-index" aria-hidden="true">01</span>
+      </div>
+
+      <h1 class="beat mt-6 font-display text-6xl font-bold uppercase leading-none tracking-tight sm:text-8xl">
+        <span class="flicker text-signal">Static</span>
+      </h1>
+      <p class="beat font-display text-2xl font-semibold uppercase tracking-[0.14em] text-facility-100 sm:text-4xl" style="--beat-delay: 90ms">
+        Salvage vs Hunter
+      </p>
+
+      <p class="beat mt-8 max-w-2xl text-lg leading-relaxed text-facility-300" style="--beat-delay: 180ms">
+        An asymmetrical 5v1 horror game for Roblox. Five Scrappers salvage fuel from a wrecked
+        shuttle while one Hunter stalks the wreck — <strong class="text-facility-100">hunting by
+        sound alone</strong>. No radar. No minimap. Nothing but what you hear.
+      </p>
+
+      <div class="beat mt-10 flex flex-wrap items-center gap-4" style="--beat-delay: 270ms">
+        <a href={LINKS.roblox} rel="noopener" target="_blank" class="btn-primary">
+          Follow on Roblox <span aria-hidden="true">→</span>
+        </a>
+        <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-secondary">
+          Join the Discord <span aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <p
+        id="countdown"
+        data-target={SITE.launchDate}
+        class="mt-12 font-mono text-sm tracking-[0.2em] text-facility-300"
+      >
+        T-MINUS — <span class="text-signal">Q4 2026 WINDOW</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- Intercept band -->
+  <div class="ticker bg-facility-900/60" aria-hidden="true">
+    <div class="ticker-track font-mono text-[0.7rem] tracking-[0.3em] text-signal-dim">
+      {[0, 1].map(() =>
+        tickerItems.map((item) => (
+          <span class="flex shrink-0 items-center gap-3 px-6 py-2.5">
+            <span class="inline-block h-1.5 w-1.5 bg-signal/70" aria-hidden="true"></span>
+            {item}
+          </span>
+        ))
+      )}
+    </div>
+  </div>
+
+  <!-- ================= ACT 02 — THE WRECK (RECOVERED FOOTAGE) ================= -->
+  <section class="act" aria-label="Recovered footage" id="transmissions">
+    <div class="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6">
+      <div class="flex items-start justify-between gap-6">
+        <div>
+          <p class="kicker flex items-center gap-3">
+            <span class="dot" aria-hidden="true"></span>
+            Act 02 — recovered footage
+          </p>
+          <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">
+            They filmed the wreck.
+          </h2>
+        </div>
+        <span class="act-index max-sm:hidden" aria-hidden="true">02</span>
+      </div>
+
+      <div class="mt-12 grid gap-6 lg:grid-cols-5">
+        <div class="beat lg:col-span-3">
+          <VideoCard video={FEATURED_VIDEO} eager />
+        </div>
+        <div class="beat panel flex flex-col justify-between gap-6 p-7 lg:col-span-2" style="--beat-delay: 120ms">
+          <div>
+            <p class="kicker">Signal intercept</p>
+            <p class="mt-4 font-display text-2xl font-bold uppercase leading-snug tracking-wide text-facility-100">
+              Trust no one. Hear everything.
+            </p>
+            <p class="mt-4 text-sm leading-relaxed text-facility-300">
+              Every clip is real playtest footage. The Hunter hears sprinting, dropped scrap, and
+              panicky breathing — so does anyone watching you play. New tapes drop every week.
+            </p>
+          </div>
+          <a href={LINKS.youtube} target="_blank" rel="noopener" class="btn-primary self-start">
+            Subscribe on YouTube <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-6 md:grid-cols-3">
+        {VIDEOS.slice(1, 4).map((v, i) => (
+          <div class="beat" style={`--beat-delay: ${i * 110}ms`}>
+            <VideoCard video={v} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ACT 03 — TWO SIDES, ONE WRECK ================= -->
+  <section class="act" aria-label="Two sides, one wreck">
+    <div class="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6">
+      <div class="flex items-start justify-between gap-6">
+        <div>
+          <p class="kicker">Act 03 — the asymmetry</p>
+          <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">
+            Two sides. One wreck.
+          </h2>
+        </div>
+        <span class="act-index max-sm:hidden" aria-hidden="true">03</span>
+      </div>
+
+      <div class="split mt-12">
+        <!-- Scrappers -->
+        <div class="beat">
+          <p class="noise-label text-status-green">Scrap crew — 5 per round</p>
+          <p class="mt-3 font-display text-3xl font-bold uppercase leading-tight tracking-wide">
+            "You are loud. You are slow. There are five of you."
+          </p>
+          <div class="mt-8 space-y-5">
+            {scrapperBeats.map((s) => (
+              <div class="flex gap-4">
+                <span class="font-mono text-sm text-signal-dim" aria-hidden="true">{s.n}</span>
+                <div>
+                  <h3 class="font-display text-lg font-bold uppercase tracking-wide">{s.t}</h3>
+                  <p class="mt-1 text-sm leading-relaxed text-facility-300">{s.b}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <!-- Hunter -->
+        <div class="beat" style="--beat-delay: 140ms">
+          <p class="noise-label text-status-red">The Hunter — 1 per round</p>
+          <p class="mt-3 font-display text-3xl font-bold uppercase leading-tight tracking-wide">
+            "You are the sound they fear."
+          </p>
+          <div class="mt-8 space-y-5">
+            {hunterTraits.map((t) => (
+              <div class="flex gap-4">
+                <span class="mt-1 inline-block h-1.5 w-1.5 shrink-0 bg-status-red" aria-hidden="true"></span>
+                <div>
+                  <h3 class="font-display text-lg font-bold uppercase tracking-wide">{t.n}</h3>
+                  <p class="mt-1 text-sm leading-relaxed text-facility-300">{t.b}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p class="mt-8 border-t border-facility-700 pt-4 font-mono text-xs leading-relaxed text-facility-500">
+            NO WALLHACKS. NO TRACKING. THE ONLY RADAR IS A MICROPHONE.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ACT 04 — THE MECHANIC (LIVE) ================= -->
+  <section class="act" aria-label="The mechanic — noise discipline">
+    <div class="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6">
+      <div class="flex items-start justify-between gap-6">
+        <div>
+          <p class="kicker flex items-center gap-3">
+            <span class="dot" aria-hidden="true"></span>
+            Act 04 — the mechanic, live on this page
+          </p>
+          <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">
+            This page is hunting you.
+          </h2>
+        </div>
+        <span class="act-index max-sm:hidden" aria-hidden="true">04</span>
+      </div>
+
+      <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
+        In STATIC, everything you do makes noise and the Hunter hears all of it. So does this page.
+        <strong class="text-facility-100">Scroll slowly</strong> and the monitor stays calm. Move
+        fast — the way you would when you panic — and watch what happens.
+      </p>
+
+      <!-- Noise Discipline Monitor -->
+      <div class="beat panel mt-10 p-7 sm:p-9" style="--beat-delay: 120ms" id="monitor">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <p class="noise-label text-facility-300">Noise discipline monitor</p>
+          <p class="noise-label text-facility-500" id="noiseState">STATUS: CALM</p>
+        </div>
+        <div class="noise-meter mt-4" role="meter" aria-label="Noise level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="noiseMeter">
+          <div class="noise-meter-fill"></div>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-x-8 gap-y-1 font-mono text-[0.68rem] tracking-[0.18em] text-facility-500">
+          <span>SCROLL SLOW → CALM</span>
+          <span class="text-signal">MOVE FAST → THEY HEAR</span>
+          <span class="text-status-red">RED LINE: 65 — SIGNAL LOSS</span>
+        </div>
+
+        <div class="mt-7 flex flex-wrap items-center gap-4 border-t border-facility-700 pt-6">
+          <button type="button" id="heartbeatToggle" class="btn-secondary !px-4 !py-2 text-xs" aria-pressed="false">
+            <span aria-hidden="true">▶</span> Enable heartbeat audio
+          </button>
+          <p class="max-w-md font-mono text-[0.68rem] leading-relaxed tracking-[0.14em] text-facility-500">
+            SYNTHESIZED IN YOUR BROWSER — NOTHING IS DOWNLOADED. IN THE GAME, THIS IS EXACTLY WHAT
+            YOU HEAR WHEN THE HUNTER IS CLOSE.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ACT 05 — THE DOOR ================= -->
+  <section class="act" aria-label="Doors open Q4 2026">
+    <div class="mx-auto w-full max-w-6xl px-4 py-20 text-center sm:px-6">
+      <span class="act-index mx-auto block" aria-hidden="true">05</span>
+      <p class="kicker mt-4">Act 05 — the door</p>
+      <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">
+        Be there when the lights go out
+      </h2>
+      <p class="beat mx-auto mt-5 max-w-xl text-facility-300" style="--beat-delay: 100ms">
+        Follow the community page to play the second it's live — or get into the Discord to help
+        shape what ships. Doors open Q4 2026.
+      </p>
+      <div class="beat mt-9 flex flex-wrap items-center justify-center gap-4" style="--beat-delay: 200ms">
+        <a href={LINKS.roblox} rel="noopener" target="_blank" class="btn-primary">Follow on Roblox <span aria-hidden="true">→</span></a>
+        <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-secondary">Join the Discord <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Countdown: 10-line, dependency-free, reduced-motion aware, static-label fallback. -->
+  <script>
+    (function () {
+      const el = document.getElementById('countdown');
+      if (!el) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const target = Date.parse(el.getAttribute('data-target') || '');
+      if (isNaN(target)) return;
+      const pad = function (n: number) { return String(n).padStart(2, '0'); };
+      const render = function () {
+        let s = Math.floor((target - Date.now()) / 1000);
+        if (s <= 0) { el.textContent = 'LAUNCH WINDOW OPEN'; return; }
+        const d = Math.floor(s / 86400); s -= d * 86400;
+        const h = Math.floor(s / 3600); s -= h * 3600;
+        const m = Math.floor(s / 60); s -= m * 60;
+        el.textContent = 'T-MINUS ' + d + 'D ' + pad(h) + ':' + pad(m) + ':' + pad(s) + ' — Q4 2026 WINDOW';
+      };
+      render();
+      setInterval(render, 1000);
+    })();
+  </script>
+
+  <!-- Scroll cinema: progress rail + beat reveals. IO-driven, zero scroll jank. -->
+  <script>
+    (function () {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Progress rail: writes only inside rAF, one read per frame at most.
+      const fill = document.getElementById('progressFill');
+      if (fill) {
+        let ticking = false;
+        const update = function () {
+          ticking = false;
+          const max = document.documentElement.scrollHeight - window.innerHeight;
+          const p = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+          fill.style.transform = 'scaleX(' + p + ')';
+        };
+        const onScroll = function () {
+          if (!ticking) { ticking = true; requestAnimationFrame(update); }
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        update();
+      }
+
+      // Beat reveals: static until armed; IO toggles both directions so
+      // re-scrolling an act replays its entrance.
+      const beats = document.querySelectorAll('.beat');
+      if (!reduce && 'IntersectionObserver' in window && beats.length) {
+        const io = new IntersectionObserver(function (entries) {
+          for (const e of entries) e.target.classList.toggle('in', e.isIntersecting);
+        }, { threshold: 0.15 });
+        beats.forEach((b) => io.observe(b));
+      }
+    })();
+  </script>
+
+  <!-- Noise Discipline Monitor: the page hunts you back. Velocity-scored
+       input, exponential decay, pure CSS output. No listeners per frame. -->
+  <script>
+    (function () {
+      const meter = document.getElementById('noiseMeter');
+      const stateLabel = document.getElementById('noiseState');
+      if (!meter) return;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+
+      let level = 0;          // 0..100
+      const decay = function () {
+        level = level > 0.5 ? level * 0.86 : 0;
+        render();
+      };
+      setInterval(decay, 250);
+
+      const render = function () {
+        meter.style.setProperty('--noise-level', String(Math.round(level)));
+        meter.setAttribute('aria-valuenow', String(Math.round(level)));
+        const state = level >= 65 ? 'CRITICAL' : level >= 30 ? 'ELEVATED' : 'CALM';
+        if (stateLabel && stateLabel.textContent !== 'STATUS: ' + state) {
+          stateLabel.textContent = 'STATUS: ' + state;
+          stateLabel.classList.toggle('text-status-red', state === 'CRITICAL');
+          stateLabel.classList.toggle('text-signal', state === 'ELEVATED');
+        }
+        document.body.dataset.noise = state.toLowerCase();
+      };
+
+      const add = function (amount: number) {
+        level = Math.min(100, level + amount);
+        render();
+      };
+
+      // Scroll velocity → noise. dx/dt scored, hard-capped per event.
+      let lastY = window.scrollY, lastT = Date.now();
+      window.addEventListener('scroll', function () {
+        const now = Date.now();
+        const dt = Math.max(16, now - lastT);
+        const v = Math.abs(window.scrollY - lastY) / dt; // px per ms
+        lastY = window.scrollY; lastT = now;
+        if (v > 0.25) add(Math.min(7, (v - 0.25) * 5));
+      }, { passive: true });
+
+      // Pointer haste counts too — panicked mice are loud.
+      let lastPX = 0, lastPY = 0, lastPT = 0;
+      window.addEventListener('pointermove', function (e) {
+        const now = Date.now();
+        const dt = Math.max(24, now - lastPT);
+        const dist = Math.hypot(e.clientX - lastPX, e.clientY - lastPY);
+        lastPX = e.clientX; lastPY = e.clientY; lastPT = now;
+        const v = dist / dt;
+        if (v > 1.2) add(Math.min(2.5, (v - 1.2) * 0.7));
+      }, { passive: true });
+
+      // ---- Heartbeat: synthesized lub-dub via WebAudio. Zero payload. ----
+      const toggle = document.getElementById('heartbeatToggle');
+      let ctx: AudioContext | null = null;
+      let master: GainNode | null = null;
+      let nextBeat = 0;      // audio-clock cursor for scheduled thumps
+      let pumpId = 0;        // the scheduling interval's id (kept separate)
+      let on = false;
+
+      const thump = function (t: number, gainVal: number, dest: GainNode) {
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(52, t);
+        osc.frequency.exponentialRampToValueAtTime(38, t + 0.14);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(gainVal, t + 0.018);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+        osc.connect(g).connect(dest);
+        osc.start(t);
+        osc.stop(t + 0.2);
+      };
+
+      const schedule = function () {
+        if (!ctx || !master) return;
+        const ahead = ctx.currentTime + 0.12;
+        while (nextBeat < ahead) {
+          const period = Math.max(0.34, 1.15 - (level / 100) * 0.75);
+          const strength = 0.22 + (level / 100) * 0.45;
+          thump(nextBeat, strength, master);
+          thump(nextBeat + Math.min(0.3, period * 0.32), strength * 0.6, master);
+          nextBeat += period;
+        }
+      };
+
+      const stop = function () {
+        on = false;
+        if (pumpId) { clearInterval(pumpId); pumpId = 0; }
+        if (ctx) { void ctx.suspend(); }
+        toggle?.setAttribute('aria-pressed', 'false');
+        if (toggle) toggle.innerHTML = '<span aria-hidden="true">▶</span> Enable heartbeat audio';
+      };
+
+      toggle?.addEventListener('click', function () {
+        if (on) { stop(); return; }
+        if (!ctx) {
+          const AC = window.AudioContext || (window as any).webkitAudioContext;
+          if (!AC) return;
+          ctx = new AC();
+          master = ctx.createGain();
+          master.gain.value = 0.5;
+          master.connect(ctx.destination);
+        }
+        void ctx.resume().then(function () {
+          if (!ctx) return;
+          nextBeat = ctx.currentTime + 0.1;
+          on = true;
+          pumpId = window.setInterval(schedule, 90);
+          schedule();
+          toggle.setAttribute('aria-pressed', 'true');
+          toggle.innerHTML = '<span aria-hidden="true">■</span> Silence heartbeat';
+        });
+      });
+
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden && on) stop();
+      });
+    })();
+  </script>
+
+  <!-- Hero static: analog TV noise, painted to a small offscreen buffer. No deps.
+       Dies instantly on reduced-motion, hidden tabs, or missing canvas support.
+       Backing store is sized on load + resize only — never inside the frame loop. -->
+  <script>
+    (function () {
+      const canvas = document.getElementById('staticNoise') as HTMLCanvasElement | null;
+      if (!canvas || !canvas.getContext) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const W = 220;
+      const H = 124;
+      const buf = document.createElement('canvas');
+      buf.width = W; buf.height = H;
+      const bctx = buf.getContext('2d');
+      if (!bctx) return;
+      const img = bctx.createImageData(W, H);
+
+      let running = true;
+      document.addEventListener('visibilitychange', () => { running = !document.hidden; });
+
+      const sizeCanvas = function () {
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+      };
+      sizeCanvas();
+      window.addEventListener('resize', sizeCanvas);
+
+      let rafId = 0;
+      const draw = function () {
+        if (running) {
+          const d = img.data;
+          for (let i = 0; i < d.length; i += 4) {
+            const v = (Math.random() * 255) | 0;
+            d[i] = v; d[i + 1] = v; d[i + 2] = v;
+            d[i + 3] = 255;
+          }
+          bctx.putImageData(img, 0, 0);
+          ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
+        }
+        rafId = requestAnimationFrame(draw);
+      };
+      // Paint only while the hero is on screen — off-screen, the loop is
+      // cancelled entirely (rAF keeps burning battery even when idle).
+      const start = function () { if (!rafId) rafId = requestAnimationFrame(draw); };
+      const stop = function () { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } };
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(function (entries) {
+          for (const e of entries) { if (e.isIntersecting) { start(); } else { stop(); } }
+        });
+        io.observe(canvas);
+      } else {
+        start();
+      }
+    })();
+  </script>
+</BaseLayout>

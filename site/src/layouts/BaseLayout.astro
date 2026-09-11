@@ -1,0 +1,135 @@
+---
+import '../styles/global.css';
+import '@fontsource/chakra-petch/500.css';
+import '@fontsource/chakra-petch/700.css';
+import '@fontsource-variable/public-sans';
+import '@fontsource-variable/jetbrains-mono';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { SITE, LINKS } from '../site.config';
+
+interface Props {
+  /** Page title — rendered as "%page% — Beanie Studio" (or verbatim if it already contains the brand). */
+  title: string;
+  description?: string;
+  /** Path with leading slash, e.g. '/play'. Used for canonical + og:url (trailing slash normalized). */
+  path: string;
+  /** Absolute path to the 1200×630 OG card (defaults to /og/home.png). */
+  ogImage?: string;
+  /** Alt text describing the OG card for screen readers and crawlers. */
+  ogImageAlt?: string;
+  /** Extra JSON-LD blocks rendered on this page. */
+  jsonLd?: Record<string, unknown>[];
+  /** Breadcrumb trail → emits BreadcrumbList structured data. */
+  breadcrumb?: { name: string; path: string }[];
+  /** Set true on utility pages (404) that must stay out of indexes. */
+  noindex?: boolean;
+  /** Open Graph type — 'article' for devlog posts. */
+  ogType?: 'website' | 'article';
+}
+
+const {
+  title,
+  description = SITE.description,
+  path,
+  ogImage = '/og/home.png',
+  ogImageAlt = `${SITE.name} — key art card`,
+  jsonLd = [],
+  breadcrumb,
+  noindex = false,
+  ogType = 'website',
+} = Astro.props;
+
+/** Canonical URLs use the trailing-slash directory form Astro actually serves. */
+const normPath = path === '/' ? '/' : path.endsWith('/') ? path : `${path}/`;
+const canonical = new URL(normPath, SITE.url);
+const ogImageAbs = new URL(ogImage, SITE.url);
+const fullTitle = title.includes('Beanie Studio') ? title : `${title} — Beanie Studio`;
+
+/** Site-wide Organization graph, present on every page. */
+const organizationLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: SITE.name,
+  url: SITE.url,
+  email: SITE.contact,
+  logo: new URL('/logo.png', SITE.url).href,
+  sameAs: [LINKS.roblox, LINKS.discord, LINKS.youtube, LINKS.instagram, LINKS.x],
+};
+
+const websiteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: SITE.url,
+};
+
+/** BreadcrumbList — wins sitelink breadcrumbs in SERPs. */
+const breadcrumbLd = breadcrumb
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumb.map((crumb, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: crumb.name,
+        item: new URL(crumb.path.endsWith('/') || crumb.path === '/' ? crumb.path : `${crumb.path}/`, SITE.url).href,
+      })),
+    }
+  : null;
+
+const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolean);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
+
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#16181d" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageAbs} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    <meta property="og:locale" content={SITE.locale} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@BeanieStudiosHQ" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageAbs} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(allLd)} />
+  </head>
+  <body>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] focus:bg-signal focus:text-facility-950 focus:px-3 focus:py-2 focus:font-mono"
+    >
+      Skip to content
+    </a>
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>

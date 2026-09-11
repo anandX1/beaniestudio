@@ -1,0 +1,82 @@
+---
+import { SITE } from '../site.config';
+
+const nav = [
+  { href: '/', label: 'BRIEF' },
+  { href: '/play', label: 'PLAY' },
+  { href: '/devlog', label: 'DEVLOG' },
+  { href: '/faq', label: 'INTEL' },
+  { href: '/press', label: 'PRESS' },
+];
+
+const current = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+function isActive(href: string): boolean {
+  if (href === '/') return current === '/';
+  return current === href || current.startsWith(href + '/');
+}
+---
+
+<header class="sticky top-0 z-50 border-b border-facility-700 bg-facility-950/90 backdrop-blur">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+    <a href="/" class="group flex items-center gap-3" aria-label={`${SITE.name} — home`}>
+      <img
+        src="/favicon.png"
+        alt=""
+        width="36"
+        height="36"
+        loading="eager"
+        decoding="async"
+        class="h-9 w-9 border-2 border-signal object-cover"
+        aria-hidden="true"
+      />
+      <span class="font-display text-sm font-bold tracking-[0.18em] text-facility-100 uppercase">
+        Beanie&nbsp;Studio
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-7 font-mono text-xs tracking-[0.22em] md:flex" aria-label="Primary">
+      {nav.map((item) => (
+        <a
+          href={item.href}
+          aria-current={isActive(item.href) ? 'page' : undefined}
+          class:list={[
+            'transition-colors',
+            isActive(item.href) ? 'text-signal' : 'text-facility-300 hover:text-signal',
+          ]}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <a href="/play" class="btn-primary hidden !px-4 !py-2 text-xs md:inline-flex">Play</a>
+
+    <!-- Mobile menu: checkbox hack, zero JS -->
+    <details class="relative md:hidden">
+      <summary
+        class="grid h-9 w-9 cursor-pointer list-none place-items-center border border-facility-600 text-facility-100"
+        aria-label="Toggle menu"
+      >
+        <span class="font-mono text-lg leading-none">≡</span>
+      </summary>
+      <nav
+        class="absolute right-0 mt-2 flex w-52 flex-col border border-facility-700 bg-facility-900 p-2 font-mono text-xs tracking-[0.2em]"
+        aria-label="Mobile"
+      >
+        {nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'px-3 py-2.5',
+              isActive(item.href) ? 'bg-facility-800 text-signal' : 'text-facility-100 hover:bg-facility-800',
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+        <a href="/play" class="mt-1 bg-signal px-3 py-2.5 text-center font-bold text-facility-950">PLAY</a>
+      </nav>
+    </details>
+  </div>
+</header>

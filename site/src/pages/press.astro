@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, LINKS } from '../site.config';
+
+const facts = [
+  ['Title', 'STATIC: Salvage vs Hunter'],
+  ['Developer', 'Beanie Studio'],
+  ['Platform', 'Roblox (PC, mobile, console — crossplay)'],
+  ['Players', '5v1 — four to five Scrappers vs one Hunter'],
+  ['Session length', '5–10 minute rounds'],
+  ['Price', 'Free to play'],
+  ['Release', 'Targeting Q4 2026'],
+  ['Genre', 'Asymmetrical horror / salvage survival'],
+];
+
+const paragraphs = [
+  'STATIC is an asymmetrical 5v1 horror game for Roblox. Four to five Scrappers salvage heavy fuel scrap from a wrecked shuttle while one player — the Hunter — stalks the wreck to stop them.',
+  'The twist is the tracker: there is none. No radar, no minimap, no wallhacks for anyone. The Hunter hunts by sound alone, and everything the Scrappers do makes noise — sprinting, dragging heavy salvage, panicking. Crouch-walk is life.',
+  'The tone is deliberately double-edged: genuinely tense when you are hiding three feet from a Hunter you cannot see, and immediately funny when a shove turns a stealth standoff into a ragdoll pile. Rounds run five to ten minutes and are built for "one more game."',
+  'STATIC targets a Q4 2026 launch and is developed by Beanie Studio, a small independent team. Performance is tuned for iPhone-8-class devices so full crossplay never means second-class players.',
+];
+
+const shortDesc = 'STATIC: Salvage vs Hunter is an asymmetrical 5v1 horror game for Roblox by Beanie Studio. Scrappers salvage fuel from a wrecked shuttle while one Hunter hunts them by sound alone. No radar. No minimap. Only ears. Free, crossplay, targeting Q4 2026.';
+---
+
+<BaseLayout
+  title="Press kit — STATIC: Salvage vs Hunter"
+  description="Copy-paste-safe facts, descriptions, and contact for press and creators covering STATIC: Salvage vs Hunter, the asymmetrical 5v1 horror game for Roblox."
+  path="/press"
+  ogImage="/og/press.png"
+  breadcrumb={[{ name: 'Mission brief', path: '/' }, { name: 'Press kit', path: '/press' }]}
+>
+  <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+    <p class="kicker">Press kit</p>
+    <h1 class="mt-6 font-display text-4xl font-bold uppercase leading-tight tracking-tight sm:text-6xl">
+      Cover STATIC
+    </h1>
+    <p class="mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
+      Everything on this page is copy-paste safe for articles, videos, and posts. Need anything
+      else — interviews, early access, custom clips — email us and ask.
+    </p>
+
+    <div class="mt-16 grid gap-10 lg:grid-cols-[1.6fr_1fr]">
+      <!-- Description blocks -->
+      <div>
+        <p class="kicker">The one-liner</p>
+        <blockquote class="panel mt-4 p-6 font-mono text-sm leading-relaxed text-facility-100">
+          {shortDesc}
+        </blockquote>
+
+        <p class="kicker mt-10">The story</p>
+        <div class="mt-4 space-y-4 leading-relaxed text-facility-300">
+          {paragraphs.map((p) => <p>{p}</p>)}
+        </div>
+      </div>
+
+      <!-- Fact sheet -->
+      <aside class="panel h-fit p-7">
+        <p class="kicker">Fact sheet</p>
+        <dl class="mt-5 divide-y divide-facility-700">
+          {facts.map(([k, v]) => (
+            <div class="flex items-baseline justify-between gap-4 py-3">
+              <dt class="font-mono text-xs uppercase tracking-widest text-facility-500">{k}</dt>
+              <dd class="text-right text-sm font-semibold text-facility-100">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </aside>
+    </div>
+
+    <!-- Assets + contact -->
+    <div class="mt-14 grid gap-6 md:grid-cols-2">
+      <div class="panel p-7">
+        <p class="kicker">Assets</p>
+        <ul class="mt-5 space-y-2.5 text-sm text-facility-300">
+          <li>• Logo (PNG, 703×703) + favicon — <span class="font-mono text-facility-100"><a href="/logo.png" class="underline decoration-facility-600 underline-offset-4 hover:decoration-signal" download>download /logo.png</a></span></li>
+          <li>• OG card (1200×630) — <span class="font-mono text-facility-100">/og/home.png</span></li>
+          <li>• Screenshots & key art — <span class="font-mono text-facility-100">on request via email</span></li>
+          <li>• Gameplay clips — <span class="font-mono text-facility-100">YouTube channel</span></li>
+        </ul>
+        <a href={LINKS.youtube} rel="noopener" target="_blank" class="btn-secondary mt-7 !px-4 !py-2 text-xs">
+          YouTube channel <span aria-hidden="true">→</span>
+        </a>
+      </div>
+      <div class="panel flex flex-col p-7">
+        <p class="kicker">Direct line</p>
+        <p class="mt-5 text-sm leading-relaxed text-facility-300">
+          Interviews, creator keys, early playtests, or anything at all — we answer fast.
+        </p>
+        <a href={`mailto:${SITE.contact}`} class="mt-6 font-mono text-lg text-signal hover:text-signal-dim">
+          {SITE.contact}
+        </a>
+        <p class="mt-auto pt-8 font-mono text-xs text-facility-500">
+          RESPONSE TIME: USUALLY UNDER 48H
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

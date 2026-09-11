@@ -1,0 +1,137 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('devlog', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const fmtDate = post.data.pubDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const postLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  image: [new URL('/og/devlog.png', Astro.site).href],
+  datePublished: post.data.pubDate.toISOString(),
+  dateModified: (post.data.updatedDate ?? post.data.pubDate).toISOString(),
+  articleSection: post.data.tag,
+  keywords: `STATIC, roblox devlog, ${post.data.tag ?? 'game development'}, Beanie Studio`,
+  inLanguage: 'en',
+  author: { '@type': 'Organization', name: 'Beanie Studio', url: Astro.site?.href },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Beanie Studio',
+    logo: { '@type': 'ImageObject', url: new URL('/logo.png', Astro.site).href },
+  },
+  mainEntityOfPage: new URL(`/devlog/${post.id}/`, Astro.site).href,
+};
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  path={`/devlog/${post.id}/`}
+  ogImage="/og/devlog.png"
+  ogType="article"
+  jsonLd={[postLd]}
+  breadcrumb={[{ name: 'Mission brief', path: '/' }, { name: 'Devlog', path: '/devlog' }, { name: post.data.title, path: `/devlog/${post.id}` }]}
+>
+  <article class="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28">
+    <p class="kicker">Devlog — {post.data.tag}</p>
+    <h1 class="mt-6 font-display text-3xl font-bold uppercase leading-tight tracking-tight sm:text-5xl">
+      {post.data.title}
+    </h1>
+    <time datetime={post.data.pubDate.toISOString()} class="mt-4 block font-mono text-xs text-facility-500">
+      {fmtDate}
+    </time>
+
+    <div
+      class="prose-static mt-12"
+      set:html={''}
+    >
+      <Content />
+    </div>
+
+    <div class="mt-16 border-t border-facility-700 pt-8">
+      <a href="/devlog/" class="font-mono text-sm text-signal hover:text-signal-dim">← All entries</a>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  /* Hand-rolled prose styling — typeset to the design system, no plugin. */
+  .prose-static :global(h2) {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 2.5rem;
+    margin-bottom: 0.9rem;
+  }
+  .prose-static :global(h3) {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 2rem;
+    margin-bottom: 0.7rem;
+  }
+  .prose-static :global(p) {
+    margin-bottom: 1.1rem;
+    line-height: 1.75;
+    color: var(--color-facility-300);
+  }
+  .prose-static :global(ul) {
+    margin: 0 0 1.1rem 1.25rem;
+    list-style: square;
+    color: var(--color-facility-300);
+  }
+  .prose-static :global(ol) {
+    margin: 0 0 1.1rem 1.25rem;
+    list-style: decimal;
+    color: var(--color-facility-300);
+  }
+  .prose-static :global(li) {
+    margin-bottom: 0.4rem;
+    line-height: 1.65;
+  }
+  .prose-static :global(strong) {
+    color: var(--color-facility-100);
+  }
+  .prose-static :global(a) {
+    color: var(--color-signal);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .prose-static :global(blockquote) {
+    border-left: 2px solid var(--color-signal-dim);
+    padding: 0.4rem 0 0.4rem 1.1rem;
+    margin: 1.4rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    color: var(--color-facility-100);
+  }
+  .prose-static :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: var(--color-facility-800);
+    padding: 0.15em 0.4em;
+  }
+  .prose-static :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--color-facility-700);
+    margin: 2.2rem 0;
+  }
+</style>

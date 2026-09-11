@@ -1,0 +1,7 @@
+# Build output is committed at the ROOT of this repo (Cloudflare Pages direct-upload
+# model: the repo root IS the deployable bundle). Only ignore working files.
+node_modules/
+site/node_modules/
+site/dist/
+site/.astro/
+*.log
