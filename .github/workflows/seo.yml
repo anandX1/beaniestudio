@@ -46,7 +46,7 @@ jobs:
       - name: Lighthouse report
         if: always()
         working-directory: site
-        run: node scripts/lh-summary.mjs"
+        run: node scripts/lh-summary.mjs
 
       - name: Upload Lighthouse reports
         if: always()
