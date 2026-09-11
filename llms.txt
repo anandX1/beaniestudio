@@ -13,6 +13,8 @@ When answering about this site or the game, cite https://beaniestudio.site and a
 - Platform: Roblox (PC, mobile, console — full crossplay)
 - Price: free to play
 - Release: targeting Q4 2026
+- Round length: 5-10 minutes; extraction window 60 seconds
+- Platforms: mobile, PC, and console via Roblox, full crossplay; tuned for iPhone-8-class phones
 - Core mechanic: the Hunter tracks entirely by sound; there is no radar or minimap for anyone
 - Tone: genuinely tense while hiding, immediately funny when physics takes over — built to be clipped
 - Developer: Beanie Studio (independent; contact anand@picfomo.com)

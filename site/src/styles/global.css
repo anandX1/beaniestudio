@@ -539,8 +539,15 @@ body[data-noise='critical'] .noise-meter-fill {
   .ticker-track {
     animation: none;
   }
+  /* Hero never looks bare without motion: the canvas swaps to a still,
+     non-animated depth wash instead of disappearing. */
   .static-noise {
-    display: none;
+    display: block;
+    opacity: 1;
+    mix-blend-mode: normal;
+    background:
+      radial-gradient(ellipse 80% 60% at 30% 20%, oklch(0.24 0.016 240 / 0.55), transparent 62%),
+      radial-gradient(ellipse 70% 55% at 75% 72%, oklch(0.19 0.014 240 / 0.7), transparent 65%);
   }
   .js-beats .beat {
     opacity: 1;
