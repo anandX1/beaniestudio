@@ -46,28 +46,7 @@ jobs:
       - name: Lighthouse report
         if: always()
         working-directory: site
-        run: |
-          node -e "
-          const fs = require('fs');
-          let files = [];
-          try { files = fs.readdirSync('reports').filter(f => f.endsWith('.json')); } catch {}
-          let out = '## Lighthouse results\n\n| Page | Perf | SEO | A11y | BP |\n|---|---|---|---|---|\n';
-          let rows = 0;
-          for (const f of files) {
-            try {
-              const r = JSON.parse(fs.readFileSync('reports/' + f, 'utf8'));
-              if (!r || !r.categories) continue;
-              let page = f;
-              try { page = decodeURIComponent(new URL(r.finalDisplayedUrl || r.finalUrl || r.requestedUrl).pathname); } catch {}
-              const s = c => r.categories[c] && r.categories[c].score != null ? Math.round(r.categories[c].score * 100) : '–';
-              out += '| ' + page + ' | ' + s('performance') + ' | ' + s('seo') + ' | ' + s('accessibility') + ' | ' + s('best-practices') + ' |\n';
-              rows++;
-            } catch { /* a bad report never kills the pipeline */ }
-          }
-          if (!rows) out += '| (no parsable reports — check artifacts) | | | | |\n';
-          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out);
-          console.log(out);
-          ""
+        run: node scripts/lh-summary.mjs"
 
       - name: Upload Lighthouse reports
         if: always()
