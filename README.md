@@ -24,6 +24,7 @@ npm run dev        # dev server on :4321 — use `npm run dev:host` for previews
 npm run check      # typecheck
 npm run build      # production build to site/dist
 npm run seo        # link check + IndexNow dry-run
+npm run audit:live # after deploy: verifies production SEO end-to-end
 
 # 3. Sync the build to the repo root
 #    (from the repo root, using Git Bash / tar)

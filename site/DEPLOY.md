@@ -36,6 +36,7 @@ The site ships with a full SEO stack. Every deploy, in order:
 1. **Pre-flight (local, before push):** `npm run seo` — checks every internal link in the built site, then dry-runs the IndexNow ping.
 2. **Deploy** (push → Cloudflare builds automatically).
 3. **Ping IndexNow:** `npm run ping:indexnow` — submits every sitemap URL to Bing/Seznam/Yandex; they typically crawl within minutes. (Google doesn't participate in IndexNow; it discovers via sitemap + Search Console. The key file is `public/<key>.txt` — deleting or regenerating the key invalidates submissions, so treat it like config, not junk.)
+4. **Post-deploy audit:** `npm run audit:live` — fetches the deployed site and verifies titles, canonicals, robots, OG/Twitter tags, JSON-LD, robots.txt/llms.txt/sitemap/RSS/404 handling. Two known advisories: enable "Always Use HTTPS" in Cloudflare, and set `not_found_handling = "404-page"` so the custom 404 body serves (the 404 status itself is already correct — SEO-safe either way).
 
 ### One-time SEO setup (do once, then forget)
 

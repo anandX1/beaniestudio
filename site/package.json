@@ -11,6 +11,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "check:links": "node scripts/check-links.mjs",
+    "audit:live": "node scripts/audit-live.mjs",
     "ping:indexnow": "node scripts/ping-indexnow.mjs",
     "ping:indexnow:dry": "node scripts/ping-indexnow.mjs --dry",
     "seo": "npm run check:links && npm run ping:indexnow:dry"
