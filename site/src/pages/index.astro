@@ -88,7 +88,7 @@ const featuredVideoLd = {
       </div>
 
       <h1 class="beat mt-6 font-display text-6xl font-bold uppercase leading-none tracking-tight sm:text-8xl">
-        <span class="flicker text-signal">Static</span>
+        <span class="flicker text-signal" data-decode>Static</span>
       </h1>
       <p class="beat font-display text-2xl font-semibold uppercase tracking-[0.14em] text-facility-100 sm:text-4xl" style="--beat-delay: 90ms">
         Salvage vs Hunter
@@ -142,7 +142,7 @@ const featuredVideoLd = {
             <span class="dot" aria-hidden="true"></span>
             Act 02 — recovered footage
           </p>
-          <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">
+          <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
             They filmed the wreck.
           </h2>
         </div>
@@ -186,7 +186,7 @@ const featuredVideoLd = {
       <div class="flex items-start justify-between gap-6">
         <div>
           <p class="kicker">Act 03 — the asymmetry</p>
-          <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">
+          <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
             Two sides. One wreck.
           </h2>
         </div>
@@ -237,6 +237,48 @@ const featuredVideoLd = {
     </div>
   </section>
 
+  <!-- Torch-lit wreck schematic: the map is dark until the cursor sweeps it. -->
+  <div class="mx-auto w-full max-w-6xl px-4 pb-4 sm:px-6">
+    <figure class="torch-plate panel" id="torchPlate" tabindex="0" aria-label="Schematic of the wreck. Move your cursor across it to sweep a flashlight." data-torch>
+      <svg class="torch-svg" viewBox="0 0 800 360" fill="none" aria-hidden="true">
+        <!-- hull, broken in two -->
+        <path d="M40 128 L250 100 L318 128 L322 168 L296 214 L74 244 Z" stroke="currentColor" stroke-width="2" opacity="0.9" />
+        <path d="M470 132 L758 104 L770 216 L506 252 L468 198 Z" stroke="currentColor" stroke-width="2" opacity="0.9" />
+        <!-- torn hull edges -->
+        <path d="M318 128 L340 142 L322 168" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.7" />
+        <path d="M470 132 L446 150 L468 198" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.7" />
+        <!-- corridors -->
+        <path d="M96 150 L250 138 M110 196 L262 182" stroke="currentColor" stroke-width="1" opacity="0.55" />
+        <path d="M520 156 L724 140 M540 208 L730 192" stroke="currentColor" stroke-width="1" opacity="0.55" />
+        <!-- lockers (left hold) -->
+        <rect x="130" y="158" width="10" height="22" stroke="currentColor" opacity="0.8" />
+        <rect x="144" y="157" width="10" height="22" stroke="currentColor" opacity="0.8" />
+        <rect x="158" y="156" width="10" height="22" stroke="currentColor" opacity="0.8" />
+        <rect x="172" y="155" width="10" height="22" stroke="currentColor" opacity="0.8" />
+        <!-- fuel cache (right hold) -->
+        <rect x="640" y="164" width="44" height="30" stroke="currentColor" stroke-width="1.6" />
+        <path d="M648 179 h28 M662 170 v18" stroke="currentColor" opacity="0.7" />
+        <!-- extractor pad -->
+        <rect x="70" y="272" width="120" height="34" stroke="currentColor" stroke-width="1.4" opacity="0.85" />
+        <path d="M70 289 h120" stroke="currentColor" opacity="0.4" />
+        <!-- sensor arcs around the breach -->
+        <path d="M395 60 a170 170 0 0 1 0 240" stroke="currentColor" stroke-width="1" stroke-dasharray="2 7" opacity="0.6" />
+        <path d="M385 90 a130 130 0 0 1 0 180" stroke="currentColor" stroke-width="1" stroke-dasharray="2 7" opacity="0.45" />
+        <!-- scrapper + hunter spawn marks -->
+        <circle cx="96" cy="172" r="7" stroke="currentColor" stroke-width="1.4" />
+        <path d="M690 236 l9 15 h-18 Z" stroke="currentColor" stroke-width="1.4" />
+      </svg>
+      <span class="torch-tag" style="left: 12%; top: 40%">LOCKERS</span>
+      <span class="torch-tag" style="right: 8%; top: 40%">FUEL CACHE</span>
+      <span class="torch-tag" style="left: 9%; bottom: 10%">EXTRACTOR PAD</span>
+      <span class="torch-tag" style="left: 46%; top: 18%; color: var(--color-status-red); opacity: 0.8">HULL BREACH</span>
+      <span class="torch-tag" style="left: 8%; top: 52%">SCRAPPERS ◯</span>
+      <span class="torch-tag" style="right: 10%; bottom: 22%">HUNTER △</span>
+      <div class="torch-shade" aria-hidden="true"></div>
+      <figcaption class="torch-hint">SECTOR 7 — SWEEP TO SURVEY</figcaption>
+    </figure>
+  </div>
+
   <!-- ================= ACT 04 — THE MECHANIC (LIVE) ================= -->
   <section class="act" aria-label="The mechanic — noise discipline">
     <div class="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6">
@@ -246,7 +288,7 @@ const featuredVideoLd = {
             <span class="dot" aria-hidden="true"></span>
             Act 04 — the mechanic, live on this page
           </p>
-          <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">
+          <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
             This page is hunting you.
           </h2>
         </div>
@@ -292,7 +334,7 @@ const featuredVideoLd = {
     <div class="mx-auto w-full max-w-6xl px-4 py-20 text-center sm:px-6">
       <span class="act-index mx-auto block" aria-hidden="true">05</span>
       <p class="kicker mt-4">Act 05 — the door</p>
-      <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">
+      <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
         Be there when the lights go out
       </h2>
       <p class="beat mx-auto mt-5 max-w-xl text-facility-300" style="--beat-delay: 100ms">
@@ -543,6 +585,48 @@ const featuredVideoLd = {
       } else {
         start();
       }
+    })();
+  </script>
+
+  <!-- Decode scramble lives in BaseLayout so every page gets it. -->
+
+  <!-- Torch sweep: cursor is a flashlight over the dark schematic. Handlers
+       write paint-only custom properties directly — cheap, frameless, works
+       even where rAF is throttled. -->
+  <script>
+    (function () {
+      const plate = document.getElementById('torchPlate');
+      if (!plate) return;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+
+      const shade = plate.querySelector('.torch-shade') as HTMLElement | null;
+      if (!shade) return;
+
+      const onMove = function (e: PointerEvent) {
+        const r = plate.getBoundingClientRect();
+        const x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+        const y = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+        shade.style.setProperty('--torch-x', (x * 100).toFixed(2) + '%');
+        shade.style.setProperty('--torch-y', (y * 100).toFixed(2) + '%');
+      };
+      // No visibility gate needed: pointermove on the plate only fires when the
+      // pointer is over it, which already implies it's on screen.
+      plate.addEventListener('pointermove', onMove, { passive: true });
+
+      // Keyboard: arrows sweep the torch so the plate works without a mouse.
+      let kx = 0.5, ky = 0.42;
+      plate.addEventListener('keydown', function (e) {
+        const step = 0.06;
+        if (e.key === 'ArrowLeft') kx = Math.max(0, kx - step);
+        else if (e.key === 'ArrowRight') kx = Math.min(1, kx + step);
+        else if (e.key === 'ArrowUp') ky = Math.max(0, ky - step);
+        else if (e.key === 'ArrowDown') ky = Math.min(1, ky + step);
+        else return;
+        e.preventDefault();
+        shade.style.setProperty('--torch-x', (kx * 100).toFixed(2) + '%');
+        shade.style.setProperty('--torch-y', (ky * 100).toFixed(2) + '%');
+      });
     })();
   </script>
 </BaseLayout>

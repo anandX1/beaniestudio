@@ -131,5 +131,49 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
       <slot />
     </main>
     <SiteFooter />
+
+    <!-- Decode scramble: any element with data-decode resolves through terminal
+         glyphs on first viewport entry. The real string is saved to the attribute
+         before any overwrite, so no-JS / reduced-motion visitors see plain text.
+         Runs on a timer, not rAF, so it animates even when frames are throttled. -->
+    <script>
+      (function () {
+        const els = document.querySelectorAll('[data-decode]');
+        if (!els.length) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (!('IntersectionObserver' in window)) return;
+
+        const GLYPHS = '#$%&@/\\<>*+=?!01';
+        const decodeOne = function (el: Element) {
+          const final = el.getAttribute('data-decode') || '';
+          let frame = 0;
+          const total = Math.max(14, Math.min(34, final.length * 2));
+          const id = window.setInterval(function () {
+            frame++;
+            const settled = Math.floor((frame / total) * final.length);
+            let out = '';
+            for (let i = 0; i < final.length; i++) {
+              out += i < settled || final[i] === ' ' ? final[i] : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+            }
+            el.textContent = out;
+            if (frame >= total) { window.clearInterval(id); el.textContent = final; }
+          }, 42);
+        };
+
+        const io = new IntersectionObserver(function (entries) {
+          for (const e of entries) {
+            if (!e.isIntersecting) continue;
+            io.unobserve(e.target);
+            decodeOne(e.target);
+          }
+        }, { threshold: 0.5 });
+        els.forEach((el) => {
+          if (!el.getAttribute('data-decode')) {
+            el.setAttribute('data-decode', (el.textContent || '').trim());
+          }
+          io.observe(el);
+        });
+      })();
+    </script>
   </body>
 </html>

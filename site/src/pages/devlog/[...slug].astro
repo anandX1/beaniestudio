@@ -48,7 +48,7 @@ const postLd = {
 >
   <article class="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28">
     <p class="kicker">Devlog — {post.data.tag}</p>
-    <h1 class="mt-6 font-display text-3xl font-bold uppercase leading-tight tracking-tight sm:text-5xl">
+    <h1 class="mt-6 font-display text-3xl font-bold uppercase leading-tight tracking-tight sm:text-5xl" data-decode>
       {post.data.title}
     </h1>
     <time datetime={post.data.pubDate.toISOString()} class="mt-4 block font-mono text-xs text-facility-500">
@@ -65,6 +65,55 @@ const postLd = {
     <div class="mt-16 border-t border-facility-700 pt-8">
       <a href="/devlog/" class="font-mono text-sm text-signal hover:text-signal-dim">← All entries</a>
     </div>
+  </article>
+
+  <!-- Hunter proximity bar: article reading progress reframed as dread —
+       the deeper you read, the closer IT gets. Fixed to the bottom edge:
+       rises from below, never collides with the sticky header. -->
+  <div class="fixed inset-x-0 bottom-0 z-[60]">
+    <div class="hunter-bar" id="huntBar">
+      <div class="hunter-bar-fill"></div>
+    </div>
+    <div class="flex items-center justify-between bg-facility-950/90 px-4 py-1.5 backdrop-blur sm:px-6">
+      <span class="font-mono text-[0.58rem] tracking-[0.22em] text-facility-500" id="huntTag">HUNTER DISTANCE: FAR</span>
+      <span class="font-mono text-[0.58rem] tracking-[0.22em] text-status-red" id="huntPct" role="meter" aria-label="Hunter proximity" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">0%</span>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const bar = document.getElementById('huntBar');
+      const tag = document.getElementById('huntTag');
+      const pct = document.getElementById('huntPct');
+      if (!bar || !tag || !pct) return;
+
+      const DISTANCES = [
+        { at: 75, label: 'IN THE CORRIDOR' },
+        { at: 45, label: 'CLOSING IN' },
+        { at: 15, label: 'MOVING' },
+        { at: -1, label: 'FAR' },
+      ];
+      let ticking = false;
+      const update = function () {
+        ticking = false;
+        const article = document.querySelector('article');
+        if (!article) return;
+        const r = article.getBoundingClientRect();
+        const total = r.height - window.innerHeight;
+        const done = Math.min(1, Math.max(0, -r.top / (total > 0 ? total : 1)));
+        const p = done * 100;
+        bar.style.setProperty('--hunt', p.toFixed(1) + '%');
+        pct.setAttribute('aria-valuenow', String(Math.round(p)));
+        pct.textContent = Math.round(p) + '%';
+        const d = DISTANCES.find((x) => p >= x.at) || DISTANCES[3];
+        const label = 'HUNTER DISTANCE: ' + d.label;
+        if (tag.textContent !== label) tag.textContent = label;
+      };
+      const onScroll = function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      update();
+    })();
+  </script>
   </article>
 </BaseLayout>
 

@@ -75,6 +75,54 @@ const steps = [
       ))}
     </div>
 
+    <!-- Signal tuner: rotate the dial, find the hidden frequencies. The wreck
+         is talking — dragging the dial is how you listen. -->
+    <section class="mt-20" aria-labelledby="tuner-heading">
+      <p class="kicker flex items-center gap-3">
+        <span class="dot" aria-hidden="true"></span>
+        Intercept a transmission
+      </p>
+      <h2 id="tuner-heading" class="mt-4 font-display text-2xl font-bold uppercase tracking-wide sm:text-4xl">
+        The wreck is still broadcasting
+      </h2>
+      <p class="mt-4 max-w-2xl text-sm leading-relaxed text-facility-300">
+        Four frequencies are still live out there. Rotate the dial until the needle locks — what
+        you hear is what a Scrapper's radio picks up mid-round. Headphones recommended.
+      </p>
+
+      <div class="panel mt-10 grid items-start gap-10 p-7 sm:grid-cols-[auto_1fr] sm:p-9">
+        <div class="flex flex-col items-center gap-5">
+          <div
+            id="tunerDial"
+            class="tuner-dial"
+            role="slider"
+            tabindex="0"
+            aria-label="Radio tuner — rotate to search frequencies"
+            aria-valuemin="0"
+            aria-valuemax="359"
+            aria-valuenow="45"
+            aria-valuetext="95.7 megahertz, searching"
+          >
+            <span class="tuner-station" style="--station-deg: 0" data-label="88.1"></span>
+            <span class="tuner-station" style="--station-deg: 90" data-label="97.3"></span>
+            <span class="tuner-station" style="--station-deg: 180" data-label="103.7"></span>
+            <span class="tuner-station" style="--station-deg: 270" data-label="147.9"></span>
+          </div>
+          <p class="tuner-readout text-[0.7rem] text-facility-300" id="tunerReadout">95.7 MHz — SIGNAL: SEARCHING</p>
+          <p class="font-mono text-[0.6rem] tracking-[0.2em] text-facility-500">DRAG THE DIAL — ARROW KEYS WORK TOO</p>
+        </div>
+
+        <div class="min-h-[7rem]">
+          <p class="noise-label text-facility-500">Decoded transmission</p>
+          <div id="tunerMsg" class="mt-4 hidden border-l-2 border-signal pl-4 font-mono text-sm leading-relaxed text-facility-100" aria-live="polite"></div>
+          <p id="tunerIdle" class="mt-4 font-mono text-sm leading-relaxed text-facility-500">
+            [ static ] — no carrier detected. The Hunter broadcasts on 147.9. Everyone regrets
+            finding that one.
+          </p>
+        </div>
+      </div>
+    </section>
+
     <!-- Gameplay footage strip -->
     <section class="mt-20" aria-labelledby="footage-heading">
       <p class="kicker flex items-center gap-3">
@@ -106,4 +154,159 @@ const steps = [
       </a>
     </div>
   </section>
+
+  <!-- Tuner: pointer drag + keyboard rotate the needle; locking a station
+       types out the transmission and plays a synthesized static burst.
+       Audio only inside a real user gesture; everything degrades to text. -->
+  <script>
+    (function () {
+      const dial = document.getElementById('tunerDial');
+      const readout = document.getElementById('tunerReadout');
+      const msgEl = document.getElementById('tunerMsg');
+      const idleEl = document.getElementById('tunerIdle');
+      if (!dial || !readout || !msgEl) return;
+
+      const STATIONS = [
+        { deg: 0, freq: '88.1', msg: '…SALVAGE WINDOW IS 60 SECONDS. REPEAT: 60 SECONDS. WHEN THE HORN SOUNDS, YOU RUN. YOU DO NOT LOOK BACK…' },
+        { deg: 90, freq: '97.3', msg: '…CONTROL TO ALL CREWS: EXTRACTION PAD IS LIT. FIVE SOULS IN, FIVE SOULS OUT. THAT IS THE WHOLE JOB…' },
+        { deg: 180, freq: '103.7', msg: '…DO NOT SPRINT. I AM REPEATING MYSELF BECAUSE CREW THREE SPRINTED. WALK. CROUCH. IT ONLY NEEDS ONE SOUND…' },
+        { deg: 270, freq: '147.9', msg: '…I HEAR YOU BREATHING…', hunter: true },
+      ];
+      const LOCK_DEG = 7;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      let deg = 45; // start between stations — the first lock should be earned
+      let locked = -1;
+      let typeTimer = 0;
+
+      const freqLabel = function () {
+        const f = 88 + (deg / 360) * 62;
+        return f.toFixed(1);
+      };
+
+      const nearest = function () {
+        let best = -1;
+        let bestDist = 361;
+        for (let i = 0; i < STATIONS.length; i++) {
+          const d = Math.abs((((STATIONS[i].deg - deg) % 360) + 540) % 360 - 180);
+          if (d < bestDist) { bestDist = d; best = i; }
+        }
+        return bestDist <= LOCK_DEG ? best : -1;
+      };
+
+      const typeOut = function (text: string) {
+        if (typeTimer) { clearInterval(typeTimer); typeTimer = 0; }
+        if (reduce) { msgEl.textContent = text; return; }
+        msgEl.textContent = '';
+        let i = 0;
+        typeTimer = window.setInterval(function () {
+          i += 2;
+          msgEl.textContent = text.slice(0, i);
+          if (i >= text.length && typeTimer) { clearInterval(typeTimer); typeTimer = 0; }
+        }, 24);
+      };
+
+      // Synthesized lock feedback: a static burst, then two confirmation blips.
+      let ctx: AudioContext | null = null;
+      const burst = function () {
+        try {
+          const AC = window.AudioContext || (window as any).webkitAudioContext;
+          if (!AC) return;
+          if (!ctx) ctx = new AC();
+          void ctx.resume();
+          const t = ctx.currentTime;
+          const len = Math.floor(ctx.sampleRate * 0.3);
+          const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+          const ch = buf.getChannelData(0);
+          for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / len);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          const bp = ctx.createBiquadFilter();
+          bp.type = 'bandpass';
+          bp.frequency.value = 1400;
+          const g = ctx.createGain();
+          g.gain.value = 0.12;
+          src.connect(bp).connect(g).connect(ctx.destination);
+          src.start(t);
+          for (const off of [0.36, 0.5]) {
+            const osc = ctx.createOscillator();
+            const og = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = 920;
+            og.gain.setValueAtTime(0.0001, t + off);
+            og.gain.exponentialRampToValueAtTime(0.06, t + off + 0.01);
+            og.gain.exponentialRampToValueAtTime(0.0001, t + off + 0.07);
+            osc.connect(og).connect(ctx.destination);
+            osc.start(t + off);
+            osc.stop(t + off + 0.09);
+          }
+        } catch { /* audio is decorative — never break the tuner over it */ }
+      };
+
+      const render = function () {
+        dial.style.setProperty('--tune-deg', deg + 'deg');
+        const n = nearest();
+        dial.setAttribute('aria-valuenow', String(Math.round(deg)));
+        if (n >= 0) {
+          readout.textContent = STATIONS[n].freq + ' MHz — SIGNAL: LOCKED';
+          readout.classList.toggle('text-signal', true);
+          dial.setAttribute('aria-valuetext', STATIONS[n].freq + ' megahertz, locked');
+          if (n !== locked) {
+            locked = n;
+            msgEl.classList.remove('hidden');
+            if (idleEl) idleEl.classList.add('hidden');
+            typeOut(STATIONS[n].msg);
+            msgEl.classList.toggle('text-status-red', !!STATIONS[n].hunter);
+            msgEl.style.borderColor = STATIONS[n].hunter ? 'var(--color-status-red)' : '';
+            burst();
+          }
+        } else {
+          readout.textContent = freqLabel() + ' MHz — SIGNAL: SEARCHING';
+          readout.classList.toggle('text-signal', false);
+          dial.setAttribute('aria-valuetext', freqLabel() + ' megahertz, searching');
+          if (locked !== -1) {
+            locked = -1;
+            msgEl.classList.add('hidden');
+            if (idleEl) idleEl.classList.remove('hidden');
+          }
+        }
+      };
+
+      const angleFrom = function (e: PointerEvent) {
+        const r = dial.getBoundingClientRect();
+        const dx = e.clientX - (r.left + r.width / 2);
+        const dy = e.clientY - (r.top + r.height / 2);
+        return (Math.atan2(dy, dx) * 180) / Math.PI + 90;
+      };
+
+      let dragging = false;
+      dial.addEventListener('pointerdown', function (e) {
+        dragging = true;
+        try { dial.setPointerCapture(e.pointerId); } catch { /* synthetic/untrusted pointers */ }
+        deg = (angleFrom(e) + 360) % 360;
+        render();
+      });
+      dial.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        deg = (angleFrom(e) + 360) % 360;
+        render();
+      });
+      const endDrag = function () { dragging = false; };
+      dial.addEventListener('pointerup', endDrag);
+      dial.addEventListener('pointercancel', endDrag);
+
+      dial.addEventListener('keydown', function (e) {
+        const step = e.shiftKey ? 12 : 4;
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') deg = (deg - step + 360) % 360;
+        else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') deg = (deg + step) % 360;
+        else if (e.key === 'Home') deg = 0;
+        else if (e.key === 'End') deg = 359;
+        else return;
+        e.preventDefault();
+        render();
+      });
+
+      render();
+    })();
+  </script>
 </BaseLayout>

@@ -11,7 +11,7 @@ export const SITE = {
   locale: 'en_US',
   /** Targeted launch window (drives countdown + copy). */
   launchDate: '2026-12-01T00:00:00Z',
-  contact: 'static@beaniestudio.site',
+  contact: 'anand@picfomo.com',
 } as const;
 
 export const LINKS = {

@@ -396,6 +396,136 @@ body[data-noise='critical'] .noise-meter-fill {
   border-color: var(--color-signal-dim);
 }
 
+/* ---------- Interactions v2: decode text / torch plate / hunter bar / tuner ---------- */
+
+/* Decode-scramble: headings resolve through terminal glyphs when they enter
+   the viewport. JS swaps text only — no-JS and reduced-motion users simply
+   see the final text, because the real string lives in data-decode. */
+
+/* Torchlight wreck map: cursor is a flashlight sweeping a dark schematic.
+   The mask follows --torch-x/--torch-y (written inside rAF only). */
+.torch-plate {
+  position: relative;
+  overflow: hidden;
+  cursor: crosshair;
+  background: var(--color-facility-950);
+}
+.torch-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    230px circle at var(--torch-x, 50%) var(--torch-y, 42%),
+    oklch(0.16 0.012 240 / 0) 0%,
+    oklch(0.16 0.012 240 / 0.55) 45%,
+    oklch(0.16 0.012 240 / 0.94) 100%
+  );
+}
+.torch-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--color-signal);
+}
+.torch-hint {
+  position: absolute;
+  right: 0.9rem;
+  bottom: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  color: var(--color-facility-500);
+  pointer-events: none;
+}
+.torch-tag {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: var(--color-facility-500);
+  opacity: 0.55;
+}
+
+/* Hunter proximity bar: reading progress, reframed as dread. Fill follows
+   scroll depth through the article (JS writes --hunt inside rAF); the status
+   label escalates with it. Without JS the bar just reads EMPTY — honest. */
+.hunter-bar {
+  height: 4px;
+  background: var(--color-facility-800);
+  overflow: hidden;
+}
+.hunter-bar-fill {
+  height: 100%;
+  width: var(--hunt, 0%);
+  background: var(--color-status-red);
+  transition: width 0.4s var(--ease-terminal);
+}
+
+/* Signal tuner (play page): rotary radio dial. Rotation follows
+   --tune-deg; the lock-in state is a class so CSS owns all visuals. */
+.tuner-dial {
+  position: relative;
+  width: 210px;
+  height: 210px;
+  border: 1px solid var(--color-facility-700);
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 50% 42%, var(--color-facility-800) 0%, var(--color-facility-950) 72%);
+  touch-action: none;
+  cursor: grab;
+}
+.tuner-dial:active {
+  cursor: grabbing;
+}
+.tuner-dial::after {
+  /* the needle */
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 2px;
+  height: 26%;
+  margin-left: -1px;
+  background: var(--color-signal);
+  transform-origin: 50% calc(95px);
+  transform: rotate(var(--tune-deg, 0deg));
+  box-shadow: 0 0 8px oklch(0.78 0.15 75 / 0.6);
+}
+.tuner-station {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 50%;
+  transform-origin: 50% 100%;
+  transform: rotate(calc(var(--station-deg) * 1deg));
+  pointer-events: none;
+}
+.tuner-station::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 0;
+  width: 2px;
+  height: 10px;
+  background: var(--color-facility-500);
+}
+.tuner-station::after {
+  content: attr(data-label);
+  position: absolute;
+  top: 13px;
+  left: 50%;
+  transform: translateX(-50%) rotate(calc(var(--station-deg) * -1deg));
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: var(--color-facility-500);
+  white-space: nowrap;
+}
+.tuner-readout {
+  font-family: var(--font-mono);
+  letter-spacing: 0.14em;
+}
+
 /* ---------- Reduced motion: kill every non-essential effect ---------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -418,7 +548,16 @@ body[data-noise='critical'] .noise-meter-fill {
     transition: none;
   }
   .noise-meter-fill,
-  .dread-vignette {
+  .dread-vignette,
+  .hunter-bar-fill {
+    transition: none;
+  }
+  /* Torch plate: darkness would hide content with no pointer to sweep it —
+     show the full schematic instead. */
+  .torch-shade {
+    display: none;
+  }
+  .tuner-dial::after {
     transition: none;
   }
 }
