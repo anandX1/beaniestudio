@@ -314,6 +314,7 @@ label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.0
   <div style="margin-top:12px;font-size:12px;color:var(--dim)"><label style="text-transform:none;letter-spacing:0;color:var(--dim)"><input type="checkbox" id="asDraft" style="width:auto;margin-right:6px">Publish as draft (hidden from the site until you flip draft:false)</label></div>
   <div style="margin-top:8px"><button id="publish" style="width:100%">Publish to blog →</button></div>
   <div style="margin-top:6px"><button class="sec" id="deploy" style="width:100%">Deploy site now (build → push → ping)</button></div>
+  <div style="display:flex;align-items:center;gap:10px"><span id="savedat" style="font-size:11px;color:var(--dim);min-height:15px"></span><button id="discard" class="sec" style="display:none;padding:2px 8px;font-size:11px;color:var(--red)">discard draft</button></div>
   <div id="log">ready.</div>
 </section>
 <section id="seo">
@@ -336,7 +337,7 @@ function $(id){return document.getElementById(id)}
 function log(m){var l=$('log');l.textContent+=m;l.scrollTop=l.scrollHeight}
 async function api(path,body){var r=await fetch(path,body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}:{});var d=await r.json().catch(function(){return{error:'bad response'}});if(!r.ok)throw new Error(d.error||r.status);return d}
 function renderChosen(){$('chosen').textContent=chosen.length?chosen.join('  ·  '):'none yet'}
-function renderKws(list){$('kwlist').innerHTML='';list.forEach(function(k){var s=document.createElement('span');s.className='kw';s.textContent=k;s.onclick=function(){if(chosen.indexOf(k)<0){chosen.push(k);s.classList.add('on');renderChosen()}};$('kwlist').appendChild(s)})}
+function renderKws(list){$('kwlist').innerHTML='';list.forEach(function(k){var s=document.createElement('span');s.className='kw';if(chosen.indexOf(k)>=0)s.classList.add('on');s.textContent=k;s.onclick=function(){if(chosen.indexOf(k)<0){chosen.push(k);s.classList.add('on');renderChosen();queueSave()}};$('kwlist').appendChild(s)})}
 function trk(){return document.getElementById('track').value}
 async function loadKeywords(){try{var d=await api('/api/keywords?track='+trk());renderKws(d.keywords||[]);var f=d.harvestedAt?new Date(d.harvestedAt).toLocaleString():'never';document.querySelector('#kwlist').insertAdjacentHTML('beforebegin','<div style="font-size:11px;color:var(--dim);margin-bottom:6px">'+(d.keywords||[]).length+' queries · harvested '+f+'</div>')}catch(e){log('keywords: '+e.message+'\\n')}}
 async function loadPosts(){try{var d=await api('/api/posts');$('posts').innerHTML='';d.posts.forEach(function(p){var e=document.createElement('div');e.className='post';e.innerHTML='<div>'+p.title+(p.draft?'<span class="badge">draft</span>':'')+'</div><div class="d">'+(p.pubDate||'')+' · '+p.file+'</div>';$('posts').appendChild(e)})}catch(e){}}
@@ -388,9 +389,11 @@ function renderImgs(){
   if(!images.length)el.innerHTML='<span style="font-size:12px;color:var(--dim)">no images attached</span>';
 }
 $('imgfile').onchange=function(){var fs=[].slice.call(this.files);this.value='';fs.forEach(function(f){compressImg(f,function(out){images.push(out);renderImgs()})})};
-$('publish').onclick=function(){var b=this;b.disabled=true;b.textContent=document.getElementById('asDraft').checked?'saving draft…':'publishing…';log('\\npublishing…\\n');api('/api/publish',{title:$('title').value,description:$('desc').value,tag:$('tag').value,markdown:$('md').value,keywords:chosen,images:images,draft:document.getElementById('asDraft').checked}).then(function(d){log('\\n✓ '+(d.draft?'saved as draft post (not on site yet)':'LIVE: '+d.url)+'\\n');loadPosts()}).catch(function(e){log('publish: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Publish to blog →'})};
-$('title').oninput=$('desc').oninput=$('md').oninput=lint;
-$('track').onchange=function(){loadKeywords()};
+$('publish').onclick=function(){var b=this;b.disabled=true;b.textContent=document.getElementById('asDraft').checked?'saving draft…':'publishing…';log('\\npublishing…\\n');api('/api/publish',{title:$('title').value,description:$('desc').value,tag:$('tag').value,markdown:$('md').value,keywords:chosen,images:images,draft:document.getElementById('asDraft').checked}).then(function(d){log('\\n✓ '+(d.draft?'saved as draft post (not on site yet)':'LIVE: '+d.url)+'\\n');try{localStorage.removeItem(ASKEY)}catch(e){}$('savedat').textContent='';$('discard').style.display='none';images=[];chosen=[];$('title').value='';$('desc').value='';$('md').value='';$('angle').value='';renderImgs();renderChosen();lint();loadPosts()}).catch(function(e){log('publish: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Publish to blog →'})};
+$('title').oninput=$('desc').oninput=$('md').oninput=function(){lint();queueSave()};
+$('angle').oninput=queueSave;
+$('tag').onchange=$('asDraft').onchange=queueSave;
+$('track').onchange=function(){loadKeywords();queueSave()};
 async function loadStats(){try{var d=await api('/api/stats');var el=$('stats');if(!d.configured){el.innerHTML='<div style="border:1px solid var(--line);border-radius:8px;padding:10px">'+
   '<b style="color:var(--txt)">What you will see here once connected:</b>'+
   '<ul style="margin:8px 0 8px 18px;padding:0;color:var(--dim)">'+
@@ -407,7 +410,22 @@ async function loadKwTop(){try{var d=await api('/api/keywords');var ks=(d.keywor
 $('statrefresh').onclick=loadStats;
 $('deploy').onclick=function(){var b=this;b.disabled=true;b.textContent='deploying…';log(' deploying: build, push, ping ');api('/api/deploy',{}).then(function(d){log(' deploy finished, exit '+d.code+' ');if(d.code===0)loadPosts()}).catch(function(e){log(' deploy: '+e.message+' ')}).finally(function(){b.disabled=false;b.textContent='Deploy site now (build → push → ping)'})};
 $('adapt').onclick=function(){var b=this;b.disabled=true;b.textContent='adapting…';api('/api/adapt',{title:$('title').value,markdown:$('md').value}).then(function(d){var el=$('share');el.innerHTML='';Object.keys(d.variants).forEach(function(p){var v=d.variants[p];var box=document.createElement('div');box.style.cssText='border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px;font-size:12px';box.innerHTML='<b style="color:var(--amber)">'+p.toUpperCase()+'</b> <span style="color:var(--dim)">'+v.note+'</span>';var pre=document.createElement('div');pre.style.cssText='margin:6px 0;white-space:pre-wrap;background:#0d0f12;border-radius:6px;padding:6px';pre.textContent=v.text||'';var row=document.createElement('div');row.style.cssText='display:flex;gap:6px';var cp=document.createElement('button');cp.className='sec';cp.style.padding='4px 10px';cp.style.fontSize='11px';cp.textContent='Copy';cp.onclick=function(){navigator.clipboard.writeText(v.text||'').then(function(){cp.textContent='Copied'})};row.appendChild(cp);if(v.intent){var op=document.createElement('button');op.style.padding='4px 10px';op.style.fontSize='11px';op.textContent='Open '+p;op.onclick=function(){window.open(v.intent,'_blank')}}box.appendChild(pre);box.appendChild(row);el.appendChild(box)})}).catch(function(e){log(' adapt: '+e.message+' ')}).finally(function(){b.disabled=false;b.textContent='Adapt for X · Reddit · Telegram · LinkedIn'})};
-loadKeywords();loadStats();loadKwTop();loadPosts();renderImgs();
+// ---- autosave: nothing you type here should ever be losable ----
+// Debounced snapshot of every field + attached images + chosen keywords
+// into localStorage; restores automatically on reopen. Cleared when a
+// publish succeeds (the post itself is now durable — in the repo).
+var ASKEY='studio.autosave.v1';
+function snapshot(){return {t:$('title').value,d:$('desc').value,m:$('md').value,a:$('angle').value,tag:$('tag').value,ad:document.getElementById('asDraft').checked,tr:document.getElementById('track').value,kw:chosen,imgs:images,at:Date.now()}}
+function restore(s){$('title').value=s.t||'';$('desc').value=s.d||'';$('md').value=s.m||'';$('angle').value=s.a||'';if(s.tag)$('tag').value=s.tag;document.getElementById('asDraft').checked=!!s.ad;if(s.tr)document.getElementById('track').value=s.tr;chosen=Array.isArray(s.kw)?s.kw:[];images=Array.isArray(s.imgs)?s.imgs:[]}
+var saveTimer=null;
+function queueSave(){if(saveTimer)return;saveTimer=setTimeout(function(){saveTimer=null;try{var s=snapshot();if(s.t||s.m||s.a){localStorage.setItem(ASKEY,JSON.stringify(s));var d=new Date();$('savedat').textContent='saved locally '+d.toLocaleTimeString();$('discard').style.display='';}}catch(e){}},800)}
+try{
+  var s0=JSON.parse(localStorage.getItem(ASKEY)||'null');
+  if(s0&&(s0.t||s0.m||s0.a)){restore(s0);restored=true;var age=Math.round((Date.now()-s0.at)/60000);$('savedat').textContent='restored unsaved work ('+(age<1?'just now':age+' min ago')+')';$('discard').style.display='';log('\\nrestored your unsaved draft from last session.\\n')}
+}catch(e){}
+$('discard').onclick=function(){try{localStorage.removeItem(ASKEY)}catch(e){}images=[];chosen=[];$('title').value='';$('desc').value='';$('md').value='';$('angle').value='';document.getElementById('asDraft').checked=false;$('savedat').textContent='';$('discard').style.display='none';renderImgs();renderChosen();lint();log('draft discarded.\\n')};
+
+loadKeywords();loadStats();loadKwTop();loadPosts();renderImgs();renderChosen();
 </script></body></html>`;
 
 // ---- boot self-check: the page script must parse, or the UI dies silently ----
