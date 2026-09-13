@@ -370,6 +370,20 @@ $('adapt').onclick=function(){var b=this;b.disabled=true;b.textContent='adapting
 loadKeywords();loadStats();loadKwTop();loadPosts();
 </script></body></html>`;
 
+// ---- boot self-check: the page script must parse, or the UI dies silently ----
+// (a single unbalanced brace once killed every button with zero visible errors —
+// the server kept serving a page whose only script never ran. This makes that
+// failure mode a loud startup error instead.)
+try {
+  const pageJs = UI.match(/<script>([\s\S]*?)<\/script>/)[1];
+  // eslint-disable-next-line no-new-func
+  new Function(pageJs);
+  console.log(`[studio] page script OK (${pageJs.length} chars)`);
+} catch (err) {
+  console.error('[studio] ✗ PAGE SCRIPT IS BROKEN — refusing to start:\n', err.message);
+  process.exit(1);
+}
+
 // ---- server ----
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${HOST}:${PORT}`);
