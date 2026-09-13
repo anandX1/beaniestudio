@@ -60,9 +60,10 @@ The site ships with a full SEO stack. Every deploy, in order:
 The layout ships with a **Cloudflare Web Analytics** beacon slot — cookie-free, GDPR-friendly, zero performance cost, and it loads only when configured:
 
 1. Cloudflare dashboard → **beaniestudio.site → Analytics & Logs → Web Analytics → enable** → copy the token from the JS snippet (the `token` value).
-2. GitHub repo → **Settings → Secrets and variables → Actions → New repository secret**: name `CF_BEACON_TOKEN`, paste the token.
-3. In the Cloudflare Pages/Workers build settings, add environment variable `PUBLIC_CF_BEACON_TOKEN` = the same token (build-time env is what Astro reads).
-4. Next deploy: check the page source for `cloudflareinsights.com/beacon.min.js`. Done — you now have private, adblock-resistant traffic + UTM attribution.
+2. This repo deploys **committed built files** (no Cloudflare build step), so the token is injected at the local build: put it in `site/.env.production` as `PUBLIC_CF_BEACON_TOKEN=<token>` (gitignored — never commit it), run `npm run build`, sync `dist/` to the repo root, push.
+3. Check the page source for `cloudflareinsights.com/beacon.min.js`. Done — private, adblock-resistant traffic + UTM attribution.
+
+Note: the beacon token is a public identifier (it appears in every page's HTML source by design — that's how all Cloudflare-analyzed sites work), but keep it in `.env.production` anyway so it can be rotated without touching source.
 
 Why this one: no consent banner needed, no third-party tracker list, and every `utm_source` link (Discord/Bluesky broadcasts, the site's share button) shows up as its own line — so you know exactly which channel recruits players.
 
