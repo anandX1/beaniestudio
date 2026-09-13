@@ -17,6 +17,10 @@
     "social:post": "node scripts/social-post.mjs",
     "social:seed": "node scripts/social-post.mjs --seed",
     "promo:pack": "node scripts/promo-pack.mjs",
+    "engine:harvest": "node scripts/content-engine.mjs harvest",
+    "engine:draft": "node scripts/content-engine.mjs draft",
+    "engine:post": "node scripts/content-engine.mjs post",
+    "engine:all": "node scripts/content-engine.mjs all",
     "seo": "npm run check:links && npm run ping:indexnow:dry"
   },
   "dependencies": {
