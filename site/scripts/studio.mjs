@@ -323,6 +323,7 @@ label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.0
   <hr style="border-color:var(--line);margin:12px 0">
   <h2>Post stats <button class="sec" id="statrefresh" style="float:right;padding:2px 8px;font-size:10px">refresh</button></h2>
   <div id="stats" style="font-size:12px;color:var(--dim)">loading…</div>
+  <div id="kwtop" style="margin-top:12px"></div>
   <hr style="border-color:var(--line);margin:12px 0">
   <h2>Blog posts</h2>
   <div id="posts"></div>
@@ -350,11 +351,23 @@ $('imgfile').onchange=function(){[].forEach.call(this.files,function(f){var rd=n
 $('publish').onclick=function(){var b=this;b.disabled=true;b.textContent=document.getElementById('asDraft').checked?'saving draft…':'publishing…';log('\\npublishing…\\n');api('/api/publish',{title:$('title').value,description:$('desc').value,tag:$('tag').value,markdown:$('md').value,keywords:chosen,images:images,draft:document.getElementById('asDraft').checked).then(function(d){log('\\n✓ '+(d.draft?'saved as draft post (not on site yet)':'LIVE: '+d.url)+'\\n');loadPosts()}).catch(function(e){log('publish: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Publish to blog →'})};
 $('title').oninput=$('desc').oninput=$('md').oninput=lint;
 $('track').onchange=function(){loadKeywords()};
-async function loadStats(){try{var d=await api('/api/stats');var el=$('stats');if(!d.configured){el.innerHTML='Per-post numbers: add CF_API_TOKEN (token with Web Analytics Reports:Read) + CF_SITE_TAG to site/.env, then refresh. Until then use the utm breakdown in the CF Web Analytics dashboard.';return}el.textContent=d.ok?'Connected. Per-path pageviews + utm sources are queryable — top pages shown in CF dashboard.':'token issue — check CF_API_TOKEN / CF_SITE_TAG'}catch(e){$('stats').textContent='stats: '+e.message}}
+async function loadStats(){try{var d=await api('/api/stats');var el=$('stats');if(!d.configured){el.innerHTML='<div style="border:1px solid var(--line);border-radius:8px;padding:10px">'+
+  '<b style="color:var(--txt)">What you will see here once connected:</b>'+
+  '<ul style="margin:8px 0 8px 18px;padding:0;color:var(--dim)">'+
+  '<li>pageviews per blog post (last 30 days)</li>'+
+  '<li>which platform sent them (utm_source: x / reddit / discord / tiktok)</li>'+
+  '<li>which keywords actually pulled traffic</li></ul>'+
+  '<b style="color:var(--txt)">One-time setup (2 min):</b>'+
+  '<ol style="margin:8px 0 8px 18px;padding:0;color:var(--dim)">'+
+  '<li>Cloudflare dash → My Profile → API Tokens → Create → permission <i>Web Analytics Reports: Read</i></li>'+
+  '<li>paste into <code>site/.env</code>:<br><code style="color:var(--amber)">CF_API_TOKEN=…</code> and <code style="color:var(--amber)">CF_SITE_TAG=…</code><br><span style="opacity:.7">(site tag = the "token" value inside your beacon snippet)</span></li>'+
+  '<li>click refresh above</li></ol>'+
+  '<a href="https://dash.cloudflare.com/?to=/:account/web-analytics" target="_blank" style="color:var(--amber)">Open Cloudflare Web Analytics dashboard ↗</a> — live data is there right now (visitors, pages, referrers).</div>';return}el.innerHTML=d.ok?'<b style="color:var(--green)">✓ connected</b> — per-path pageviews flowing. Detailed tables render in the Cloudflare dashboard (button below).<br><a href="https://dash.cloudflare.com/?to=/:account/web-analytics" target="_blank" style="color:var(--amber)">Open full analytics ↗</a>':'token issue — check CF_API_TOKEN / CF_SITE_TAG in site/.env'}catch(e){$('stats').textContent='stats: '+e.message}}
+async function loadKwTop(){try{var d=await api('/api/keywords');var ks=(d.keywords||[]).slice(0,10);var el=$('kwtop');el.innerHTML='<b style="color:var(--txt)">Top trending queries right now:</b><div style="margin-top:6px;line-height:2">'+ks.map(function(k){return '<span class="kw" style="cursor:default">'+k+'</span>'}).join(' ')+'</div><div style="opacity:.6;margin-top:4px">these are real Google searches people type — full list in the left panel</div>'}catch(e){}}
 $('statrefresh').onclick=loadStats;
 $('deploy').onclick=function(){var b=this;b.disabled=true;b.textContent='deploying…';log(' deploying: build, push, ping ');api('/api/deploy',{}).then(function(d){log(' deploy finished, exit '+d.code+' ');if(d.code===0)loadPosts()}).catch(function(e){log(' deploy: '+e.message+' ')}).finally(function(){b.disabled=false;b.textContent='Deploy site now (build → push → ping)'})};
 $('adapt').onclick=function(){var b=this;b.disabled=true;b.textContent='adapting…';api('/api/adapt',{title:$('title').value,markdown:$('md').value}).then(function(d){var el=$('share');el.innerHTML='';Object.keys(d.variants).forEach(function(p){var v=d.variants[p];var box=document.createElement('div');box.style.cssText='border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px;font-size:12px';box.innerHTML='<b style="color:var(--amber)">'+p.toUpperCase()+'</b> <span style="color:var(--dim)">'+v.note+'</span>';var pre=document.createElement('div');pre.style.cssText='margin:6px 0;white-space:pre-wrap;background:#0d0f12;border-radius:6px;padding:6px';pre.textContent=v.text||'';var row=document.createElement('div');row.style.cssText='display:flex;gap:6px';var cp=document.createElement('button');cp.className='sec';cp.style.padding='4px 10px';cp.style.fontSize='11px';cp.textContent='Copy';cp.onclick=function(){navigator.clipboard.writeText(v.text||'').then(function(){cp.textContent='Copied'})};row.appendChild(cp);if(v.intent){var op=document.createElement('button');op.style.padding='4px 10px';op.style.fontSize='11px';op.textContent='Open '+p;op.onclick=function(){window.open(v.intent,'_blank')}}box.appendChild(pre);box.appendChild(row);el.appendChild(box)})}).catch(function(e){log(' adapt: '+e.message+' ')}).finally(function(){b.disabled=false;b.textContent='Adapt for X · Reddit · Telegram · LinkedIn'})};
-loadKeywords();loadStats();loadPosts();
+loadKeywords();loadStats();loadKwTop();loadPosts();
 </script></body></html>`;
 
 // ---- server ----
