@@ -12,6 +12,8 @@ export const SITE = {
   /** Targeted launch window (drives countdown + copy). */
   launchDate: '2026-12-01T00:00:00Z',
   contact: 'anand@picfomo.com',
+  /** Pre-launch playtest night (drives /playtest countdown). Update per event. */
+  playtestDate: '2026-09-20T18:00:00Z',
 } as const;
 
 export const LINKS = {

@@ -14,6 +14,7 @@
 import { SITE, LINKS } from '../site.config';
 
 const shareUrl = `${SITE.url}/?utm_source=shared&utm_medium=friend&utm_campaign=prelaunch`;
+const playtestUrl = `${SITE.url}/playtest/?utm_source=site&utm_medium=cta&utm_campaign=playtest`;
 ---
 
 <section class="act" aria-label="Stay on the signal">
@@ -24,15 +25,17 @@ const shareUrl = `${SITE.url}/?utm_source=shared&utm_medium=friend&utm_campaign=
     </h2>
     <p class="beat mx-auto mt-5 max-w-2xl text-facility-300" style="--beat-delay: 100ms">
       One follow today is a player on launch day. Playtests, devlogs and the launch alarm all go
-      out through these channels first.
+      out through these channels first — the next playtest night is
+      <a href="/playtest/" class="text-signal hover:text-signal-dim underline underline-offset-4">announced here</a>.
     </p>
 
     <div class="mt-10 grid gap-5 sm:grid-cols-2">
       <div class="beat panel p-7" style="--beat-delay: 150ms">
-        <h3 class="font-display text-lg font-bold uppercase tracking-wide">Discord</h3>
+        <h3 class="font-display text-lg font-bold uppercase tracking-wide">Discord — playtest nights</h3>
         <p class="mt-3 text-sm leading-relaxed text-facility-300">
           Playtests before anyone else, voice hunts with the crew, and the launch ping the moment
-          doors open.
+          doors open. Next slot: see the
+          <a href={playtestUrl} class="text-signal hover:text-signal-dim underline underline-offset-4">playtest briefing</a>.
         </p>
         <p class="mt-5">
           <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-primary">Join the Discord <span aria-hidden="true">→</span></a>

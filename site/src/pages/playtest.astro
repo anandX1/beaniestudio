@@ -1,0 +1,192 @@
+---
+/**
+ * /playtest — the pre-launch event page. One job: turn a visitor into a
+ * Discord member with a calendar reminder. Growth roles of each piece:
+ *  - Countdown → urgency (deadline in your face, updated per event in config)
+ *  - "Save the date" (.ics download) → leaves a real artifact on their device
+ *  - Discord CTA → the capture (main #join CTA reuses the site-wide header CTA)
+ *  - Share button → attendees recruit their squads (5v1 needs squads)
+ *  - What happens → sets expectations so playtest no-shows convert later
+ *  - JSON-LD Event schema → Google can surface it as an event rich result
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, LINKS } from '../site.config';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/** .ics with the chosen slot; escape per RFC 5545 (commas/semicolons). */
+const ics = [
+  'BEGIN:VCALENDAR',
+  'VERSION:2.0',
+  'PRODID:-//Beanie Studio//STATIC Playtest//EN',
+  'BEGIN:VEVENT',
+  `UID:static-playtest-${SITE.playtestDate}@beaniestudio.site`,
+  `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+  `DTSTART:${SITE.playtestDate.replace(/[-:]/g, '').split('.')[0]}Z`,
+  `DTEND:${new Date(Date.parse(SITE.playtestDate) + 90 * 60000).toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+  'SUMMARY:STATIC — community playtest night (Roblox)',
+  'DESCRIPTION:Five Scrappers. One Hunter. No radar. Be in the Discord when the doors open — join link and details inside.',
+  `LOCATION:${LINKS.discord}`,
+  'END:VEVENT',
+  'END:VCALENDAR',
+].join('\r\n');
+
+/** Build-time data URI — no JS, no extra asset, works even with scripts disabled. */
+const icsHref = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+
+const eventLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: 'STATIC — Community Playtest Night',
+  description:
+    'Playtest night for STATIC: Salvage vs Hunter, the free 5v1 sound-only horror game on Roblox. Join the Beanie Studio Discord to get the private link when doors open.',
+  startDate: SITE.playtestDate,
+  endDate: new Date(Date.parse(SITE.playtestDate) + 90 * 60000).toISOString(),
+  eventStatus: 'https://schema.org/EventScheduled',
+  eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
+  location: {
+    '@type': 'VirtualLocation',
+    url: LINKS.discord,
+  },
+  image: [new URL('/og/home.png', Astro.site).href],
+  organizer: {
+    '@type': 'Organization',
+    name: SITE.name,
+    url: SITE.url,
+  },
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+    url: LINKS.discord,
+    availability: 'https://schema.org/InStock',
+  },
+};
+---
+
+<BaseLayout
+  title="Playtest night — be in the Discord when doors open"
+  description="STATIC community playtest night. Join the Discord, save the date, bring your crew. Five Scrappers, one Hunter, no radar — only ears. Free on Roblox."
+  path="/playtest"
+  ogImage="/og/home.png"
+  jsonLd={[eventLd]}
+  breadcrumb={[{ name: 'Mission brief', path: '/' }, { name: 'Playtest', path: '/playtest' }]}
+>
+  <section class="act border-t-0" aria-label="Playtest night">
+    <div class="mx-auto w-full max-w-4xl px-4 py-20 text-center sm:px-6 sm:py-24">
+      <p class="kicker">Pre-launch operation</p>
+      <h1 class="beat mt-4 font-display text-4xl font-bold uppercase leading-tight tracking-tight sm:text-6xl" data-decode>
+        Playtest night
+      </h1>
+      <p class="beat mx-auto mt-5 max-w-xl text-facility-300" style="--beat-delay: 80ms">
+        Doors open, Discord gets the link, and the first outside crew ever sets foot in the
+        wreck. Bring a headset. Bring friends — you'll need five you can trust.
+      </p>
+
+      <p
+        id="ptCountdown"
+        class="beat mx-auto mt-8 max-w-xl rounded border border-facility-700 bg-facility-950/70 px-4 py-3 font-mono text-sm text-signal"
+        data-target={SITE.playtestDate}
+        style="--beat-delay: 140ms"
+        role="timer"
+        aria-live="off"
+      >
+        T-MINUS — loading…
+      </p>
+      <noscript>
+        <p class="mx-auto mt-4 max-w-xl font-mono text-sm text-facility-400">
+          Playtest slot: {new Date(SITE.playtestDate).toUTCString()} — check the Discord for your local time.
+        </p>
+      </noscript>
+
+      <div class="beat mt-9 flex flex-wrap items-center justify-center gap-4" style="--beat-delay: 200ms">
+        <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-primary">Join the Discord — get the link <span aria-hidden="true">→</span></a>
+        <a id="icsLink" href={icsHref} download="static-playtest.ics" class="btn-secondary">Save the date (.ics)</a>
+      </div>
+
+      <p class="beat mt-6" style="--beat-delay: 260ms">
+        <button type="button" id="ptShare" class="font-mono text-xs uppercase tracking-widest text-signal hover:text-signal-dim">
+          Or share this page with your crew <span aria-hidden="true">↗</span>
+        </button>
+        <span id="ptShareOut" class="ml-2 font-mono text-xs text-signal" role="status" aria-live="polite"></span>
+      </p>
+    </div>
+  </section>
+
+  <section class="act" aria-label="How the night runs">
+    <div class="mx-auto w-full max-w-4xl px-4 pb-20 sm:px-6">
+      <div class="grid gap-5 sm:grid-cols-3">
+        <div class="beat panel p-6" style="--beat-delay: 120ms">
+          <h2 class="font-display text-base font-bold uppercase tracking-wide">01 — Link drops in Discord</h2>
+          <p class="mt-3 text-sm leading-relaxed text-facility-300">
+            The private experience link goes to the announcement channel at T-15 minutes.
+            Members only — that's how we keep the wreck from overflowing on night one.
+          </p>
+        </div>
+        <div class="beat panel p-6" style="--beat-delay: 190ms">
+          <h2 class="font-display text-base font-bold uppercase tracking-wide">02 — Full rounds, real hunts</h2>
+          <p class="mt-3 text-sm leading-relaxed text-facility-300">
+            We run real 5v1 rounds back to back. Every scream, every locker save, every
+            sprint that got someone killed is feedback we ship into the launch build.
+          </p>
+        </div>
+        <div class="beat panel p-6" style="--beat-delay: 260ms">
+          <h2 class="font-display text-base font-bold uppercase tracking-wide">03 — Your name in the credits</h2>
+          <p class="mt-3 text-sm leading-relaxed text-facility-300">
+            Playtesters who file feedback get a credit role in the Discord and a thank-you
+            in the launch devlog. Be first in when the game goes live.
+          </p>
+        </div>
+      </div>
+
+      <p class="mt-10 text-center">
+        <a href="/play" class="font-mono text-sm text-signal hover:text-signal-dim">
+          New here? Read how the game works first <span aria-hidden="true">→</span>
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      // Countdown — same 10-line pattern as home, reduced-motion aware.
+      const el = document.getElementById('ptCountdown');
+      if (el) {
+        const target = Date.parse(el.getAttribute('data-target') || '');
+        if (!isNaN(target) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          const pad = function (n: number) { return String(n).padStart(2, '0'); };
+          const render = function () {
+            let s = Math.floor((target - Date.now()) / 1000);
+            if (s <= 0) { el.textContent = 'DOORS ARE OPEN — GET IN THE DISCORD'; return; }
+            const d = Math.floor(s / 86400); s -= d * 86400;
+            const h = Math.floor(s / 3600); s -= h * 3600;
+            const m = Math.floor(s / 60); s -= m * 60;
+            el.textContent = 'T-MINUS ' + d + 'D ' + pad(h) + ':' + pad(m) + ':' + pad(s);
+          };
+          render();
+          setInterval(render, 1000);
+        } else if (!isNaN(target)) {
+          el.textContent = 'SLOT: ' + new Date(target).toUTCString();
+        }
+      }
+
+      // Share — native sheet on phones, clipboard fallback, UTM-tagged.
+      const btn = document.getElementById('ptShare');
+      const out = document.getElementById('ptShareOut');
+      if (btn) {
+        btn.addEventListener('click', function () {
+          const url = 'https://beaniestudio.site/playtest/?utm_source=shared&utm_medium=friend&utm_campaign=playtest';
+          const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+          if (nav.share) {
+            nav.share({ title: 'STATIC playtest night', text: '5v1 horror on Roblox, no radar — playtest night. Get the link in the Discord.', url: url }).catch(function () {});
+            return;
+          }
+          navigator.clipboard.writeText(url).then(
+            function () { if (out) out.textContent = 'LINK COPIED'; },
+            function () { if (out) out.textContent = url; }
+          );
+        });
+      }
+    })();
+  </script>
+</BaseLayout>
