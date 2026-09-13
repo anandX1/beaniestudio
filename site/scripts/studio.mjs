@@ -132,7 +132,7 @@ function seoLint({ title = '', description = '', markdown = '', keywords = [] })
   add(/discord\.gg|beaniestudio\.site/.test(markdown), 'Internal/Discord link present', '');
   const imgCount = (markdown.match(/!\[[^\]]*\]\([^)]+\)/g) || []).length;
   add(true, 'Image optional (add one for OG/social)', imgCount ? `${imgCount} image(s)` : 'none');
-  const aiisms = ['delve', 'elevate', 'seamless', 'game-changer', 'revolutionize', 'testament', 'unleash', 'in the realm of'];
+  const aiisms = ['delve', 'elevate', 'seamless', 'game-changer', 'revolutionize', 'testament', 'unleash', 'in the realm of', 'furthermore', 'moreover', 'utilize', 'leverage', 'pleased to announce'];
   const found = aiisms.filter((w) => lower.includes(w));
   add(found.length === 0, 'No AI-tell phrases', found.join(', ') || 'clean');
 
