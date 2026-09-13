@@ -118,7 +118,7 @@ const BLOG_TRACKS = {
 const MARKDOWN_PROMPT = (angle, keywords, track = 'game') => {
   const t = BLOG_TRACKS[track] || BLOG_TRACKS.game;
   return [
-    { role: 'system', content: `${BRAND}\n${t.brief}\nSEO rules: weave these search phrases naturally into the intro and at least two H2 headings: ${keywords.join(', ')}. Short paragraphs (2-4 sentences). Concrete details over adjectives. Never use "unleash", "elevate", "delve", "seamless", "game-changer", "revolutionize", "testament". Voice: a smart, candid developer. Output ONLY the markdown body (300-420 words, H2 headings with ##, no H1, no title line). No preamble, no code fences.` },
+    { role: 'system', content: `${BRAND}\n${t.brief}\n\nKEYWORD RULES (critical — violation makes the post useless):\nThese search phrases must be woven into NORMAL sentences so a reader never notices them: ${keywords.join(', ')}.\n- NEVER put a keyword in quotation marks.\n- NEVER use a keyword phrase as a heading by itself — headings must be descriptive sentences or phrases that may CONTAIN a keyword naturally (e.g. \"Why our Hunter hunts by sound alone\", not \"roblox horror game\").\n- Use each phrase at most once. If a phrase cannot fit naturally into a sentence, skip it — natural readability beats keyword presence.\n\nSTYLE: short paragraphs (2-4 sentences). Concrete details over adjectives. Never use "unleash", "elevate", "delve", "seamless", "game-changer", "revolutionize", "testament", "furthermore", "moreover", "utilize", "leverage". Voice: a smart, candid developer. Output ONLY the markdown body (300-420 words, H2 headings with ##, no H1, no title line). No preamble, no code fences.` },
     { role: 'user', content: `Post angle: ${angle}` },
   ];
 };
