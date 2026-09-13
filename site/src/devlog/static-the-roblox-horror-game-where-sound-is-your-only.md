@@ -1,5 +1,5 @@
 ---
-title: 'STATIC: The Roblox Horror Game Where Sound Is Your Only'
+title: 'Why sound is your only weapon'
 description: 'Discover how STATIC redefines roblox horror with friends. In this tense game, sound is your primary tool to evade the blind Hunter and survive the dark.'
 pubDate: 2026-09-13
 tag: design
