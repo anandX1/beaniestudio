@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import VideoCard from '../components/VideoCard.astro';
+import FollowSection from '../components/FollowSection.astro';
 import { SITE, LINKS } from '../site.config';
 import { FEATURED_VIDEO, VIDEOS, watchUrl } from '../data/videos';
 
@@ -397,6 +398,12 @@ const featuredVideoLd = {
       </p>
     </div>
   </section>
+
+  <!-- ================= STAY ON THE SIGNAL =================
+       Pre-launch capture module: every visitor lands in a channel we can
+       reach again (Discord / YouTube / Roblox follow) — plus the
+       UTM-tagged share button that turns readers into recruiters. -->
+  <FollowSection />
 
   <!-- ================= ACT 05 — THE DOOR ================= -->
   <section class="act" aria-label="Doors open Q4 2026">

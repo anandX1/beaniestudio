@@ -14,6 +14,8 @@
     "audit:live": "node scripts/audit-live.mjs",
     "ping:indexnow": "node scripts/ping-indexnow.mjs",
     "ping:indexnow:dry": "node scripts/ping-indexnow.mjs --dry",
+    "social:post": "node scripts/social-post.mjs",
+    "social:seed": "node scripts/social-post.mjs --seed",
     "seo": "npm run check:links && npm run ping:indexnow:dry"
   },
   "dependencies": {

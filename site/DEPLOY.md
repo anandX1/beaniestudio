@@ -55,7 +55,27 @@ The site ships with a full SEO stack. Every deploy, in order:
 - Internal link checker: `npm run check:links` (fails the build on dead links)
 - Hover prefetch + inlined CSS for Core Web Vitals (LCP/CINP headroom)
 
+## Analytics (10 minutes, do this before any promotion)
+
+The layout ships with a **Cloudflare Web Analytics** beacon slot — cookie-free, GDPR-friendly, zero performance cost, and it loads only when configured:
+
+1. Cloudflare dashboard → **beaniestudio.site → Analytics & Logs → Web Analytics → enable** → copy the token from the JS snippet (the `token` value).
+2. GitHub repo → **Settings → Secrets and variables → Actions → New repository secret**: name `CF_BEACON_TOKEN`, paste the token.
+3. In the Cloudflare Pages/Workers build settings, add environment variable `PUBLIC_CF_BEACON_TOKEN` = the same token (build-time env is what Astro reads).
+4. Next deploy: check the page source for `cloudflareinsights.com/beacon.min.js`. Done — you now have private, adblock-resistant traffic + UTM attribution.
+
+Why this one: no consent banner needed, no third-party tracker list, and every `utm_source` link (Discord/Bluesky broadcasts, the site's share button) shows up as its own line — so you know exactly which channel recruits players.
+
+## Growth automation (see GROWTH.md for the full runbook)
+
+The repo can auto-broadcast every new devlog to Discord + Bluesky with UTM-tagged links (state-cached, seed-safe — first run never spams). To arm it, add repo secrets:
+
+- `DISCORD_WEBHOOK_URL` — Discord server → Integrations → Webhooks → copy URL into `#devlog`.
+- `BLUESKY_IDENTIFIER` + `BLUESKY_APP_PASSWORD` — optional; bsky.app account + app password.
+
+Until secrets exist, the CI step logs `skipped` and everything else runs green.
+
 ## Optional next steps
 
-- **Analytics:** self-host Umami (or Matomo) on any small VPS and add the snippet to `BaseLayout.astro` — cookieless, no consent banner needed. Watch which pages convert to Roblox follows.
+- **Self-hosted analytics alternative:** Umami or Matomo on any small VPS — add the snippet to `BaseLayout.astro` next to the CF beacon slot. Cloudflare Web Analytics above is recommended first: zero infra.
 - **CI gate:** add a GitHub Action running `npm run check && npm run build && npm run check:links` on every PR (Unlighthouse for Lighthouse budgets when you want the next level).

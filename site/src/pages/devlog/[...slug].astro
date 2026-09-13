@@ -10,6 +10,11 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 
+/** Share targets — canonical URL + UTM so analytics attributes every share. */
+const postUrl = new URL(`/devlog/${post.id}/`, Astro.site).href;
+const shareUrl = `${postUrl}?utm_source=shared&utm_medium=social&utm_campaign=devlog`;
+const xIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${post.data.title} — STATIC devlog`)}&url=${encodeURIComponent(shareUrl)}`;
+
 const fmtDate = post.data.pubDate.toLocaleDateString('en-US', {
   year: 'numeric',
   month: 'long',
@@ -63,6 +68,25 @@ const postLd = {
     </div>
 
     <div class="mt-16 border-t border-facility-700 pt-8">
+      <!-- Transmit strip: native share sheet on phones, X intent + clipboard
+           fallback on desktop. No third-party buttons/scripts — just links. -->
+      <div class="mb-8 flex flex-wrap items-center gap-4">
+        <span class="font-mono text-xs tracking-[0.2em] text-facility-500">TRANSMIT THIS ENTRY</span>
+        <button
+          type="button"
+          id="sharePost"
+          class="btn-secondary px-4 py-1.5 font-mono text-xs uppercase tracking-widest"
+          data-url={shareUrl}
+          data-title={post.data.title}
+        >Share <span aria-hidden="true">→</span></button>
+        <a
+          href={xIntent}
+          target="_blank"
+          rel="noopener"
+          class="font-mono text-xs uppercase tracking-widest text-signal hover:text-signal-dim"
+        >Post on X <span aria-hidden="true">↗</span></a>
+        <span id="shareCopied" class="font-mono text-xs text-signal" role="status" aria-live="polite"></span>
+      </div>
       <a href="/devlog/" class="font-mono text-sm text-signal hover:text-signal-dim">← All entries</a>
     </div>
   </article>
@@ -112,6 +136,28 @@ const postLd = {
       const onScroll = function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
       window.addEventListener('scroll', onScroll, { passive: true });
       update();
+    })();
+  </script>
+
+  <!-- Share button: native share sheet where it exists, clipboard fallback. -->
+  <script>
+    (function () {
+      const btn = document.getElementById('sharePost');
+      const out = document.getElementById('shareCopied');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        const url = btn.getAttribute('data-url') || window.location.href;
+        const title = btn.getAttribute('data-title') || 'STATIC devlog';
+        const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+        if (nav.share) {
+          nav.share({ title: title, text: 'STATIC: Salvage vs Hunter — devlog', url: url }).catch(function () {});
+          return;
+        }
+        navigator.clipboard.writeText(url).then(
+          function () { if (out) out.textContent = 'LINK COPIED'; },
+          function () { if (out) out.textContent = url; }
+        );
+      });
     })();
   </script>
   </article>

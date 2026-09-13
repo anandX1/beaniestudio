@@ -40,6 +40,9 @@ const {
   ogType = 'website',
 } = Astro.props;
 
+/** Cloudflare Web Analytics token — injected only when the environment provides it, so nothing loads until the user opts in by setting the token in DEPLOY.md. */
+const analyticsToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN || '';
+
 /** Canonical URLs use the trailing-slash directory form Astro actually serves. */
 const normPath = path === '/' ? '/' : path.endsWith('/') ? path : `${path}/`;
 const canonical = new URL(normPath, SITE.url);
@@ -118,6 +121,12 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
     <meta name="twitter:image:alt" content={ogImageAlt} />
 
     <script type="application/ld+json" set:html={JSON.stringify(allLd)} />
+
+    <!-- Cloudflare Web Analytics — cookie-free, GDPR-friendly, zero CWV cost.
+         Loads only when PUBLIC_CF_BEACON_TOKEN is set at build time. -->
+    {analyticsToken && (
+      <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "${analyticsToken}"}'></script>
+    )}
   </head>
   <body>
     <a

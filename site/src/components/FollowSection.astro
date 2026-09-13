@@ -1,0 +1,120 @@
+---
+/**
+ * Pre-launch capture module — the "gather the audience before launch" block.
+ *
+ * Growth rules it follows:
+ *  - Every outbound link is the community action we want (follow/join), not a
+ *    dead-end. Copy comes from CHANNELS in site.config.ts.
+ *  - The share button uses the Web Share API where available (phones: native
+ *    share sheet) and falls back to clipboard copy with a UTM-tagged URL so
+ *    shares are attributable in analytics.
+ *  - No third-party requests, no tracking scripts — nothing here can break
+ *    CWV or trip ad blockers.
+ */
+import { SITE, LINKS } from '../site.config';
+
+const shareUrl = `${SITE.url}/?utm_source=shared&utm_medium=friend&utm_campaign=prelaunch`;
+---
+
+<section class="act" aria-label="Stay on the signal">
+  <div class="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6">
+    <p class="kicker">Stay on the signal</p>
+    <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
+      Pick your frequency
+    </h2>
+    <p class="beat mx-auto mt-5 max-w-2xl text-facility-300" style="--beat-delay: 100ms">
+      One follow today is a player on launch day. Playtests, devlogs and the launch alarm all go
+      out through these channels first.
+    </p>
+
+    <div class="mt-10 grid gap-5 sm:grid-cols-2">
+      <div class="beat panel p-7" style="--beat-delay: 150ms">
+        <h3 class="font-display text-lg font-bold uppercase tracking-wide">Discord</h3>
+        <p class="mt-3 text-sm leading-relaxed text-facility-300">
+          Playtests before anyone else, voice hunts with the crew, and the launch ping the moment
+          doors open.
+        </p>
+        <p class="mt-5">
+          <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-primary">Join the Discord <span aria-hidden="true">→</span></a>
+        </p>
+      </div>
+
+      <div class="beat panel p-7" style="--beat-delay: 220ms">
+        <h3 class="font-display text-lg font-bold uppercase tracking-wide">YouTube</h3>
+        <p class="mt-3 text-sm leading-relaxed text-facility-300">
+          Every devlog and playtest upload lands here first — the transmissions grid on this page
+          is pulled from the same channel.
+        </p>
+        <p class="mt-5">
+          <a href={LINKS.youtube} rel="noopener" target="_blank" class="btn-secondary">Subscribe on YouTube <span aria-hidden="true">→</span></a>
+        </p>
+      </div>
+
+      <div class="beat panel p-7" style="--beat-delay: 290ms">
+        <h3 class="font-display text-lg font-bold uppercase tracking-wide">Roblox community</h3>
+        <p class="mt-3 text-sm leading-relaxed text-facility-300">
+          Following now means STATIC shows up in your Roblox home the day it ships. Zero effort,
+          first in line.
+        </p>
+        <p class="mt-5">
+          <a href={LINKS.roblox} rel="noopener" target="_blank" class="btn-secondary">Follow on Roblox <span aria-hidden="true">→</span></a>
+        </p>
+      </div>
+
+      <div class="beat panel p-7" style="--beat-delay: 360ms">
+        <h3 class="font-display text-lg font-bold uppercase tracking-wide">Recruit a friend</h3>
+        <p class="mt-3 text-sm leading-relaxed text-facility-300">
+          STATIC is a 5v1 — it literally needs five people who trust each other. Send them the
+          briefing.
+        </p>
+        <p class="mt-5">
+          <button
+            type="button"
+            id="shareStatic"
+            class="btn-primary"
+            data-url={shareUrl}
+          >
+            Share STATIC <span aria-hidden="true">→</span>
+          </button>
+        </p>
+        <p class="mt-3 font-mono text-[0.62rem] tracking-[0.18em] text-signal" id="shareStatus" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    const btn = document.getElementById('shareStatic');
+    const status = document.getElementById('shareStatus');
+    if (!btn) return;
+
+    const setStatus = function (msg: string) {
+      if (status) status.textContent = msg;
+    };
+
+    btn.addEventListener('click', function () {
+      const url = btn.getAttribute('data-url') || window.location.origin + '/';
+      const data = {
+        title: 'STATIC: Salvage vs Hunter',
+        text: 'Free 5v1 horror on Roblox — five salvagers, one hunter, no radar. Only ears.',
+        url: url,
+      } as const;
+
+      // Native share sheet (mobile, some desktops) — else clipboard fallback.
+      const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+      if (nav.share) {
+        nav.share(data).then(
+          function () { setStatus('SENT — THANKS FOR THE RECRUIT'); },
+          function () { /* user canceled — stay quiet */ }
+        );
+        return;
+      }
+
+      navigator.clipboard.writeText(url).then(
+        function () { setStatus('LINK COPIED — GO RECRUIT SOMEONE'); },
+        function () { setStatus('COPY FAILED — SHARE ' + url); }
+      );
+    });
+  })();
+</script>
