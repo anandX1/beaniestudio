@@ -71,12 +71,28 @@ const ROBLOX_URL = grab('roblox');
 const PLAYTEST_URL = `${SITE_URL}/playtest/`;
 
 // ---------- 1. HARVEST ----------
-const SEEDS = [
-  'roblox horror game', 'asymmetrical horror', 'roblox horror multiplayer',
-  'hide and seek horror game', '5v1 horror game', 'roblox horror with friends',
-  'roblox sound based horror', 'new roblox horror 2026', 'roblox horror no radar',
-  'scary roblox games to play with friends',
-];
+// Topic tracks: the blog is not only about the game — indie-dev lessons and
+// Roblox-technical posts earn links and reach audiences the game posts can't.
+const TRACKS = {
+  game: [
+    'roblox horror game', 'asymmetrical horror', 'roblox horror multiplayer',
+    'hide and seek horror game', '5v1 horror game', 'roblox horror with friends',
+    'roblox sound based horror', 'new roblox horror 2026', 'roblox horror no radar',
+    'scary roblox games to play with friends',
+  ],
+  indie: [
+    'indie game marketing', 'how to market an indie game', 'roblox game dev tips',
+    'solo game developer', 'game dev devlog', 'how to grow a discord server',
+    'indie game launch checklist', 'game development motivation',
+  ],
+  technical: [
+    'roblox sound design', 'roblox proximity chat', 'roblox ai npc',
+    'roblox horror map ideas', 'roblox game optimization', 'roblox studio tips',
+    'how to make a horror game on roblox', 'roblox asymmetrical gameplay',
+  ],
+};
+const SEEDS = TRACKS[opt('track') || 'game'] || TRACKS.game;
+const TRACK = opt('track') || 'game';
 
 async function fetchGoogle(q) {
   const res = await fetch(`https://suggestqueries.google.com/complete/search?client=firefox&hl=en&q=${encodeURIComponent(q)}`);
@@ -105,8 +121,9 @@ async function harvest() {
     }
   }
   const keywords = [...all].sort();
-  fs.writeFileSync(KW_PATH, JSON.stringify({ harvestedAt: new Date().toISOString(), seeds: SEEDS, keywords }, null, 2));
-  log(`harvested ${keywords.length} real search queries → ${path.relative(SITE_ROOT, KW_PATH)}`);
+  const kwFile = TRACK === 'game' ? KW_PATH : path.join(CONTENT_DIR, `keywords-${TRACK}.json`);
+  fs.writeFileSync(kwFile, JSON.stringify({ track: TRACK, harvestedAt: new Date().toISOString(), seeds: SEEDS, keywords }, null, 2));
+  log(`[${TRACK}] harvested ${keywords.length} real search queries → ${path.relative(SITE_ROOT, kwFile)}`);
   log('top of the list:', keywords.slice(0, 8).join(' | '));
 }
 
@@ -272,6 +289,7 @@ async function post() {
     log('  draft    — Groq writes today\u2019s post pack into content/drafts-<date>.md');
     log('  post     — push [x]-approved blocks (Discord/Bluesky); ceiling 6/day');
     log('  all      — harvest + draft in one go');
+    log('  --track game|indie|technical  — keyword set to harvest (default: game)');
     log('daily: npm run engine:all → review/tick → npm run engine:post');
   }
 })().catch((e) => die(e.message));

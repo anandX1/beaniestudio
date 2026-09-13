@@ -95,10 +95,33 @@ async function groq(messages, { json = false, maxTokens = 980 } = {}) {
 
 const BRAND = `Brand: Beanie Studio — indie team making "STATIC: Salvage vs Hunter", a free 5v1 horror game on Roblox. Five Scrapper players salvage fuel from a wrecked shuttle; the sixth player, the Hunter, is blind and hunts entirely by sound (sprints, dropped scrap, panicked breathing, proximity voice chat). No radar, no minimap. Crossplay, tuned for low-end phones. Launch window Q4 2026. Playtest nights via Discord. Site: https://beaniestudio.site — Discord: https://discord.gg/z8kPT6cRbG — Roblox community: https://www.roblox.com/communities/1108819917/Beanies-studios`;
 
-const MARKDOWN_PROMPT = (angle, keywords) => [
-  { role: 'system', content: `${BRAND}\nYou write devlog blog posts for the studio website. SEO rules: weave these search phrases naturally into the intro and at least two H2 headings: ${keywords.join(', ')}. Short paragraphs (2-4 sentences). Concrete details over adjectives. Never use "unleash", "elevate", "delve", "seamless", "game-changer", "revolutionize", "testament". Voice: a smart, candid developer talking to players. Output ONLY the markdown body (300-420 words, H2 headings with ##, no H1, no title line) and end with one question inviting readers to the Discord. No preamble, no code fences.` },
-  { role: 'user', content: `Post angle: ${angle}` },
-];
+/** Topic tracks: the blog is not only about the game — indie-dev lessons and
+ *  Roblox-technical posts earn links from audiences the game posts can't reach. */
+const BLOG_TRACKS = {
+  game: {
+    label: 'Game — STATIC itself',
+    seeds: ['roblox horror game', 'asymmetrical horror', 'roblox horror multiplayer', 'hide and seek horror game', '5v1 horror game', 'roblox horror with friends', 'roblox sound based horror', 'new roblox horror 2026', 'roblox horror no radar', 'scary roblox games to play with friends'],
+    brief: 'Post topic: STATIC itself — mechanics, the Hunter, sound design, the wreck, playtest stories, dev progress. Speak as the studio. End CTA: one line inviting readers to the playtest Discord.',
+  },
+  indie: {
+    label: 'Indie dev — lessons & process',
+    seeds: ['indie game marketing', 'how to market an indie game', 'roblox game dev tips', 'solo game developer', 'game dev devlog', 'how to grow a discord server', 'indie game launch checklist', 'game development motivation'],
+    brief: 'Post topic: indie game development lessons from building STATIC — marketing experiments (real numbers), cutting features, solo-dev process, community building. Useful to ANY indie dev; STATIC is the case study, not the subject. End CTA: one soft line like "we document everything we learn on this blog and in our Discord" — do NOT hard-sell the game.',
+  },
+  technical: {
+    label: 'Roblox technical — how it\u2019s built',
+    seeds: ['roblox sound design', 'roblox proximity chat', 'roblox ai npc', 'roblox horror map ideas', 'roblox game optimization', 'roblox studio tips', 'how to make a horror game on roblox', 'roblox asymmetrical gameplay'],
+    brief: 'Post topic: Roblox development technique shown through STATIC — sound design, listening AI, optimization for low-end phones, proximity chat. Practical, technical, generous. End CTA: one line pointing to the devlog for more build notes.',
+  },
+};
+
+const MARKDOWN_PROMPT = (angle, keywords, track = 'game') => {
+  const t = BLOG_TRACKS[track] || BLOG_TRACKS.game;
+  return [
+    { role: 'system', content: `${BRAND}\n${t.brief}\nSEO rules: weave these search phrases naturally into the intro and at least two H2 headings: ${keywords.join(', ')}. Short paragraphs (2-4 sentences). Concrete details over adjectives. Never use "unleash", "elevate", "delve", "seamless", "game-changer", "revolutionize", "testament". Voice: a smart, candid developer. Output ONLY the markdown body (300-420 words, H2 headings with ##, no H1, no title line). No preamble, no code fences.` },
+    { role: 'user', content: `Post angle: ${angle}` },
+  ];
+};
 
 const META_PROMPT = (markdown, keywords) => [
   { role: 'system', content: 'Return ONLY strict JSON: {"title": string, "description": string}. Title: max 55 chars, compelling, no clickbait. Description: max 150 chars meta description including one of the keywords. No extra keys.' },
@@ -267,6 +290,8 @@ label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.0
 </section>
 <section>
   <h2>Draft</h2>
+  <label>Topic track</label>
+  <select id="track"><option value="game">Game — STATIC itself</option><option value="indie">Indie dev — lessons &amp; process</option><option value="technical">Roblox technical — how it's built</option></select>
   <label>Post angle (what's the story?)</label>
   <input id="angle" placeholder="e.g. how the Hunter's hearing actually works">
   <label>Using keywords (click left to add)</label>
@@ -281,17 +306,23 @@ label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.0
   <div style="display:flex;gap:8px;flex-wrap:wrap">
     <button id="draft">Draft with Groq</button>
     <button class="sec" id="humanize">Humanize pass</button>
+    <button class="sec" id="adapt">Adapt for X · Reddit · Telegram · LinkedIn</button>
     <label class="sec" style="border:1px solid var(--amber);border-radius:8px;padding:8px 12px;cursor:pointer">Attach images<input type="file" id="imgfile" accept="image/*" multiple style="display:none"></label>
   </div>
+  <div id="share" style="margin-top:10px"></div>
   <div id="imgs"></div>
   <div style="margin-top:12px;font-size:12px;color:var(--dim)"><label style="text-transform:none;letter-spacing:0;color:var(--dim)"><input type="checkbox" id="asDraft" style="width:auto;margin-right:6px">Publish as draft (hidden from the site until you flip draft:false)</label></div>
   <div style="margin-top:8px"><button id="publish" style="width:100%">Publish to blog →</button></div>
+  <div style="margin-top:6px"><button class="sec" id="deploy" style="width:100%">Deploy site now (build → push → ping)</button></div>
   <div id="log">ready.</div>
 </section>
 <section id="seo">
   <h2>SEO lint</h2>
   <div id="score">–</div>
   <div id="checks"></div>
+  <hr style="border-color:var(--line);margin:12px 0">
+  <h2>Post stats <button class="sec" id="statrefresh" style="float:right;padding:2px 8px;font-size:10px">refresh</button></h2>
+  <div id="stats" style="font-size:12px;color:var(--dim)">loading…</div>
   <hr style="border-color:var(--line);margin:12px 0">
   <h2>Blog posts</h2>
   <div id="posts"></div>
@@ -305,19 +336,25 @@ function log(m){var l=$('log');l.textContent+=m;l.scrollTop=l.scrollHeight}
 async function api(path,body){var r=await fetch(path,body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}:{});var d=await r.json().catch(function(){return{error:'bad response'}});if(!r.ok)throw new Error(d.error||r.status);return d}
 function renderChosen(){$('chosen').textContent=chosen.length?chosen.join('  ·  '):'none yet'}
 function renderKws(list){$('kwlist').innerHTML='';list.forEach(function(k){var s=document.createElement('span');s.className='kw';s.textContent=k;s.onclick=function(){if(chosen.indexOf(k)<0){chosen.push(k);s.classList.add('on');renderChosen()}};$('kwlist').appendChild(s)})}
-async function loadKeywords(){try{var d=await api('/api/keywords');renderKws(d.keywords||[]);var f=d.harvestedAt?new Date(d.harvestedAt).toLocaleString():'never';document.querySelector('#kwlist').insertAdjacentHTML('beforebegin','<div style="font-size:11px;color:var(--dim);margin-bottom:6px">'+(d.keywords||[]).length+' queries · harvested '+f+'</div>')}catch(e){log('keywords: '+e.message+'\\n')}}
+function trk(){return document.getElementById('track').value}
+async function loadKeywords(){try{var d=await api('/api/keywords?track='+trk());renderKws(d.keywords||[]);var f=d.harvestedAt?new Date(d.harvestedAt).toLocaleString():'never';document.querySelector('#kwlist').insertAdjacentHTML('beforebegin','<div style="font-size:11px;color:var(--dim);margin-bottom:6px">'+(d.keywords||[]).length+' queries · harvested '+f+'</div>')}catch(e){log('keywords: '+e.message+'\\n')}}
 async function loadPosts(){try{var d=await api('/api/posts');$('posts').innerHTML='';d.posts.forEach(function(p){var e=document.createElement('div');e.className='post';e.innerHTML='<div>'+p.title+(p.draft?'<span class="badge">draft</span>':'')+'</div><div class="d">'+(p.pubDate||'')+' · '+p.file+'</div>';$('posts').appendChild(e)})}catch(e){}}
 function lint(){var r=apiLater();function apiLater(){return null}var title=$('title').value,desc=$('desc').value,md=$('md').value;
   fetch('/api/seo',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:title,description:desc,markdown:md,keywords:chosen})}).then(function(r){return r.json()}).then(function(d){
     $('score').textContent=d.score+' / 100';$('score').style.color=d.score>=80?'var(--green)':d.score>=55?'var(--amber)':'var(--red)';
     $('checks').innerHTML='';d.checks.forEach(function(c){var e=document.createElement('div');e.className='check '+(c.ok?'ok':'bad');e.innerHTML='<b>'+(c.ok?'✓':'✗')+'</b><span>'+c.label+(c.detail?' <span style="color:var(--dim)">('+c.detail+')</span>':'')+'</span>';$('checks').appendChild(e)})})}
-$('reharvest').onclick=function(){var b=this;b.disabled=true;b.textContent='harvesting…';api('/api/harvest',{}).then(function(d){renderKws(d.keywords||[]);b.disabled=false;b.textContent='Refresh harvest'}).catch(function(e){log('harvest: '+e.message+'\\n');b.disabled=false;b.textContent='Refresh harvest'})};
-$('draft').onclick=function(){var b=this;if(!$('angle').value){log('angle required — what is the post about?\\n');return}b.disabled=true;b.textContent='drafting…';log('\\ngroq is writing…\\n');api('/api/draft',{angle:$('angle').value,keywords:chosen}).then(function(d){$('title').value=d.title;$('desc').value=d.description;$('md').value=d.markdown;lint();log('draft ready — edit freely.\\n')}).catch(function(e){log('draft: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Draft with Groq'})};
+$('reharvest').onclick=function(){var b=this;b.disabled=true;b.textContent='harvesting…';api('/api/harvest?track='+trk(),{}).then(function(d){renderKws(d.keywords||[]);b.disabled=false;b.textContent='Refresh harvest'}).catch(function(e){log('harvest: '+e.message+'\\n');b.disabled=false;b.textContent='Refresh harvest'})};
+$('draft').onclick=function(){var b=this;if(!$('angle').value){log('angle required — what is the post about?\\n');return}b.disabled=true;b.textContent='drafting…';log('\\ngroq is writing…\\n');api('/api/draft',{angle:$('angle').value,keywords:chosen,track:trk()}).then(function(d){$('title').value=d.title;$('desc').value=d.description;$('md').value=d.markdown;lint();log('draft ready — edit freely.\\n')}).catch(function(e){log('draft: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Draft with Groq'})};
 $('humanize').onclick=function(){var b=this;if(!$('md').value){log('nothing to humanize\\n');return}b.disabled=true;log('\\nhumanize pass…\\n');api('/api/humanize',{markdown:$('md').value}).then(function(d){$('md').value=d.markdown;lint();log('humanized.\\n')}).catch(function(e){log('humanize: '+e.message+'\\n')}).finally(function(){b.disabled=false})};
 $('imgfile').onchange=function(){[].forEach.call(this.files,function(f){var rd=new FileReader();rd.onload=function(){var data=String(rd.result);images.push({name:f.name,data:data,alt:$('title').value||'image'});var e=document.createElement('div');e.textContent='▲ '+f.name+' ('+Math.round(data.length/1365)+' KB) — attached';$('imgs').appendChild(e)};rd.readAsDataURL(f)});this.value=''};
 $('publish').onclick=function(){var b=this;b.disabled=true;b.textContent=document.getElementById('asDraft').checked?'saving draft…':'publishing…';log('\\npublishing…\\n');api('/api/publish',{title:$('title').value,description:$('desc').value,tag:$('tag').value,markdown:$('md').value,keywords:chosen,images:images,draft:document.getElementById('asDraft').checked).then(function(d){log('\\n✓ '+(d.draft?'saved as draft post (not on site yet)':'LIVE: '+d.url)+'\\n');loadPosts()}).catch(function(e){log('publish: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Publish to blog →'})};
 $('title').oninput=$('desc').oninput=$('md').oninput=lint;
-loadKeywords();loadPosts();
+$('track').onchange=function(){loadKeywords()};
+async function loadStats(){try{var d=await api('/api/stats');var el=$('stats');if(!d.configured){el.innerHTML='Per-post numbers: add CF_API_TOKEN (token with Web Analytics Reports:Read) + CF_SITE_TAG to site/.env, then refresh. Until then use the utm breakdown in the CF Web Analytics dashboard.';return}el.textContent=d.ok?'Connected. Per-path pageviews + utm sources are queryable — top pages shown in CF dashboard.':'token issue — check CF_API_TOKEN / CF_SITE_TAG'}catch(e){$('stats').textContent='stats: '+e.message}}
+$('statrefresh').onclick=loadStats;
+$('deploy').onclick=function(){var b=this;b.disabled=true;b.textContent='deploying…';log(' deploying: build, push, ping ');api('/api/deploy',{}).then(function(d){log(' deploy finished, exit '+d.code+' ');if(d.code===0)loadPosts()}).catch(function(e){log(' deploy: '+e.message+' ')}).finally(function(){b.disabled=false;b.textContent='Deploy site now (build → push → ping)'})};
+$('adapt').onclick=function(){var b=this;b.disabled=true;b.textContent='adapting…';api('/api/adapt',{title:$('title').value,markdown:$('md').value}).then(function(d){var el=$('share');el.innerHTML='';Object.keys(d.variants).forEach(function(p){var v=d.variants[p];var box=document.createElement('div');box.style.cssText='border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px;font-size:12px';box.innerHTML='<b style="color:var(--amber)">'+p.toUpperCase()+'</b> <span style="color:var(--dim)">'+v.note+'</span>';var pre=document.createElement('div');pre.style.cssText='margin:6px 0;white-space:pre-wrap;background:#0d0f12;border-radius:6px;padding:6px';pre.textContent=v.text||'';var row=document.createElement('div');row.style.cssText='display:flex;gap:6px';var cp=document.createElement('button');cp.className='sec';cp.style.padding='4px 10px';cp.style.fontSize='11px';cp.textContent='Copy';cp.onclick=function(){navigator.clipboard.writeText(v.text||'').then(function(){cp.textContent='Copied'})};row.appendChild(cp);if(v.intent){var op=document.createElement('button');op.style.padding='4px 10px';op.style.fontSize='11px';op.textContent='Open '+p;op.onclick=function(){window.open(v.intent,'_blank')}}box.appendChild(pre);box.appendChild(row);el.appendChild(box)})}).catch(function(e){log(' adapt: '+e.message+' ')}).finally(function(){b.disabled=false;b.textContent='Adapt for X · Reddit · Telegram · LinkedIn'})};
+loadKeywords();loadStats();loadPosts();
 </script></body></html>`;
 
 // ---- server ----
@@ -336,8 +373,10 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (url.pathname === '/api/harvest' && req.method === 'POST') {
-      execSync('node scripts/content-engine.mjs harvest', { cwd: SITE_ROOT, stdio: 'pipe', timeout: 120000 });
-      return json(res, 200, JSON.parse(fs.readFileSync(KW_PATH, 'utf8')));
+      const track = (['game', 'indie', 'technical'].includes(url.searchParams.get('track') || '') ? url.searchParams.get('track') : 'game');
+      const kwFile = track === 'game' ? KW_PATH : path.join(CONTENT_DIR, `keywords-${track}.json`);
+      execSync(`node scripts/content-engine.mjs harvest --track ${track}`, { cwd: SITE_ROOT, stdio: 'pipe', timeout: 120000 });
+      return json(res, 200, JSON.parse(fs.readFileSync(kwFile, 'utf8')));
     }
 
     if (url.pathname === '/api/posts' && req.method === 'GET') {
@@ -349,19 +388,85 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (url.pathname === '/api/draft' && req.method === 'POST') {
-      const { angle, keywords = [] } = await readBody(req);
+      const { angle, keywords = [], track = 'game' } = await readBody(req);
       if (!angle) return json(res, 400, { error: 'angle required' });
-      const kws = keywords.length ? keywords : (JSON.parse(fs.readFileSync(KW_PATH, 'utf8')).keywords || []).slice(0, 8);
+      const kwFile = track === 'game' ? KW_PATH : path.join(CONTENT_DIR, `keywords-${track}.json`);
+      let pool = keywords;
+      if (!pool.length) { try { pool = JSON.parse(fs.readFileSync(kwFile, 'utf8')).keywords || []; } catch { pool = []; } }
+      if (!pool.length) { try { pool = JSON.parse(fs.readFileSync(KW_PATH, 'utf8')).keywords || []; } catch { pool = []; } }
+      const kws = (pool.length ? pool : BLOG_TRACKS[track].seeds).slice(0, 8);
       // Two small calls beat one big one: reasoning models burn token budgets,
       // so the body is plain-text and the tiny title/meta pair is a separate
       // cheap JSON call that fits the free tier easily.
-      const markdown = (await groq(MARKDOWN_PROMPT(angle, kws), { maxTokens: 980 })).replace(/^```(markdown)?\n?|\n?```$/g, '').trim();
+      const markdown = (await groq(MARKDOWN_PROMPT(angle, kws, track), { maxTokens: 980 })).replace(/^```(markdown)?\n?|\n?```$/g, '').trim();
       let meta = { title: angle.slice(0, 55), description: '' };
       try {
         const raw = await groq(META_PROMPT(markdown, kws), { json: true, maxTokens: 200 });
         meta = { ...meta, ...JSON.parse(raw) };
       } catch { /* fall back to angle-derived title */ }
-      return json(res, 200, { title: (meta.title || angle).slice(0, 70), description: (meta.description || '').slice(0, 165), markdown, keywords: kws });
+      return json(res, 200, { title: (meta.title || angle).slice(0, 70), description: (meta.description || '').slice(0, 165), markdown, keywords: kws, track });
+    }
+
+    if (url.pathname === '/api/adapt' && req.method === 'POST') {
+      const { title = '', markdown = '', url: postUrl = '' } = await readBody(req, 1024 * 1024);
+      if (!markdown) return json(res, 400, { error: 'markdown required' });
+      const src = postUrl || `https://beaniestudio.site/devlog/${slugify(title)}/`;
+      const first = markdown.replace(/[#*>`]/g, '').split('\n').map((l) => l.trim()).filter(Boolean)[0] || title;
+      const utm = (source) => `${src}?utm_source=${source}&utm_medium=social&utm_campaign=blog`;
+      // Per-platform adaptation: the same content, each platform's native voice
+      // and constraints. Reddit/Telegram/LinkedIn ship as intent URLs + copy —
+      // one click opens the platform pre-filled (their APIs forbid auto-posting;
+      // intent URLs are the compliant path).
+      const variants = {
+        x: {
+          mode: 'intent',
+          note: 'Opens X pre-filled (280 chars incl. link). Post from the handle for reach.',
+          text: `${title}\n${first.slice(0, 120)}…\n${utm('x')}`.slice(0, 279) + '…',
+          intent: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${title}\n${utm('x')}`.slice(0, 279))}`,
+        },
+        reddit: {
+          mode: 'intent+rules',
+          note: 'Title + body for r/robloxgamedev or r/gamedev. LINK IN FIRST COMMENT ONLY — subreddits remove link-drops.',
+          text: `${title}\n\n${first}\n\n(Context: we are building this game; full writeup on our site.)`,
+        },
+        telegram: {
+          mode: 'intent',
+          note: 'Opens Telegram share.',
+          intent: `https://t.me/share/url?url=${encodeURIComponent(utm('telegram'))}&text=${encodeURIComponent(title)}`,
+          text: `${title} — ${utm('telegram')}`,
+        },
+        linkedin: {
+          mode: 'intent',
+          note: 'Opens LinkedIn share. Angle indie-dev lessons as professional lessons.',
+          intent: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(utm('linkedin'))}`,
+          text: utm('linkedin'),
+        },
+      };
+      return json(res, 200, { url: src, variants });
+    }
+
+    if (url.pathname === '/api/deploy' && req.method === 'POST') {
+      const code = await runStep('npm run deploy --silent --no-ping', (s) => process.stdout.write(`[studio:deploy] ${String(s).split('\n')[0]}\n`));
+      return json(res, 200, { code });
+    }
+
+    if (url.pathname === '/api/stats' && req.method === 'GET') {
+      const token = process.env.CF_API_TOKEN;
+      if (!token) {
+        return json(res, 200, { configured: false, hint: 'Add CF_API_TOKEN to site/.env (Cloudflare dash → My Profile → API Tokens → "Web Analytics reports:read" permission). Until then, use the utm breakdown in the Web Analytics dashboard.' });
+      }
+      const since = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+      const until = new Date().toISOString().slice(0, 10);
+      const siteTag = process.env.CF_SITE_TAG || '';
+      const q = `query { viewer { accounts(filter: {}) { webAnalyticsReports(limit: 1, filter: { siteTag: "${siteTag}", date_geq: "${since}", date_leq: "${until}" }) { topPages { pageInfo { count } rows: topPages(limit: 20) { pageViews date } } } } } }`;
+      const r = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+        body: JSON.stringify({ query: q }),
+      });
+      const body = await r.json().catch(() => null);
+      if (!r.ok || !body?.data) return json(res, 200, { configured: true, ok: false, hint: `CF API said ${r.status} — check token permission or site tag. Raw: ${JSON.stringify(body).slice(0, 200)}` });
+      return json(res, 200, { configured: true, ok: true, data: body.data });
     }
 
     if (url.pathname === '/api/humanize' && req.method === 'POST') {
@@ -384,6 +489,18 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+server.on('error', (e) => {
+  if (e.code === 'EADDRINUSE') {
+    console.error(`[studio] port ${PORT} busy — Studio is probably already running at http://${HOST}:${PORT}`);
+    process.exit(0);
+  }
+  throw e;
+});
+
 server.listen(PORT, HOST, () => {
-  console.log(`[studio] Content Studio → http://${HOST}:${PORT}  (local only, Ctrl+C to stop)`);
+  const url = `http://${HOST}:${PORT}`;
+  console.log(`[studio] Content Studio → ${url}  (local only, Ctrl+C to stop)`);
+  if (process.env.STUDIO_NO_OPEN !== '1') {
+    spawn('cmd.exe', ['/c', 'start', '', url], { stdio: 'ignore', windowsHide: true });
+  }
 });
