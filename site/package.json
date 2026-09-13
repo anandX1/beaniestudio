@@ -21,6 +21,9 @@
     "engine:draft": "node scripts/content-engine.mjs draft",
     "engine:post": "node scripts/content-engine.mjs post",
     "engine:all": "node scripts/content-engine.mjs all",
+    "deploy": "node scripts/deploy-site.mjs",
+    "deploy:dry": "node scripts/deploy-site.mjs --dry-run",
+    "studio": "node scripts/studio.mjs",
     "seo": "npm run check:links && npm run ping:indexnow:dry"
   },
   "dependencies": {

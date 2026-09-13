@@ -49,6 +49,14 @@ const MAX_POSTS_PER_DAY = 6;
 const log = (...m) => console.log('[engine]', ...m);
 const die = (m) => { console.error('[engine] ✗', m); process.exit(1); };
 
+/** Load site/.env (gitignored) into process.env — keys never live in code or git. */
+try {
+  for (const line of fs.readFileSync(path.join(SITE_ROOT, '.env'), 'utf8').split('\n')) {
+    const m = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/);
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
+  }
+} catch { /* no .env — env vars only */ }
+
 const args = process.argv.slice(2);
 const cmd = args[0] || 'help';
 const flag = (name) => args.includes(`--${name}`);
@@ -106,20 +114,31 @@ async function harvest() {
 async function groq(messages, json = false) {
   const key = process.env.GROQ_API_KEY;
   if (!key) die('GROQ_API_KEY not set — free key at console.groq.com, then: set GROQ_API_KEY=...');
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model: 'llama-3.1-8b-instant',
-      messages,
-      temperature: 0.8,
-      max_tokens: 1500,
-      ...(json ? { response_format: { type: 'json_object' } } : {}),
-    }),
-  });
-  if (!res.ok) die(`Groq ${res.status}: ${await res.text().catch(() => '')}`);
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? '';
+  // Groq retires models periodically — try the preferred one, then fall back
+  // across the current catalog automatically instead of dying.
+  const MODELS = ['openai/gpt-oss-20b', 'openai/gpt-oss-120b', 'qwen/qwen3.8-27b'];
+  let lastErr = '';
+  for (const model of MODELS) {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.8,
+        max_tokens: 900, // free-tier OTPM ceiling is 1000 — stay under it
+        ...(json ? { response_format: { type: 'json_object' } } : {}),
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content ?? '';
+    }
+    lastErr = `${model}: ${res.status}`;
+    if (res.status === 429) { await new Promise((r) => setTimeout(r, 4000)); continue; } // rate-limited: breathe, try next
+    if (res.status !== 404 && res.status !== 400) die(`Groq ${res.status}: ${await res.text().catch(() => '')}`);
+  }
+  die(`all Groq models failed (last: ${lastErr}) — check console.groq.com/models`);
 }
 
 const DRAFT_PROMPT = (keywords) => [
@@ -137,7 +156,7 @@ async function draft() {
   if (!fs.existsSync(KW_PATH)) { log('no keywords yet — running harvest first…'); await harvest(); }
   const { keywords } = JSON.parse(fs.readFileSync(KW_PATH, 'utf8'));
   const sample = keywords.sort(() => Math.random() - 0.5).slice(0, 14);
-  log('drafting with Groq (llama-3.1-8b-instant)…');
+  log('drafting with Groq (gpt-oss-20b, auto-fallback)…');
   const raw = await groq(DRAFT_PROMPT(sample), true);
   let pack;
   try { pack = JSON.parse(raw); } catch { die('Groq returned invalid JSON — rerun `npm run engine:draft`'); }
@@ -145,6 +164,11 @@ async function draft() {
   fs.mkdirSync(CONTENT_DIR, { recursive: true });
   const date = new Date().toISOString().slice(0, 10);
   const file = path.join(CONTENT_DIR, `drafts-${date}.md`);
+  // Models sometimes return editor_notes as an object — render either shape readably.
+  const brief = typeof pack.editor_notes === 'string'
+    ? pack.editor_notes
+    : Object.entries(pack.editor_notes || {}).map(([k, v]) => `- **${k}:** ${v}`).join('\n');
+
   const md = `# Draft pack — ${date}
 
 > Topic: ${pack.topic}
@@ -161,7 +185,7 @@ async function draft() {
 - [ ] \`\`\`\n${pack.discord}\n\`\`\`
 
 ## EDITOR BRIEF (today's clip)
-${pack.editor_notes}
+${brief}
 
 *Suggested filename: \`static-${date}-clip.mp4\` — hook text on screen 0-2s.*
 `;
