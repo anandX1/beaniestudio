@@ -167,7 +167,7 @@ function seoLint({ title = '', description = '', markdown = '', keywords = [] })
 const json = (res, code, data) => { res.writeHead(code, { 'content-type': 'application/json', 'cache-control': 'no-store' }); res.end(JSON.stringify(data)); };
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').slice(0, 60);
 
-function readBody(req, limit = 6 * 1024 * 1024) {
+function readBody(req, limit = 24 * 1024 * 1024) {
   return new Promise((resolve, reject) => {
     let size = 0; const chunks = [];
     req.on('data', (c) => { size += c.length; if (size > limit) { reject(new Error('body too large')); req.destroy(); } else chunks.push(c); });
@@ -208,7 +208,7 @@ async function publish(body, res, onLine) {
   fs.mkdirSync(BLOG_IMG_DIR, { recursive: true });
   let i = 0;
   for (const img of images.slice(0, 3)) {
-    const m = String(img.data || '').match(/^data:image\/(png|jpe?g|webp);base64,(.+)$/s);
+    const m = String(img.data || '').match(/^data:image\/(png|jpe?g|webp|gif);base64,(.+)$/s);
     if (!m) continue;
     i++;
     const ext = m[1] === 'jpeg' ? 'jpg' : m[1];
@@ -307,7 +307,7 @@ label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.0
     <button id="draft">Draft with Groq</button>
     <button class="sec" id="humanize">Humanize pass</button>
     <button class="sec" id="adapt">Adapt for X · Reddit · Telegram · LinkedIn</button>
-    <label class="sec" style="border:1px solid var(--amber);border-radius:8px;padding:8px 12px;cursor:pointer">Attach images<input type="file" id="imgfile" accept="image/*" multiple style="display:none"></label>
+    <label class="sec" style="border:1px solid var(--amber);border-radius:8px;padding:8px 12px;cursor:pointer">Attach images · auto-optimized<input type="file" id="imgfile" accept="image/*" multiple style="display:none"></label>
   </div>
   <div id="share" style="margin-top:10px"></div>
   <div id="imgs"></div>
@@ -347,7 +347,47 @@ function lint(){var r=apiLater();function apiLater(){return null}var title=$('ti
 $('reharvest').onclick=function(){var b=this;b.disabled=true;b.textContent='harvesting…';api('/api/harvest?track='+trk(),{}).then(function(d){renderKws(d.keywords||[]);b.disabled=false;b.textContent='Refresh harvest'}).catch(function(e){log('harvest: '+e.message+'\\n');b.disabled=false;b.textContent='Refresh harvest'})};
 $('draft').onclick=function(){var b=this;if(!$('angle').value){log('angle required — what is the post about?\\n');return}b.disabled=true;b.textContent='drafting…';log('\\ngroq is writing…\\n');api('/api/draft',{angle:$('angle').value,keywords:chosen,track:trk()}).then(function(d){$('title').value=d.title;$('desc').value=d.description;$('md').value=d.markdown;lint();log('draft ready — edit freely.\\n')}).catch(function(e){log('draft: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Draft with Groq'})};
 $('humanize').onclick=function(){var b=this;if(!$('md').value){log('nothing to humanize\\n');return}b.disabled=true;log('\\nhumanize pass…\\n');api('/api/humanize',{markdown:$('md').value}).then(function(d){$('md').value=d.markdown;lint();log('humanized.\\n')}).catch(function(e){log('humanize: '+e.message+'\\n')}).finally(function(){b.disabled=false})};
-$('imgfile').onchange=function(){[].forEach.call(this.files,function(f){var rd=new FileReader();rd.onload=function(){var data=String(rd.result);images.push({name:f.name,data:data,alt:$('title').value||'image'});var e=document.createElement('div');e.textContent='▲ '+f.name+' ('+Math.round(data.length/1365)+' KB) — attached';$('imgs').appendChild(e)};rd.readAsDataURL(f)});this.value=''};
+// Attach images: everything browser-friendly gets auto-optimized before it
+// can ever bloat the blog (canvas resize to ≤1600px + WebP q0.82, JPEG
+// fallback if the browser refuses WebP). Tiny files, GIFs (canvas would
+// kill the animation) and undecodable files pass through untouched.
+// alt is deliberately left unset here so publish stamps the FINAL title.
+function compressImg(f,done){
+  var finish=function(data,name,origKB){done({name:name,data:data,orig:origKB})};
+  var origKB=Math.round(f.size/1024);
+  if(f.type==='image/gif'||f.size<150*1024){var r0=new FileReader();r0.onload=function(){finish(String(r0.result),f.name,origKB)};r0.readAsDataURL(f);return}
+  var rd=new FileReader();
+  rd.onload=function(){
+    var im=new Image();
+    im.onload=function(){
+      var MAX=1600,sc=Math.min(1,MAX/Math.max(im.width,im.height));
+      var c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      var data=c.toDataURL('image/webp',0.82),name=f.name.replace(/\.\w+$/,'')+'.webp';
+      if(data.indexOf('data:image/webp')!==0){data=c.toDataURL('image/jpeg',0.85);name=f.name.replace(/\.\w+$/,'')+'.jpg'}
+      finish(data,name,origKB);
+    };
+    im.onerror=function(){var r1=new FileReader();r1.onload=function(){finish(String(r1.result),f.name,origKB)};r1.readAsDataURL(f)};
+    im.src=String(rd.result);
+  };
+  rd.readAsDataURL(f);
+}
+function renderImgs(){
+  var el=$('imgs');el.innerHTML='';
+  images.forEach(function(img,i){
+    var kb=Math.round(img.data.length/1365);
+    var e=document.createElement('div');
+    e.style.cssText='display:flex;align-items:center;gap:8px;margin-top:4px;font-size:12px';
+    var t=document.createElement('span');
+    t.textContent='▲ '+img.name+' — '+(img.orig&&img.orig>kb?img.orig+' KB → '+kb+' KB (optimized)':kb+' KB');
+    var x=document.createElement('button');x.textContent='✕ remove';x.className='sec';
+    x.style.cssText='padding:2px 8px;font-size:11px;color:var(--red)';
+    x.onclick=function(){images.splice(i,1);renderImgs()};
+    e.appendChild(t);e.appendChild(x);el.appendChild(e);
+  });
+  if(!images.length)el.innerHTML='<span style="font-size:12px;color:var(--dim)">no images attached</span>';
+}
+$('imgfile').onchange=function(){var fs=[].slice.call(this.files);this.value='';fs.forEach(function(f){compressImg(f,function(out){images.push(out);renderImgs()})})};
 $('publish').onclick=function(){var b=this;b.disabled=true;b.textContent=document.getElementById('asDraft').checked?'saving draft…':'publishing…';log('\\npublishing…\\n');api('/api/publish',{title:$('title').value,description:$('desc').value,tag:$('tag').value,markdown:$('md').value,keywords:chosen,images:images,draft:document.getElementById('asDraft').checked}).then(function(d){log('\\n✓ '+(d.draft?'saved as draft post (not on site yet)':'LIVE: '+d.url)+'\\n');loadPosts()}).catch(function(e){log('publish: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Publish to blog →'})};
 $('title').oninput=$('desc').oninput=$('md').oninput=lint;
 $('track').onchange=function(){loadKeywords()};
@@ -367,7 +407,7 @@ async function loadKwTop(){try{var d=await api('/api/keywords');var ks=(d.keywor
 $('statrefresh').onclick=loadStats;
 $('deploy').onclick=function(){var b=this;b.disabled=true;b.textContent='deploying…';log(' deploying: build, push, ping ');api('/api/deploy',{}).then(function(d){log(' deploy finished, exit '+d.code+' ');if(d.code===0)loadPosts()}).catch(function(e){log(' deploy: '+e.message+' ')}).finally(function(){b.disabled=false;b.textContent='Deploy site now (build → push → ping)'})};
 $('adapt').onclick=function(){var b=this;b.disabled=true;b.textContent='adapting…';api('/api/adapt',{title:$('title').value,markdown:$('md').value}).then(function(d){var el=$('share');el.innerHTML='';Object.keys(d.variants).forEach(function(p){var v=d.variants[p];var box=document.createElement('div');box.style.cssText='border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px;font-size:12px';box.innerHTML='<b style="color:var(--amber)">'+p.toUpperCase()+'</b> <span style="color:var(--dim)">'+v.note+'</span>';var pre=document.createElement('div');pre.style.cssText='margin:6px 0;white-space:pre-wrap;background:#0d0f12;border-radius:6px;padding:6px';pre.textContent=v.text||'';var row=document.createElement('div');row.style.cssText='display:flex;gap:6px';var cp=document.createElement('button');cp.className='sec';cp.style.padding='4px 10px';cp.style.fontSize='11px';cp.textContent='Copy';cp.onclick=function(){navigator.clipboard.writeText(v.text||'').then(function(){cp.textContent='Copied'})};row.appendChild(cp);if(v.intent){var op=document.createElement('button');op.style.padding='4px 10px';op.style.fontSize='11px';op.textContent='Open '+p;op.onclick=function(){window.open(v.intent,'_blank')}}box.appendChild(pre);box.appendChild(row);el.appendChild(box)})}).catch(function(e){log(' adapt: '+e.message+' ')}).finally(function(){b.disabled=false;b.textContent='Adapt for X · Reddit · Telegram · LinkedIn'})};
-loadKeywords();loadStats();loadKwTop();loadPosts();
+loadKeywords();loadStats();loadKwTop();loadPosts();renderImgs();
 </script></body></html>`;
 
 // ---- boot self-check: the page script must parse, or the UI dies silently ----
