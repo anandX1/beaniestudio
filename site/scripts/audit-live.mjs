@@ -118,6 +118,7 @@ for (const url of [...new Set(urls || [])]) {
   const types = jsonLdTypes(html);
   check('JSON-LD parses + present', types.length > 0 && !types.some((t) => String(t).startsWith('⚠')), types.join(', ') || 'none');
   check('html lang set', /<html[^>]*lang=["'][a-z-]+["']/i.test(html));
+  check('GSC verification tag present', /<meta[^>]*name=["']google-site-verification["'][^>]*>/i.test(html));
 }
 
 // ---------- 3. Report ----------

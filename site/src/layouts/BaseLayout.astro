@@ -97,6 +97,11 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
 
+    <!-- Google Search Console ownership verification (URL-prefix method).
+         Domain properties verify via the DNS TXT record instead — both stay
+         in place permanently so ownership survives either path. -->
+    <meta name="google-site-verification" content="p-POBX1mKG1k2DYgeWx4mZly8rQtR_6dUYUWgWOVjyg" />
+
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#16181d" />
 
