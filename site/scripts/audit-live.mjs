@@ -113,6 +113,17 @@ for (const url of [...new Set(urls || [])]) {
   const robotsMeta = meta(html, 'name', 'robots') || '';
   check('robots meta allows indexing', robotsMeta.length > 0 && !robotsMeta.includes('noindex') && robotsMeta.includes('max-image-preview:large'), robotsMeta);
   check('og:title + og:image present', !!meta(html, 'property', 'og:title') && !!meta(html, 'property', 'og:image'));
+  // The tag existing is worthless if the image 404s — crawlers and Discord both
+  // silently drop broken cards. Fetch every og:image and demand HTTP 200.
+  // (Skipped for relative URLs; this site always emits absolute ones.)
+  const ogImages = [...html.matchAll(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["'][^>]*>/gi)].map((m) => m[1]);
+  for (const img of ogImages) {
+    if (!/^https?:\/\//.test(img)) continue;
+    let ok = false;
+    let status = 0;
+    try { status = (await get(img)).res.status; ok = status === 200; } catch { /* network blip = fail loudly */ }
+    check(`og:image loads (${img.replace(SITE, '')})`, ok, `HTTP ${status || 'no response'}`);
+  }
   check('og:url matches', meta(html, 'property', 'og:url') === url);
   check('twitter:card present', !!meta(html, 'name', 'twitter:card'));
   const types = jsonLdTypes(html);

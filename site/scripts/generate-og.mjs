@@ -334,6 +334,24 @@ const cards = [
       { text: 'ASSETS — FACTS — CONTACT', scale: 4 },
     ],
   },
+  {
+    file: 'creators.png',
+    kicker: 'CREATOR PROGRAM',
+    lines: [
+      { text: 'STREAM STATIC', scale: 10 },
+      { text: 'YOUR CHAT PLAYS DETECTIVE', scale: 4 },
+      { text: 'VERIFIED CREATORS WANTED', scale: 4 },
+    ],
+  },
+  {
+    file: 'playtest.png',
+    kicker: 'PLAYTEST NIGHTS',
+    lines: [
+      { text: 'PLAYTEST STATIC', scale: 10 },
+      { text: 'FREE — EVERYONE WELCOME', scale: 4 },
+      { text: 'YOUR FEEDBACK SHAPES THE GAME', scale: 4 },
+    ],
+  },
 ];
 
 for (const card of cards) {
