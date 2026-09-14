@@ -15,7 +15,7 @@ export interface SiteVideo {
   /** ISO publish date (from the channel RSS feed). */
   date: string;
   /** Curio-board tag. Tag styling is reserved for signal amber. */
-  tag: 'STATIC' | 'DEVLOG' | 'GAMEPLAY' | 'COMMUNITY';
+  tag: 'STATIC' | 'DEVLOG' | 'GAMEPLAY' | 'COMMUNITY';  // DEVLOG label kept (it's the standard YouTube word viewers search for)
 }
 
 export const FEATURED_VIDEO: SiteVideo = {
@@ -32,7 +32,7 @@ export const VIDEOS: SiteVideo[] = [
   {
     id: '9nR4wjaOpMs',
     title: 'Making a $150K Roblox Menu',
-    note: 'Devlog: how the facility UI gets built to feel like a terminal.',
+    note: 'How the facility UI gets built to feel like a terminal.',
     date: '2026-09-05',
     tag: 'DEVLOG',
   },
@@ -67,7 +67,7 @@ export const VIDEOS: SiteVideo[] = [
   {
     id: 'DSP8Kr5EXeQ',
     title: 'Can AI make a scary Roblox game?',
-    note: 'Devlog: where the tools help, and where they make slop.',
+    note: 'Where the tools help, and where they make slop.',
     date: '2026-08-10',
     tag: 'DEVLOG',
   },

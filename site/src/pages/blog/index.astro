@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('devlog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+---
+
+<BaseLayout
+  title="Blog — news and updates on STATIC"
+  description="News, updates and behind-the-scenes notes on STATIC, the free 5v1 horror game on Roblox where the Hunter hunts by sound alone. From Beanie Studio."
+  path="/blog"
+  ogImage="/og/blog.png"
+  breadcrumb={[{ name: 'Home', path: '/' }, { name: 'Blog', path: '/blog' }]}
+>
+  <section class="mx-auto max-w-4xl px-4 py-20 sm:px-6 sm:py-28">
+    <p class="kicker">News &amp; updates</p>
+    <h1 class="mt-6 font-display text-4xl font-bold uppercase leading-tight tracking-tight sm:text-6xl">
+      Blog
+    </h1>
+    <p class="mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
+      What we're building, what broke, and what we learned making STATIC — in plain words. Full
+      videos live on our YouTube channel too.
+    </p>
+
+    <!-- Site search: Pagefind (open source) — the search index is static files
+         built at deploy time. No server, no external service, works offline. -->
+    <div class="mt-8">
+      <label for="pfsearch" class="font-mono text-xs uppercase tracking-widest text-facility-500">Search the blog</label>
+      <input
+        id="pfsearch"
+        type="search"
+        placeholder="Try “hunter”, “playtest”, “sound”…"
+        autocomplete="off"
+        class="mt-2 w-full max-w-md border border-facility-700 bg-facility-950 px-4 py-3 font-mono text-sm text-facility-100 placeholder:text-facility-600 focus:border-signal focus:outline-none"
+      />
+      <div id="pfresults" class="mt-6" hidden></div>
+    </div>
+
+    <div class="mt-14 space-y-6" id="allposts">
+      {posts.map((post) => (
+        <article class="panel p-7 transition-colors hover:border-signal-dim">
+          <div class="flex flex-wrap items-baseline justify-between gap-3">
+            <h2 class="font-display text-2xl font-bold uppercase tracking-wide">
+              <a href={`/blog/${post.id}/`} class="hover:text-signal">{post.data.title}</a>
+            </h2>
+            <time datetime={post.data.pubDate.toISOString()} class="font-mono text-xs text-facility-500">
+              {fmt(post.data.pubDate)}
+            </time>
+          </div>
+          <p class="mt-4 leading-relaxed text-facility-300">{post.data.description}</p>
+          <a href={`/blog/${post.id}/`} class="mt-5 inline-flex items-center gap-2 font-mono text-sm text-signal hover:text-signal-dim">
+            Read entry <span aria-hidden="true">→</span>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <script is:inline src="/pagefind/pagefind.js" defer></script>
+  <script>
+    // Progressive enhancement: hide the full list while searching, show
+    // Pagefind's results (styled to the blog cards) until the query clears.
+    const input = document.getElementById('pfsearch') as HTMLInputElement | null;
+    const results = document.getElementById('pfresults');
+    const all = document.getElementById('allposts');
+    const pf = (window as unknown as { pagefind?: { search: (q: string) => Promise<{ results: Array<{ data: () => Promise<Record<string, unknown>> }> }> } }).pagefind;
+    if (input && results && all && pf) {
+      let last = '';
+      input.addEventListener('input', async () => {
+        const q = input.value.trim();
+        if (q === last) return;
+        last = q;
+        if (!q) { results.hidden = true; results.innerHTML = ''; all.hidden = false; return; }
+        const search = await pf.search(q);
+        const items = await Promise.all(search.results.slice(0, 10).map((r) => r.data()));
+        results.innerHTML = items
+          .map(
+            (r) => {
+              const meta = (r.meta ?? {}) as { title?: string; description?: string };
+              const url = String(r.url ?? '/blog/');
+              return `<article class="panel p-7">
+              <h2 class="font-display text-2xl font-bold uppercase tracking-wide"><a href="${url}" class="hover:text-signal">${meta.title ?? 'Post'}</a></h2>
+              <p class="mt-4 leading-relaxed text-facility-300">${meta.description ?? ''}</p>
+              <a href="${url}" class="mt-5 inline-flex items-center gap-2 font-mono text-sm text-signal hover:text-signal-dim">Read entry <span aria-hidden="true">→</span></a>
+            </article>`;
+            }
+          )
+          .join('') || '<p class="text-facility-300">Nothing found — try a shorter word.</p>';
+        results.hidden = false;
+        all.hidden = true;
+      });
+    }
+  </script>
+</BaseLayout>

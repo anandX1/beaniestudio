@@ -11,8 +11,8 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 
 /** Share targets — canonical URL + UTM so analytics attributes every share. */
-const postUrl = new URL(`/devlog/${post.id}/`, Astro.site).href;
-const shareUrl = `${postUrl}?utm_source=shared&utm_medium=social&utm_campaign=devlog`;
+const postUrl = new URL(`/blog/${post.id}/`, Astro.site).href;
+const shareUrl = `${postUrl}?utm_source=shared&utm_medium=social&utm_campaign=blog`;
 const xIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${post.data.title} — STATIC devlog`)}&url=${encodeURIComponent(shareUrl)}`;
 
 const fmtDate = post.data.pubDate.toLocaleDateString('en-US', {
@@ -26,11 +26,11 @@ const postLd = {
   '@type': 'BlogPosting',
   headline: post.data.title,
   description: post.data.description,
-  image: [new URL('/og/devlog.png', Astro.site).href],
+  image: [new URL('/og/blog.png', Astro.site).href],
   datePublished: post.data.pubDate.toISOString(),
   dateModified: (post.data.updatedDate ?? post.data.pubDate).toISOString(),
   articleSection: post.data.tag,
-  keywords: `STATIC, roblox devlog, ${post.data.tag ?? 'game development'}, Beanie Studio`,
+  keywords: `STATIC, roblox horror game, roblox blog, ${post.data.tag ?? 'game development'}, Beanie Studio`,
   inLanguage: 'en',
   author: { '@type': 'Organization', name: 'Beanie Studio', url: Astro.site?.href },
   publisher: {
@@ -38,21 +38,21 @@ const postLd = {
     name: 'Beanie Studio',
     logo: { '@type': 'ImageObject', url: new URL('/logo.png', Astro.site).href },
   },
-  mainEntityOfPage: new URL(`/devlog/${post.id}/`, Astro.site).href,
+  mainEntityOfPage: new URL(`/blog/${post.id}/`, Astro.site).href,
 };
 ---
 
 <BaseLayout
   title={post.data.title}
   description={post.data.description}
-  path={`/devlog/${post.id}/`}
-  ogImage="/og/devlog.png"
+  path={`/blog/${post.id}/`}
+  ogImage="/og/blog.png"
   ogType="article"
   jsonLd={[postLd]}
-  breadcrumb={[{ name: 'Mission brief', path: '/' }, { name: 'Devlog', path: '/devlog' }, { name: post.data.title, path: `/devlog/${post.id}` }]}
+  breadcrumb={[{ name: 'Home', path: '/' }, { name: 'Blog', path: '/blog' }, { name: post.data.title, path: `/blog/${post.id}` }]}
 >
   <article class="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28">
-    <p class="kicker">Devlog — {post.data.tag}</p>
+    <p class="kicker">Blog — {post.data.tag}</p>
     <h1 class="mt-6 font-display text-3xl font-bold uppercase leading-tight tracking-tight sm:text-5xl" data-decode>
       {post.data.title}
     </h1>
@@ -87,7 +87,7 @@ const postLd = {
         >Post on X <span aria-hidden="true">↗</span></a>
         <span id="shareCopied" class="font-mono text-xs text-signal" role="status" aria-live="polite"></span>
       </div>
-      <a href="/devlog/" class="font-mono text-sm text-signal hover:text-signal-dim">← All entries</a>
+      <a href="/blog/" class="font-mono text-sm text-signal hover:text-signal-dim">← All posts</a>
     </div>
   </article>
 

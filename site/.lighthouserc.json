@@ -8,8 +8,8 @@
         "http://127.0.0.1:4173/play/",
         "http://127.0.0.1:4173/faq/",
         "http://127.0.0.1:4173/press/",
-        "http://127.0.0.1:4173/devlog/",
-        "http://127.0.0.1:4173/devlog/why-we-removed-the-radar/"
+        "http://127.0.0.1:4173/blog/",
+        "http://127.0.0.1:4173/blog/why-we-removed-the-radar/"
       ],
       "numberOfRuns": 1,
       "settings": {

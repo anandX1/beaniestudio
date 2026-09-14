@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "astro dev",
     "dev:host": "astro dev --host ::",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "check": "astro check",
     "check:links": "node scripts/check-links.mjs",
@@ -22,9 +22,15 @@
     "engine:post": "node scripts/content-engine.mjs post",
     "engine:all": "node scripts/content-engine.mjs all",
     "deploy": "node scripts/deploy-site.mjs",
+    "search:index": "pagefind --site dist",
     "deploy:dry": "node scripts/deploy-site.mjs --dry-run",
     "studio": "node scripts/studio.mjs",
     "seo": "npm run check:links && npm run ping:indexnow:dry"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "pagefind": "^1.5.2",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.12",
@@ -35,9 +41,5 @@
     "@tailwindcss/vite": "^4.1.11",
     "astro": "^5.12.0",
     "tailwindcss": "^4.1.11"
-  },
-  "devDependencies": {
-    "@astrojs/check": "^0.9.4",
-    "typescript": "^5.8.3"
   }
 }

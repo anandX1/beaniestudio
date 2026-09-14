@@ -27,7 +27,7 @@ const PORT = Number(process.env.STUDIO_PORT || 4323);
 const HOST = '127.0.0.1';
 const CONTENT_DIR = path.join(SITE_ROOT, 'content');
 const KW_PATH = path.join(CONTENT_DIR, 'keywords.json');
-const DEVLOG_DIR = path.join(SITE_ROOT, 'src', 'devlog');
+const DEVLOG_DIR = path.join(SITE_ROOT, 'src', 'blog'); // folder + public URLs are "blog" now (collection key kept for compat)
 const BLOG_IMG_DIR = path.join(SITE_ROOT, 'public', 'blog');
 
 // ---- env ----
@@ -159,6 +159,15 @@ function seoLint({ title = '', description = '', markdown = '', keywords = [] })
   const found = aiisms.filter((w) => lower.includes(w));
   add(found.length === 0, 'No AI-tell phrases', found.join(', ') || 'clean');
 
+  // ---- plain-language checks: all ages, all reading levels ----
+  const longOnes = sentences.filter((s) => s.trim().split(/\s+/).length > 30).length;
+  add(sentences.length < 5 || longOnes / sentences.length <= 0.1, 'Long sentences (30+ words) ≤10%', longOnes ? `${longOnes} long of ${sentences.length}` : 'none');
+  const passive = (text.match(/\b(was|were|is|are|been|being)\s+\w+(ed|en)\b/gi) || []).length;
+  add(passive <= 3, 'Mostly active voice', passive ? `${passive} passive-style hits` : 'active');
+  const jargon = ['asymmetrical', 'gameplay loop', 'vertical slice', 'procedural', 'greybox', 'whitebox', 'navmesh', 'tick rate', 'netcode', 'client-side prediction', 'iteration cadence', 'horizontal slice', 'art pipeline', 'design pillar'];
+  const jfound = jargon.filter((j) => lower.includes(j));
+  add(jfound.length === 0 || words.length >= 500, 'Jargon explained (or post long enough to)', jfound.length ? `${jfound.join(', ')} — first use should say what it means` : 'none');
+
   const score = Math.round((checks.filter((c) => c.ok).length / checks.length) * 100);
   return { score, checks };
 }
@@ -222,13 +231,12 @@ async function publish(body, res, onLine) {
   const kwLine = keywords.length ? `\n<!-- studio-keywords: ${keywords.join(' | ')} -->\n` : '';
   const post = `---\ntitle: '${title.replace(/'/g, "\\'")}'\ndescription: '${description.replace(/'/g, "\\'")}'\npubDate: ${new Date().toISOString().slice(0, 10)}\ntag: ${['design', 'production', 'systems'].includes(tag) ? tag : 'design'}\ndraft: ${draft ? 'true' : 'false'}\n---\n\n${markdown.trim()}\n${imageBlock}${kwLine}`;
   const postPath = path.join(DEVLOG_DIR, `${slug}.md`);
-  fs.writeFileSync(postPath, post);
-  onLine(`post written: src/devlog/${slug}.md\n`);
+  fs.writeFileSync(postPath, post);    onLine(`post written: src/blog/${slug}.md\n`);
 
   // Draft mode: write the file and stop — nothing touches the live site
   // until the post is flipped to draft:false and republished.
   if (draft) {
-    return json(res, 200, { ok: true, slug, draft: true, url: `(local draft) src/devlog/${slug}.md`, images: saved.map((s) => s.file) });
+    return json(res, 200, { ok: true, slug, draft: true, url: `(local draft) src/blog/${slug}.md`, images: saved.map((s) => s.file) });
   }
 
   // Build → if it fails, leave the post as draft so nothing breaks production.
@@ -244,7 +252,7 @@ async function publish(body, res, onLine) {
 
   onLine('pinging IndexNow…\n');
   await runStep('npm run ping:indexnow --silent', onLine);
-  return json(res, 200, { ok: true, slug, draft, url: `https://beaniestudio.site/devlog/${slug}/`, images: saved.map((s) => s.file) });
+  return json(res, 200, { ok: true, slug, draft, url: `https://beaniestudio.site/blog/${slug}/`, images: saved.map((s) => s.file) });
 }
 
 // ---- UI ----
@@ -495,7 +503,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/adapt' && req.method === 'POST') {
       const { title = '', markdown = '', url: postUrl = '' } = await readBody(req, 1024 * 1024);
       if (!markdown) return json(res, 400, { error: 'markdown required' });
-      const src = postUrl || `https://beaniestudio.site/devlog/${slugify(title)}/`;
+      const src = postUrl || `https://beaniestudio.site/blog/${slugify(title)}/`;
       const first = markdown.replace(/[#*>`]/g, '').split('\n').map((l) => l.trim()).filter(Boolean)[0] || title;
       const utm = (source) => `${src}?utm_source=${source}&utm_medium=social&utm_campaign=blog`;
       // Per-platform adaptation: the same content, each platform's native voice

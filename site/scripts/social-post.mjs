@@ -91,7 +91,7 @@ function composePost(item, source) {
   // The built feed emits ABSOLUTE urls — never prepend the domain to one that
   // already has it (the double-domain bug in the first real broadcast).
   const base = /^https?:\/\//.test(item.link) ? item.link : SITE_URL + item.link;
-  const url = `${base}?utm_source=${source}&utm_medium=social&utm_campaign=devlog`;
+  const url = `${base}?utm_source=${source}&utm_medium=social&utm_campaign=blog`;
   const blurb = item.description.replace(/\s+/g, ' ').slice(0, 120).trim();
   const tail = blurb.endsWith('.') ? blurb : blurb ? blurb + '.' : '';
   return `NEW DEVLOG: ${item.title}\n${tail}\n→ ${url}`;

@@ -27,7 +27,7 @@ export const LINKS = {
 export const CHANNELS = [
   { name: 'Discord', handle: 'discord.gg/z8kPT6cRbG', url: LINKS.discord, note: 'Be first in when doors open' },
   { name: 'Roblox', handle: 'Beanie’s Studios community', url: LINKS.roblox, note: 'Follow now, play the second it’s live' },
-  { name: 'YouTube', handle: '@official_beaniestudios', url: LINKS.youtube, note: 'Devlogs and gameplay clips' },
+  { name: 'YouTube', handle: '@official_beaniestudios', url: LINKS.youtube, note: 'Devlogs and gameplay videos' },
   { name: 'Instagram', handle: '@official_beaniestudios', url: LINKS.instagram, note: 'Concept art and behind the scenes' },
   { name: 'X', handle: '@BeanieStudiosHQ', url: LINKS.x, note: 'Fastest updates, shortest posts' },
 ] as const;

@@ -73,7 +73,7 @@ jobs:
         working-directory: site
 
       # ---- Autonomous distribution ----
-      # Post new devlog entries to Discord/Bluesky with UTM-tagged links.
+      # Post new blog entries to Discord/Bluesky with UTM-tagged links.
       # State roll-forward via cache; if the cache is ever lost the script
       # reseeds and stays silent — it can never re-spam the feed.
       - name: Restore social broadcast state
@@ -84,7 +84,7 @@ jobs:
           key: social-state-v1-${{ github.run_id }}
           restore-keys: social-state-v1-
 
-      - name: Broadcast new devlog entries
+      - name: Broadcast new blog entries
         if: github.event_name != 'pull_request'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
