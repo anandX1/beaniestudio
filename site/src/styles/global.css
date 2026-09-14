@@ -14,7 +14,10 @@
   --color-facility-800: oklch(0.24 0.016 240);
   --color-facility-700: oklch(0.31 0.018 240);
   --color-facility-600: oklch(0.42 0.02 240);
-  --color-facility-500: oklch(0.55 0.02 240);
+  /* Lighthouse contrast fix: 0.55 sat right at the WCAG AA line (4.5:1) and
+     failed on lighter panels. 0.60 computes ~5.4:1 vs facility-950 — passes
+     AA everywhere the token is used (small mono text). */
+  --color-facility-500: oklch(0.6 0.02 240);
   --color-facility-300: oklch(0.75 0.015 240);
   --color-facility-100: oklch(0.95 0.005 240);
 

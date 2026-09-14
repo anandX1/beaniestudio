@@ -1,9 +1,10 @@
 ---
 import '../styles/global.css';
-import '@fontsource/chakra-petch/500.css';
-import '@fontsource/chakra-petch/700.css';
-import '@fontsource-variable/public-sans';
-import '@fontsource-variable/jetbrains-mono';
+// Fonts are self-hosted from /public/fonts with STABLE filenames (see
+// scripts/copy-fonts.mjs): preloaded in <head>, so the browser starts the
+// fetch with the HTML instead of after CSS+@font-face parsing (Lighthouse
+// measured the old hashed-font chain at 1,310ms on the critical path).
+import '../styles/fonts.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { SITE, LINKS } from '../site.config';
@@ -92,7 +93,13 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/png" sizes="256x256" href="/favicon.png" />
+    <!-- Preload the 3 fonts above the fold actually uses (mono + display weights).
+         Stable /fonts/ names + preload = font fetch starts with the HTML,
+         no CSS→@font-face discovery chain (was 1,310ms on mobile). -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/jetbrains-mono-latin-wght-normal.woff2" crossorigin="anonymous" />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/chakra-petch-latin-700-normal.woff2" crossorigin="anonymous" />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/chakra-petch-latin-500-normal.woff2" crossorigin="anonymous" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />

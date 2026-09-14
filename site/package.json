@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "astro dev",
     "dev:host": "astro dev --host ::",
-    "build": "astro build && pagefind --site dist",
+    "build": "node scripts/copy-fonts.mjs && astro build && pagefind --site dist",
     "preview": "astro preview",
     "check": "astro check",
     "check:links": "node scripts/check-links.mjs",
@@ -30,6 +30,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "pagefind": "^1.5.2",
+    "sharp": "^0.35.4",
     "typescript": "^5.8.3"
   },
   "dependencies": {
