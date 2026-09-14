@@ -74,15 +74,51 @@ const featuredVideoLd = {
        sat at opacity:0 until the main JS executed. This script is tiny and runs
        at parse time — above-fold beats now reveal on first paint. -->
   <script is:inline>
-    document.documentElement.classList.add('js-beats');
+    /* Beat-reveal arming — order-independent and fail-safe.
+       History: the first version added .js-beats (which hides every .beat via
+       CSS) BEFORE any .beat element existed, then queried them once — found
+       none — and left the whole homepage permanently at opacity:0. Rules
+       learned the hard way:
+         1. Never add the hiding class unless an observer is actually created.
+         2. (Re)observe at call time — elements may be parsed after this script.
+         3. A timed failsafe force-reveals anything the observer missed. */
     (function () {
-      if (!('IntersectionObserver' in window)) return;
+      if (!('IntersectionObserver' in window)) return; /* CSS default shows all */
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      var io = new IntersectionObserver(function (entries) {
-        for (var i = 0; i < entries.length; i++) entries[i].target.classList.toggle('in', entries[i].isIntersecting);
-      }, { threshold: 0.15 });
-      var els = document.querySelectorAll('.beat');
-      for (var j = 0; j < els.length; j++) io.observe(els[j]);
+      var io = null;
+      var pending = [];
+      function ensureIo() {
+        if (io) return;
+        var obs = new IntersectionObserver(function (entries) {
+          for (var i = 0; i < entries.length; i++) entries[i].target.classList.toggle('in', entries[i].isIntersecting);
+        }, { threshold: 0.15 });
+        io = obs; /* class only goes on once construction succeeded */
+        document.documentElement.classList.add('js-beats');
+        for (var k = 0; k < pending.length; k++) io.observe(pending[k]);
+        pending.length = 0;
+      }
+      function arm() {
+        var els = document.querySelectorAll('.beat:not([data-armed])');
+        for (var j = 0; j < els.length; j++) {
+          els[j].setAttribute('data-armed', '1');
+          if (io) io.observe(els[j]); else pending.push(els[j]);
+        }
+        ensureIo();
+      }
+      arm(); /* beats already parsed (re-runs harmlessly later) */
+      document.addEventListener('DOMContentLoaded', arm);
+      /* Failsafe: observer dead → drop the hiding class entirely (content
+         over animation, always). Observer alive but something in view still
+         hidden → reveal just that; below-fold beats keep their scroll reveal. */
+      setTimeout(function () {
+        arm();
+        if (!io) { document.documentElement.classList.remove('js-beats'); return; }
+        var vh = window.innerHeight || document.documentElement.clientHeight;
+        var stuck = document.querySelectorAll('.beat:not(.in)');
+        for (var j = 0; j < stuck.length; j++) {
+          if (stuck[j].getBoundingClientRect().top < vh * 1.1) stuck[j].classList.add('in');
+        }
+      }, 5000);
     })();
   </script>
 
