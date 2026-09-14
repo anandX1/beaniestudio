@@ -69,7 +69,22 @@ const featuredVideoLd = {
 
 <BaseLayout title={SITE.title} path="/" jsonLd={[videoGameLd, featuredVideoLd]}>
   <!-- Arms beat reveals only when JS is running — no-JS visitors see everything. -->
-  <script is:inline>document.documentElement.classList.add('js-beats');</script>
+  <!-- Arm the beat reveals INLINE, not in the deferred bundle: the Lighthouse
+       mobile run measured 1.9s of LCP render-delay because the hero paragraph
+       sat at opacity:0 until the main JS executed. This script is tiny and runs
+       at parse time — above-fold beats now reveal on first paint. -->
+  <script is:inline>
+    document.documentElement.classList.add('js-beats');
+    (function () {
+      if (!('IntersectionObserver' in window)) return;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var io = new IntersectionObserver(function (entries) {
+        for (var i = 0; i < entries.length; i++) entries[i].target.classList.toggle('in', entries[i].isIntersecting);
+      }, { threshold: 0.15 });
+      var els = document.querySelectorAll('.beat');
+      for (var j = 0; j < els.length; j++) io.observe(els[j]);
+    })();
+  </script>
 
   <!-- Reading-progress rail -->
   <div class="progress-rail" aria-hidden="true"><div class="progress-rail-fill" id="progressFill"></div></div>
@@ -468,15 +483,8 @@ const featuredVideoLd = {
         update();
       }
 
-      // Beat reveals: static until armed; IO toggles both directions so
-      // re-scrolling an act replays its entrance.
-      const beats = document.querySelectorAll('.beat');
-      if (!reduce && 'IntersectionObserver' in window && beats.length) {
-        const io = new IntersectionObserver(function (entries) {
-          for (const e of entries) e.target.classList.toggle('in', e.isIntersecting);
-        }, { threshold: 0.15 });
-        beats.forEach((b) => io.observe(b));
-      }
+      // Beat reveals are armed inline at the top of <body> (see above) —
+      // they must not wait for this deferred bundle or LCP suffers.
     })();
   </script>
 
