@@ -1,5 +1,5 @@
 ---
-title: 'What is STATIC on roblox asymmetrical horror game '
+title: 'What is STATIC? Roblox horror, explained'
 description: 'Discover STATIC, a unique asymmetrical horror game where a hunter hunts five scrappers. Learn how this 5v1 horror game changes the genre.'
 pubDate: 2026-09-13
 tag: design
