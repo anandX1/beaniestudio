@@ -21,6 +21,15 @@ const year = new Date().getFullYear();
       </div>
 
       <ul class="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+        <li>
+          <a href="/creators" class="group block">
+            <span class="flex items-center justify-between border-b border-facility-700 pb-2 font-display text-sm font-bold uppercase tracking-wider text-facility-100 transition-colors group-hover:text-signal">
+              Creator program
+              <span class="text-signal transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
+            </span>
+            <span class="mt-1.5 block font-mono text-xs text-facility-500">Stream STATIC? Get the creator kit</span>
+          </a>
+        </li>
         {CHANNELS.map((ch) => (
           <li>
             <a href={ch.url} rel="noopener" target={ch.url.startsWith('http') ? '_blank' : undefined} class="group block">
