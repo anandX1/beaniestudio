@@ -287,19 +287,23 @@ async function publish(body, res, onLine) {
   const kwLine = keywords.length ? `\n<!-- studio-keywords: ${keywords.join(' | ')} -->\n` : '';
   const post = `---\ntitle: '${title.replace(/'/g, "\\'")}'\ndescription: '${description.replace(/'/g, "\\'")}'\npubDate: ${new Date().toISOString().slice(0, 10)}\ntag: ${['design', 'production', 'systems'].includes(tag) ? tag : 'design'}\ndraft: ${draft ? 'true' : 'false'}\n---\n\n${bodyMd}\n${imageBlock}${kwLine}`;
   const postPath = path.join(DEVLOG_DIR, `${slug}.md`);
+
+  // Thin-content guard: sub-400-word posts are exactly what Google shelved as
+  // "Crawled - currently not indexed". Production refuses them; drafts are free.
+  // MUST run before the file is written — a guard that rejects *after* writing
+  // leaves a draft:false .md behind that the next build ships to the live site
+  // (this exact bug once put a test post in the sitemap).
+  if (!draft) {
+    const wc = markdown.replace(/\[\s*photo\s*\]/gi, ' ').trim().split(/\s+/).filter(Boolean).length;
+    if (wc < 400) return json(res, 400, { error: `only ${wc} words — the SEO bar is ~900 (Google shelves thin posts). Expand it, or tick "Publish as draft".` });
+  }
+
   fs.writeFileSync(postPath, post);    onLine(`post written: src/blog/${slug}.md\n`);
 
   // Draft mode: write the file and stop — nothing touches the live site
   // until the post is flipped to draft:false and republished.
   if (draft) {
     return json(res, 200, { ok: true, slug, draft: true, url: `(local draft) src/blog/${slug}.md`, images: saved.map((s) => s.file) });
-  }
-
-  // Thin-content guard: sub-400-word posts are exactly what Google shelved as
-  // "Crawled - currently not indexed". Production refuses them; drafts are free.
-  if (!draft) {
-    const wc = markdown.replace(/\[\s*photo\s*\]/gi, ' ').trim().split(/\s+/).filter(Boolean).length;
-    if (wc < 400) return json(res, 400, { error: `only ${wc} words — the SEO bar is ~900 (Google shelves thin posts). Expand it, or tick "Publish as draft".` });
   }
 
   // Build → if it fails, leave the post as draft so nothing breaks production.
