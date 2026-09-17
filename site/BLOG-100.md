@@ -168,3 +168,21 @@ These don't sell the game; they make beaniestudio.site a place devs cite.
 - **GSC bulk URL inspection via API** — script the "request indexing" for new posts (needs a Google Cloud project; free tier is fine).
 
 > **Honesty note:** this ranking is built from autocomplete demand (real queries, real phrasing) — not paid Ahrefs/SEMrush volume. After 30 days of traffic data, re-rank: promote anything pulling impressions in GSC, demote anything with zero clicks after 6 weeks. The list is a hypothesis; the log is the proof.
+
+---
+
+## The honest math (read before sprinting)
+
+**What Google's own policy says** (Spam Policies → *Scaled content abuse*, developers.google.com): the trigger is not AI, not volume — it is "many pages generated for the primary purpose of manipulating rankings **without adding value**, no matter how they're created." AI-assisted + genuinely useful + human-edited + own images/own data = safe. 5 identical-feeling Groq dumps a day = the exact profile that gets silently shelved as "Crawled - currently not indexed" (which we already experienced at a 5-post scale).
+
+**What SEO realistically takes** (Ahrefs' survey of 3,680 practitioners): **3–6 months** before meaningful results; Google's John Mueller says new sites can take **up to a year** to find their rankings. beaniestudio.site is months old with ~0 backlinks — assume the slow end. Content published NOW compounds toward the Q4 2026 launch; that timing is actually perfect.
+
+**The realistic traffic picture:** ranking top-5 across 100 long-tail queries ≈ tens of thousands of impressions/month, hundreds-to-low-thousands of *visitors*/month by months 4–6, compounding after. **The blog will never be the #1 player source by itself.** It is the ambient layer that (a) converts warm searchers via Tier-1, (b) gives creators/press something to cite, (c) builds the brand queries people later search directly. The fast channels remain: creator clips (days), Discord (direct), Roblox's own discovery (launch).
+
+**Time allocation that actually works:**
+- **Daily: 30–45 min in Studio, 1–2 posts/day, 5–7/week** — NOT 5/day. Each post: pick idea → draft → **rewrite the intro + add one real thing** (screenshot, playtest number, opinion) → image → publish. That human touch per post is the entire difference between a library and a spam farm.
+- **Front-load mass, then maintain:** weeks 1–3 push ~2/day to build interlinked clusters (corpus depth helps every post); after ~30 posts settle to 5/week + refresh old ones (updatedDate).
+- **First 20 posts:** manually Request Indexing in GSC for each — it front-runs the sandbox.
+- **Weekly:** check GSC impressions; anything showing impressions but no clicks = fix its title/description first. That loop beats writing new posts.
+
+**Verdict: not a dream — a compounding asset with a 3–6 month fuse.** The dream version is "5 posts/day → traffic tomorrow." The real version: ~35 quality posts/month, indexed reliably, each with one real human insight, timed so the library is deep exactly when STATIC launches and search demand for it spikes.

@@ -195,6 +195,31 @@ function listPosts() {
   }).sort((a, b) => (b.pubDate || '').localeCompare(a.pubDate || ''));
 }
 
+// ---- idea bank: parsed live from BLOG-100.md (the doc stays the single source) ----
+function parseIdeas() {
+  const docPath = path.join(SITE_ROOT, 'BLOG-100.md');
+  if (!fs.existsSync(docPath)) return { tiers: [] };
+  const text = fs.readFileSync(docPath, 'utf8');
+  const tierRe = /^## TIER (\d) — (.+)$/gm;
+  const ideaRe = /^(\d+)\.\s+\*\*(.+?)\*\*\s+—\s+(.*)$/gm;
+  const tierMatches = [...text.matchAll(tierRe)];
+  const tiers = tierMatches.map((m, i) => {
+    const start = m.index + m[0].length;
+    const end = i + 1 < tierMatches.length ? tierMatches[i + 1].index : text.length;
+    const ideas = [...text.slice(start, end).matchAll(ideaRe)].map((im) => {
+      const n = Number(im[1]);
+      const slug = im[2].replace(/\/$/, '');
+      const note = im[3].trim();
+      // Track mapping mirrors the doc's "operating system" section.
+      const track = ((n >= 21 && n <= 33) || (n >= 63 && n <= 75)) ? 'technical'
+        : ((n >= 46 && n <= 62) || n >= 86) ? 'indie' : 'game';
+      return { n, slug, note, track, title: slug.replace(/-\//g, '').replace(/-/g, ' ') };
+    });
+    return { tier: Number(m[1]), label: m[2].trim(), ideas };
+  });
+  return { tiers };
+}
+
 function runStep(cmd, onLine) {
   return new Promise((resolve) => {
     const child = spawn('cmd.exe', ['/c', cmd], { cwd: SITE_ROOT, windowsHide: true });
@@ -252,6 +277,13 @@ async function publish(body, res, onLine) {
   // until the post is flipped to draft:false and republished.
   if (draft) {
     return json(res, 200, { ok: true, slug, draft: true, url: `(local draft) src/blog/${slug}.md`, images: saved.map((s) => s.file) });
+  }
+
+  // Thin-content guard: sub-400-word posts are exactly what Google shelved as
+  // "Crawled - currently not indexed". Production refuses them; drafts are free.
+  if (!draft) {
+    const wc = markdown.replace(/\[\s*photo\s*\]/gi, ' ').trim().split(/\s+/).filter(Boolean).length;
+    if (wc < 400) return json(res, 400, { error: `only ${wc} words — the SEO bar is ~900 (Google shelves thin posts). Expand it, or tick "Publish as draft".` });
   }
 
   // Build → if it fails, leave the post as draft so nothing breaks production.
@@ -315,6 +347,8 @@ label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.0
   <h2>Draft</h2>
   <label>Topic track</label>
   <select id="track"><option value="game">Game — STATIC itself</option><option value="indie">Indie dev — lessons &amp; process</option><option value="technical">Roblox technical — how it's built</option></select>
+  <label>Idea bank — live from BLOG-100 (✓ = already published)</label>
+  <select id="idea"><option value="">— pick an idea (optional) —</option></select>
   <label>Post angle (what's the story?)</label>
   <input id="angle" placeholder="e.g. how the Hunter's hearing actually works">
   <label>Using keywords (click left to add)</label>
@@ -377,6 +411,19 @@ function lint(){var r=apiLater();function apiLater(){return null}var title=$('ti
 // so the number the writer sees is the number Google's quality bar judges.
 function countWords(){var t=$('md').value.replace(/\\[\\s*photo\\s*\\]/gi,' ').replace(/[#*\\x60>\\-\\[\\]()!]/g,' ').replace(/\\s+/g,' ').trim();var w=t?t.split(/\\s+/).filter(Boolean).length:0;var el=$('wordcount');el.textContent=w.toLocaleString()+' words · target 1,000'+(w>=900?' \u2713':'');el.style.color=w>=900?'var(--green)':w>=600?'var(--amber)':'var(--dim)'}
 $('addphoto').onclick=function(){var ta=$('md');var pos=ta.selectionStart!=null?ta.selectionStart:ta.value.length;var before=ta.value.slice(0,pos),after=ta.value.slice(pos);var pad=(before&&!/\\n\\s*$/.test(before)?'\\n\\n':'')+'[photo]\\n\\n';ta.value=before+pad+after;ta.focus();ta.selectionStart=ta.selectionEnd=pos+pad.length;lint();countWords();queueSave()};
+// ---- idea bank: BLOG-100.md → dropdown; picking one sets track + angle ----
+var IDEAS=null;
+async function loadIdeas(){try{var d=await api('/api/ideas');IDEAS=d;var sel=$('idea');sel.innerHTML='<option value="">— pick an idea ('+d.done+'/'+d.total+' published) —</option>';
+  d.tiers.forEach(function(t){var g=document.createElement('optgroup');g.label='TIER '+t.tier+' · '+t.label.split('·')[0].trim();t.ideas.forEach(function(i2){var o=document.createElement('option');o.value=i2.n;o.textContent=(i2.done?'✓ ':'')+i2.n+'. '+i2.title;o.disabled=i2.done;g.appendChild(o)});sel.appendChild(g)})}catch(e){}}
+$('idea').onchange=function(){var n=Number(this.value);if(!n||!IDEAS)return;var hit=null;IDEAS.tiers.forEach(function(t){t.ideas.forEach(function(i2){if(i2.n===n)hit=i2})});if(!hit)return;
+  $('track').value=hit.track;loadKeywords();
+  $('angle').value=hit.title+' — '+hit.note;
+  if(!$('title').value){
+    var t=hit.title.replace(/\\b\\w/g,function(c){return c.toUpperCase()});
+    if(t.length>46)t=t.slice(0,46).replace(/\\s\\S*$/,'');
+    $('title').value=t+' in Roblox';
+  }
+  queueSave();log('idea #'+hit.n+' loaded — angle + track set. Add keywords, draft, images, publish.\\n')};
 $('reharvest').onclick=function(){var b=this;b.disabled=true;b.textContent='harvesting…';api('/api/harvest?track='+trk(),{}).then(function(d){renderKws(d.keywords||[]);b.disabled=false;b.textContent='Refresh harvest'}).catch(function(e){log('harvest: '+e.message+'\\n');b.disabled=false;b.textContent='Refresh harvest'})};
 $('draft').onclick=function(){var b=this;if(!$('angle').value){log('angle required — what is the post about?\\n');return}b.disabled=true;b.textContent='drafting…';log('\\ngroq is writing…\\n');api('/api/draft',{angle:$('angle').value,keywords:chosen,track:trk()}).then(function(d){$('title').value=d.title;$('desc').value=d.description;$('md').value=d.markdown;lint();log('draft ready — edit freely.\\n')}).catch(function(e){log('draft: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Draft with Groq'})};
 $('humanize').onclick=function(){var b=this;if(!$('md').value){log('nothing to humanize\\n');return}b.disabled=true;log('\\nhumanize pass…\\n');api('/api/humanize',{markdown:$('md').value}).then(function(d){$('md').value=d.markdown;lint();log('humanized.\\n')}).catch(function(e){log('humanize: '+e.message+'\\n')}).finally(function(){b.disabled=false})};
@@ -457,7 +504,7 @@ try{
 }catch(e){}
 $('discard').onclick=function(){try{localStorage.removeItem(ASKEY)}catch(e){}images=[];chosen=[];$('title').value='';$('desc').value='';$('md').value='';$('angle').value='';document.getElementById('asDraft').checked=false;$('savedat').textContent='';$('discard').style.display='none';renderImgs();renderChosen();lint();log('draft discarded.\\n')};
 
-loadKeywords();loadStats();loadKwTop();loadPosts();renderImgs();renderChosen();countWords();
+loadKeywords();loadIdeas();loadStats();loadKwTop();loadPosts();renderImgs();renderChosen();countWords();
 </script></body></html>`;
 
 // ---- boot self-check: the page script must parse, or the UI dies silently ----
@@ -498,6 +545,18 @@ const server = http.createServer(async (req, res) => {
 
     if (url.pathname === '/api/posts' && req.method === 'GET') {
       return json(res, 200, { posts: listPosts() });
+    }
+
+    if (url.pathname === '/api/ideas' && req.method === 'GET') {
+      const parsed = parseIdeas();
+      const published = new Set(listPosts().map((p) => p.file.replace(/\.md$/, '')));
+      const tiers = parsed.tiers.map((t) => ({
+        ...t,
+        ideas: t.ideas.map((i2) => ({ ...i2, done: published.has(i2.slug) })),
+      }));
+      const total = tiers.reduce((a, t) => a + t.ideas.length, 0);
+      const done = tiers.reduce((a, t) => a + t.ideas.filter((i2) => i2.done).length, 0);
+      return json(res, 200, { tiers, total, done });
     }
 
     if (url.pathname === '/api/seo' && req.method === 'POST') {
