@@ -185,6 +185,22 @@ function readBody(req, limit = 24 * 1024 * 1024) {
   });
 }
 
+// ---- publish queue: pre-written posts waiting in content/queue/ ----
+// Each queue file is a JSON post object (same shape /api/draft returns, plus
+// id + idea). "Load" fills the editor; publishing auto-drops the item so the
+// queue shows what's left. One post a day ≈ 9 days of runway out of the box.
+const QUEUE_DIR = path.join(CONTENT_DIR, 'queue');
+function listQueue() {
+  if (!fs.existsSync(QUEUE_DIR)) return [];
+  return fs.readdirSync(QUEUE_DIR).filter((f) => f.endsWith('.json')).map((f) => {
+    try {
+      const d = JSON.parse(fs.readFileSync(path.join(QUEUE_DIR, f), 'utf8'));
+      const words = String(d.markdown || '').replace(/\[\s*photo\s*\]/gi, ' ').trim().split(/\s+/).filter(Boolean).length;
+      return { id: d.id || f.replace(/\.json$/, ''), title: d.title || d.id || f, words, idea: d.idea || null, file: f };
+    } catch { return { id: f, title: f + ' (invalid JSON)', words: 0, file: f, broken: true }; }
+  }).sort((a, b) => a.file.localeCompare(b.file));
+}
+
 function listPosts() {
   if (!fs.existsSync(DEVLOG_DIR)) return [];
   return fs.readdirSync(DEVLOG_DIR).filter((f) => f.endsWith('.md')).map((f) => {
@@ -341,7 +357,10 @@ label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.0
 <section>
   <h2>Trending keywords</h2>
   <div style="display:flex;gap:6px;margin-bottom:8px"><button class="sec" id="reharvest" style="flex:1">Refresh harvest</button></div>
-  <div id="kwlist" style="max-height:420px;overflow:auto"></div>
+  <div id="kwlist" style="max-height:300px;overflow:auto"></div>
+  <hr style="border-color:var(--line);margin:12px 0">
+  <h2>Publishing queue</h2>
+  <div id="queue" style="font-size:12px;color:var(--dim)">loading…</div>
 </section>
 <section>
   <h2>Draft</h2>
@@ -396,6 +415,7 @@ var chosen = [];
 var images = [];
 function $(id){return document.getElementById(id)}
 function log(m){var l=$('log');l.textContent+=m;l.scrollTop=l.scrollHeight}
+function confirm(msg){return window.confirm(msg)}
 async function api(path,body){var r=await fetch(path,body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}:{});var d=await r.json().catch(function(){return{error:'bad response'}});if(!r.ok)throw new Error(d.error||r.status);return d}
 function renderChosen(){$('chosen').textContent=chosen.length?chosen.join('  ·  '):'none yet'}
 function renderKws(list){$('kwlist').innerHTML='';list.forEach(function(k){var s=document.createElement('span');s.className='kw';if(chosen.indexOf(k)>=0)s.classList.add('on');s.textContent=k;s.onclick=function(){if(chosen.indexOf(k)<0){chosen.push(k);s.classList.add('on');renderChosen();queueSave()}};$('kwlist').appendChild(s)})}
@@ -468,7 +488,7 @@ function renderImgs(){
   if(!images.length)el.innerHTML='<span style="font-size:12px;color:var(--dim)">no images attached</span>';
 }
 $('imgfile').onchange=function(){var fs=[].slice.call(this.files);this.value='';fs.forEach(function(f){compressImg(f,function(out){images.push(out);renderImgs()})})};
-$('publish').onclick=function(){var b=this;b.disabled=true;b.textContent=document.getElementById('asDraft').checked?'saving draft…':'publishing…';log('\\npublishing…\\n');api('/api/publish',{title:$('title').value,description:$('desc').value,tag:$('tag').value,markdown:$('md').value,keywords:chosen,images:images,draft:document.getElementById('asDraft').checked}).then(function(d){log('\\n✓ '+(d.draft?'saved as draft post (not on site yet)':'LIVE: '+d.url)+'\\n');try{localStorage.removeItem(ASKEY)}catch(e){}$('savedat').textContent='';$('discard').style.display='none';images=[];chosen=[];$('title').value='';$('desc').value='';$('md').value='';$('angle').value='';renderImgs();renderChosen();lint();loadPosts()}).catch(function(e){log('publish: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Publish to blog →'})};
+$('publish').onclick=function(){var b=this;b.disabled=true;b.textContent=document.getElementById('asDraft').checked?'saving draft…':'publishing…';log('\\npublishing…\\n');api('/api/publish',{title:$('title').value,description:$('desc').value,tag:$('tag').value,markdown:$('md').value,keywords:chosen,images:images,draft:document.getElementById('asDraft').checked}).then(function(d){log('\\n✓ '+(d.draft?'saved as draft post (not on site yet)':'LIVE: '+d.url)+'\\n');try{localStorage.removeItem(ASKEY)}catch(e){}$('savedat').textContent='';$('discard').style.display='none';images=[];chosen=[];$('title').value='';$('desc').value='';$('md').value='';$('angle').value='';renderImgs();renderChosen();lint();loadPosts();loadQueue()}).catch(function(e){log('publish: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Publish to blog →'})};
 $('title').oninput=$('desc').oninput=$('md').oninput=function(){lint();countWords();queueSave();};
 $('angle').oninput=queueSave;
 $('tag').onchange=$('asDraft').onchange=queueSave;
@@ -504,7 +524,12 @@ try{
 }catch(e){}
 $('discard').onclick=function(){try{localStorage.removeItem(ASKEY)}catch(e){}images=[];chosen=[];$('title').value='';$('desc').value='';$('md').value='';$('angle').value='';document.getElementById('asDraft').checked=false;$('savedat').textContent='';$('discard').style.display='none';renderImgs();renderChosen();lint();log('draft discarded.\\n')};
 
-loadKeywords();loadIdeas();loadStats();loadKwTop();loadPosts();renderImgs();renderChosen();countWords();
+// ---- publishing queue: pre-written posts, one click to load ----
+async function loadQueue(){try{var d=await api('/api/queue');var el=$('queue');if(!d.queue.length){el.textContent='queue empty — add JSON post files to site/content/queue/';return}
+el.innerHTML='';d.queue.forEach(function(q){var e=document.createElement('div');e.className='post';e.style.cursor='pointer';e.title='Load into the editor';e.innerHTML='<div>'+q.title+'</div><div class="d">'+q.words.toLocaleString()+' words'+(q.idea?' · idea #'+q.idea:'')+'</div>';
+e.onclick=function(){if(!confirm('Load "'+q.title+'" into the editor? Current unsaved edits are replaced (autosave is cleared).'))return;api('/api/queue/load',{id:q.id}).then(function(p){chosen=[];images=[];$('title').value=p.title||'';$('desc').value=p.description||'';$('md').value=p.markdown||'';$('tag').value=['design','production','systems'].indexOf(p.tag)>=0?p.tag:'design';if(p.keywords){chosen=p.keywords.slice(0,6)}renderChosen();renderImgs();lint();countWords();log('\\nqueued post loaded: '+q.title+' — add [photo] images and publish.\\n')}).catch(function(err){log('queue load: '+err.message+'\\n')})};
+el.appendChild(e)});var hint=document.createElement('div');hint.style.cssText='margin-top:6px;opacity:.7';hint.textContent=d.queue.length+' in queue · publishing auto-removes';el.appendChild(hint)}catch(e){$('queue').textContent='queue: '+e.message}}
+loadKeywords();loadIdeas();loadQueue();loadStats();loadKwTop();loadPosts();renderImgs();renderChosen();countWords();
 </script></body></html>`;
 
 // ---- boot self-check: the page script must parse, or the UI dies silently ----
@@ -557,6 +582,27 @@ const server = http.createServer(async (req, res) => {
       const total = tiers.reduce((a, t) => a + t.ideas.length, 0);
       const done = tiers.reduce((a, t) => a + t.ideas.filter((i2) => i2.done).length, 0);
       return json(res, 200, { tiers, total, done });
+    }
+
+    if (url.pathname === '/api/queue' && req.method === 'GET') {
+      return json(res, 200, { queue: listQueue() });
+    }
+
+    if (url.pathname === '/api/queue/load' && req.method === 'POST') {
+      const { id } = await readBody(req, 64 * 1024);
+      const item = listQueue().find((q) => q.id === id);
+      if (!item) return json(res, 404, { error: 'queue item not found' });
+      // Full post content goes back; the file stays in the queue until it is
+      // actually published (auto-drop), so a load is free to be repeated.
+      return json(res, 200, JSON.parse(fs.readFileSync(path.join(QUEUE_DIR, item.file), 'utf8')));
+    }
+
+    if (url.pathname === '/api/queue/drop' && req.method === 'POST') {
+      const { id } = await readBody(req, 64 * 1024);
+      const item = listQueue().find((q) => q.id === id);
+      if (!item) return json(res, 404, { error: 'queue item not found' });
+      fs.rmSync(path.join(QUEUE_DIR, item.file));
+      return json(res, 200, { ok: true, remaining: listQueue().length });
     }
 
     if (url.pathname === '/api/seo' && req.method === 'POST') {
@@ -659,7 +705,14 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req);
       const lines = [];
       const onLine = (s) => { lines.push(s); process.stdout.write(`[studio] ${String(s).split('\n')[0]}\n`); };
-      return await publish(body, res, onLine);
+      const result = await publish(body, res, onLine);
+      // Published (not merely saved-as-draft) → drop the queue item so the
+      // queue reflects reality. Match by title; queue ids map 1:1 to titles.
+      if (result?.ok && !result?.draft && body?.title) {
+        const hit = listQueue().find((q) => q.title === body.title);
+        if (hit) { fs.rmSync(path.join(QUEUE_DIR, hit.file)); process.stdout.write(`[studio] queue: dropped "${hit.title}" (${listQueue().length} left)\n`); }
+      }
+      return result;
     }
 
     json(res, 404, { error: 'not found' });
