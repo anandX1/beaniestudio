@@ -1,5 +1,5 @@
 ---
-title: 'Asymmetrical Horror: 1 Blind Hunter vs 5 Scrappers'
+title: 'Asymmetrical Horror: Hunter vs 5 Scrappers'
 description: 'What asymmetrical horror actually means, and how STATIC builds it: 5 Scrappers, 1 Hunter, no radar for anyone, and rounds decided by mistakes.'
 pubDate: 2026-09-16
 updatedDate: 2026-09-17

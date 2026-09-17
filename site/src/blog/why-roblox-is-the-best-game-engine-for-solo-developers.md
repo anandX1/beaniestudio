@@ -1,5 +1,5 @@
 ---
-title: 'Why Roblox Is the Best Game Engine for Solo Developers'
+title: 'Why Roblox Is the Best Engine for Solo Devs'
 description: 'Discover why we chose Roblox for STATIC. Learn the best way to market an indie game by leveraging platform discovery to grow your community fast.'
 pubDate: 2026-09-17
 tag: design
