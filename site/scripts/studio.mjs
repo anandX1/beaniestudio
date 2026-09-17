@@ -118,7 +118,7 @@ const BLOG_TRACKS = {
 const MARKDOWN_PROMPT = (angle, keywords, track = 'game') => {
   const t = BLOG_TRACKS[track] || BLOG_TRACKS.game;
   return [
-    { role: 'system', content: `${BRAND}\n${t.brief}\n\nKEYWORD RULES (critical — violation makes the post useless):\nThese search phrases must be woven into NORMAL sentences so a reader never notices them: ${keywords.join(', ')}.\n- NEVER put a keyword in quotation marks.\n- NEVER use a keyword phrase as a heading by itself — headings must be descriptive sentences or phrases that may CONTAIN a keyword naturally (e.g. \"Why our Hunter hunts by sound alone\", not \"roblox horror game\").\n- Use each phrase at most once. If a phrase cannot fit naturally into a sentence, skip it — natural readability beats keyword presence.\n\nSTYLE: short paragraphs (2-4 sentences). Concrete details over adjectives. Never use "unleash", "elevate", "delve", "seamless", "game-changer", "revolutionize", "testament", "furthermore", "moreover", "utilize", "leverage". Voice: a smart, candid developer. Output ONLY the markdown body (300-420 words, H2 headings with ##, no H1, no title line). No preamble, no code fences.` },
+    { role: 'system', content: `${BRAND}\n${t.brief}\n\nKEYWORD RULES (critical — violation makes the post useless):\nThese search phrases must be woven into NORMAL sentences so a reader never notices them: ${keywords.join(', ')}.\n- NEVER put a keyword in quotation marks.\n- NEVER use a keyword phrase as a heading by itself — headings must be descriptive sentences or phrases that may CONTAIN a keyword naturally (e.g. \"Why our Hunter hunts by sound alone\", not \"roblox horror game\").\n- Use each phrase at most once. If a phrase cannot fit naturally into a sentence, skip it — natural readability beats keyword presence.\n\nSTYLE: short paragraphs (2-4 sentences). Concrete details over adjectives. Never use "unleash", "elevate", "delve", "seamless", "game-changer", "revolutionize", "testament", "furthermore", "moreover", "utilize", "leverage". Voice: a smart, candid developer. Output ONLY the markdown body (900-1100 words — search depth matters more than brevity; fill it honestly with concrete detail, numbers, examples and mini-stories, never padding. H2 headings with ##, no H1, no title line). No preamble, no code fences.` },
     { role: 'user', content: `Post angle: ${angle}` },
   ];
 };
@@ -129,7 +129,7 @@ const META_PROMPT = (markdown, keywords) => [
 ];
 
 const HUMANIZE_PROMPT = (md) => [
-  { role: 'system', content: `You are a humanizing editor. Rewrite the text so it reads like a real developer wrote it fast and honestly: use contractions, vary sentence length (some very short), keep every fact/link/heading intact, kill any remaining AI-isms ("delve", "elevate", "seamless", "robust", "landscape", "testament"), no new facts, no emoji. Keep it under 400 words. Return ONLY the rewritten markdown.` },
+  { role: 'system', content: `You are a humanizing editor. Rewrite the text so it reads like a real developer wrote it fast and honestly: use contractions, vary sentence length (some very short), keep every fact/link/heading intact, kill any remaining AI-isms ("delve", "elevate", "seamless", "robust", "landscape", "testament"), no new facts, no emoji. PRESERVE the full length — the input is ~1000 words on purpose for search depth; output must stay 900+ words and keep every section. Return ONLY the rewritten markdown.` },
   { role: 'user', content: md },
 ];
 
@@ -145,7 +145,7 @@ function seoLint({ title = '', description = '', markdown = '', keywords = [] })
 
   add(title.length >= 20 && title.length <= 60, 'Title 20–60 chars', `${title.length}`);
   add(description.length >= 50 && description.length <= 160, 'Meta description 50–160 chars', `${description.length}`);
-  add(words.length >= 350, '≥350 words', `${words.length} words`);
+  add(words.length >= 900, '900+ words (target 1,000 — search depth)', `${words.length} words`);
   add(avgSentence <= 22, 'Avg sentence ≤22 words', avgSentence.toFixed(1));
   add(/^##\s/m.test(markdown), 'Has H2 sections', '');
   const kwHits = keywords.filter((k) => lower.includes(k.toLowerCase()));
@@ -166,7 +166,7 @@ function seoLint({ title = '', description = '', markdown = '', keywords = [] })
   add(passive <= 3, 'Mostly active voice', passive ? `${passive} passive-style hits` : 'active');
   const jargon = ['asymmetrical', 'gameplay loop', 'vertical slice', 'procedural', 'greybox', 'whitebox', 'navmesh', 'tick rate', 'netcode', 'client-side prediction', 'iteration cadence', 'horizontal slice', 'art pipeline', 'design pillar'];
   const jfound = jargon.filter((j) => lower.includes(j));
-  add(jfound.length === 0 || words.length >= 500, 'Jargon explained (or post long enough to)', jfound.length ? `${jfound.join(', ')} — first use should say what it means` : 'none');
+  add(jfound.length === 0 || words.length >= 900, 'Jargon explained (or post long enough to)', jfound.length ? `${jfound.join(', ')} — first use should say what it means` : 'none');
 
   const score = Math.round((checks.filter((c) => c.ok).length / checks.length) * 100);
   return { score, checks };
@@ -216,7 +216,7 @@ async function publish(body, res, onLine) {
   const saved = [];
   fs.mkdirSync(BLOG_IMG_DIR, { recursive: true });
   let i = 0;
-  for (const img of images.slice(0, 3)) {
+  for (const img of images.slice(0, 6)) {
     const m = String(img.data || '').match(/^data:image\/(png|jpe?g|webp|gif);base64,(.+)$/s);
     if (!m) continue;
     i++;
@@ -227,9 +227,24 @@ async function publish(body, res, onLine) {
     onLine(`image saved: public/blog/${file}\n`);
   }
 
-  const imageBlock = saved.length ? `\n${saved.map((s) => s.markdown).join('\n\n')}\n` : '';
+  // Inline [photo] markers: uploaded images drop into their markers IN ORDER,
+  // so each image lands exactly where the writer put the slot. Leftover
+  // images (markers exhausted) append at the end like before; leftover
+  // markers become an HTML comment placeholder so no literal "[photo]"
+  // ever ships to readers.
+  let bodyMd = markdown.trim();
+  let sIdx = 0;
+  bodyMd = bodyMd.replace(/\[\s*photo\s*\]/gi, () => {
+    if (sIdx < saved.length) return `\n\n${saved[sIdx++].markdown}\n\n`;
+    return `\n\n<!-- photo slot: attach an image in Studio to fill this spot -->\n\n`;
+  });
+  const leftovers = saved.slice(sIdx);
+  if (leftovers.length) onLine(`${leftovers.length} image(s) had no [photo] marker — appended at the end\n`);
+  const markerCount = (markdown.match(/\[\s*photo\s*\]/gi) || []).length;
+  if (markerCount > saved.length) onLine(`${markerCount - saved.length} [photo] slot(s) left empty — attach more images next time\n`);
+  const imageBlock = leftovers.length ? `\n${leftovers.map((s) => s.markdown).join('\n\n')}\n` : '';
   const kwLine = keywords.length ? `\n<!-- studio-keywords: ${keywords.join(' | ')} -->\n` : '';
-  const post = `---\ntitle: '${title.replace(/'/g, "\\'")}'\ndescription: '${description.replace(/'/g, "\\'")}'\npubDate: ${new Date().toISOString().slice(0, 10)}\ntag: ${['design', 'production', 'systems'].includes(tag) ? tag : 'design'}\ndraft: ${draft ? 'true' : 'false'}\n---\n\n${markdown.trim()}\n${imageBlock}${kwLine}`;
+  const post = `---\ntitle: '${title.replace(/'/g, "\\'")}'\ndescription: '${description.replace(/'/g, "\\'")}'\npubDate: ${new Date().toISOString().slice(0, 10)}\ntag: ${['design', 'production', 'systems'].includes(tag) ? tag : 'design'}\ndraft: ${draft ? 'true' : 'false'}\n---\n\n${bodyMd}\n${imageBlock}${kwLine}`;
   const postPath = path.join(DEVLOG_DIR, `${slug}.md`);
   fs.writeFileSync(postPath, post);    onLine(`post written: src/blog/${slug}.md\n`);
 
@@ -309,8 +324,12 @@ label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.0
     <div style="max-width:140px"><label>Tag</label><select id="tag"><option>design</option><option>production</option><option>systems</option></select></div>
   </div>
   <label>Meta description</label><input id="desc" maxlength="170">
-  <label>Markdown</label>
-  <textarea id="md" placeholder="Draft it with Groq, or write/paste your own…"></textarea>
+  <label>Markdown — type [photo] on its own line wherever an image should appear</label>
+  <textarea id="md" placeholder="Draft it with Groq, or write/paste your own…&#10;&#10;Put [photo] on its own line wherever an image should sit — attached images fill the slots in order."></textarea>
+  <div style="display:flex;gap:8px;align-items:center;margin:-4px 0 8px">
+    <button class="sec" id="addphoto" style="padding:4px 10px;font-size:11px">＋ [photo] at cursor</button>
+    <span id="wordcount" style="font-size:11px;color:var(--dim)">0 words · target 1,000</span>
+  </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
     <button id="draft">Draft with Groq</button>
     <button class="sec" id="humanize">Humanize pass</button>
@@ -353,6 +372,11 @@ function lint(){var r=apiLater();function apiLater(){return null}var title=$('ti
   fetch('/api/seo',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({title:title,description:desc,markdown:md,keywords:chosen})}).then(function(r){return r.json()}).then(function(d){
     $('score').textContent=d.score+' / 100';$('score').style.color=d.score>=80?'var(--green)':d.score>=55?'var(--amber)':'var(--red)';
     $('checks').innerHTML='';d.checks.forEach(function(c){var e=document.createElement('div');e.className='check '+(c.ok?'ok':'bad');e.innerHTML='<b>'+(c.ok?'✓':'✗')+'</b><span>'+c.label+(c.detail?' <span style="color:var(--dim)">('+c.detail+')</span>':'')+'</span>';$('checks').appendChild(e)})})}
+// ---- [photo] workflow + 1,000-word target ----
+// Word count mirrors the server lint (markers and markdown syntax excluded)
+// so the number the writer sees is the number Google's quality bar judges.
+function countWords(){var t=$('md').value.replace(/\\[\\s*photo\\s*\\]/gi,' ').replace(/[#*\\x60>\\-\\[\\]()!]/g,' ').replace(/\\s+/g,' ').trim();var w=t?t.split(/\\s+/).filter(Boolean).length:0;var el=$('wordcount');el.textContent=w.toLocaleString()+' words · target 1,000'+(w>=900?' \u2713':'');el.style.color=w>=900?'var(--green)':w>=600?'var(--amber)':'var(--dim)'}
+$('addphoto').onclick=function(){var ta=$('md');var pos=ta.selectionStart!=null?ta.selectionStart:ta.value.length;var before=ta.value.slice(0,pos),after=ta.value.slice(pos);var pad=(before&&!/\\n\\s*$/.test(before)?'\\n\\n':'')+'[photo]\\n\\n';ta.value=before+pad+after;ta.focus();ta.selectionStart=ta.selectionEnd=pos+pad.length;lint();countWords();queueSave()};
 $('reharvest').onclick=function(){var b=this;b.disabled=true;b.textContent='harvesting…';api('/api/harvest?track='+trk(),{}).then(function(d){renderKws(d.keywords||[]);b.disabled=false;b.textContent='Refresh harvest'}).catch(function(e){log('harvest: '+e.message+'\\n');b.disabled=false;b.textContent='Refresh harvest'})};
 $('draft').onclick=function(){var b=this;if(!$('angle').value){log('angle required — what is the post about?\\n');return}b.disabled=true;b.textContent='drafting…';log('\\ngroq is writing…\\n');api('/api/draft',{angle:$('angle').value,keywords:chosen,track:trk()}).then(function(d){$('title').value=d.title;$('desc').value=d.description;$('md').value=d.markdown;lint();log('draft ready — edit freely.\\n')}).catch(function(e){log('draft: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Draft with Groq'})};
 $('humanize').onclick=function(){var b=this;if(!$('md').value){log('nothing to humanize\\n');return}b.disabled=true;log('\\nhumanize pass…\\n');api('/api/humanize',{markdown:$('md').value}).then(function(d){$('md').value=d.markdown;lint();log('humanized.\\n')}).catch(function(e){log('humanize: '+e.message+'\\n')}).finally(function(){b.disabled=false})};
@@ -398,7 +422,7 @@ function renderImgs(){
 }
 $('imgfile').onchange=function(){var fs=[].slice.call(this.files);this.value='';fs.forEach(function(f){compressImg(f,function(out){images.push(out);renderImgs()})})};
 $('publish').onclick=function(){var b=this;b.disabled=true;b.textContent=document.getElementById('asDraft').checked?'saving draft…':'publishing…';log('\\npublishing…\\n');api('/api/publish',{title:$('title').value,description:$('desc').value,tag:$('tag').value,markdown:$('md').value,keywords:chosen,images:images,draft:document.getElementById('asDraft').checked}).then(function(d){log('\\n✓ '+(d.draft?'saved as draft post (not on site yet)':'LIVE: '+d.url)+'\\n');try{localStorage.removeItem(ASKEY)}catch(e){}$('savedat').textContent='';$('discard').style.display='none';images=[];chosen=[];$('title').value='';$('desc').value='';$('md').value='';$('angle').value='';renderImgs();renderChosen();lint();loadPosts()}).catch(function(e){log('publish: '+e.message+'\\n')}).finally(function(){b.disabled=false;b.textContent='Publish to blog →'})};
-$('title').oninput=$('desc').oninput=$('md').oninput=function(){lint();queueSave()};
+$('title').oninput=$('desc').oninput=$('md').oninput=function(){lint();countWords();queueSave();};
 $('angle').oninput=queueSave;
 $('tag').onchange=$('asDraft').onchange=queueSave;
 $('track').onchange=function(){loadKeywords();queueSave()};
@@ -433,7 +457,7 @@ try{
 }catch(e){}
 $('discard').onclick=function(){try{localStorage.removeItem(ASKEY)}catch(e){}images=[];chosen=[];$('title').value='';$('desc').value='';$('md').value='';$('angle').value='';document.getElementById('asDraft').checked=false;$('savedat').textContent='';$('discard').style.display='none';renderImgs();renderChosen();lint();log('draft discarded.\\n')};
 
-loadKeywords();loadStats();loadKwTop();loadPosts();renderImgs();renderChosen();
+loadKeywords();loadStats();loadKwTop();loadPosts();renderImgs();renderChosen();countWords();
 </script></body></html>`;
 
 // ---- boot self-check: the page script must parse, or the UI dies silently ----
@@ -491,7 +515,10 @@ const server = http.createServer(async (req, res) => {
       // Two small calls beat one big one: reasoning models burn token budgets,
       // so the body is plain-text and the tiny title/meta pair is a separate
       // cheap JSON call that fits the free tier easily.
-      const markdown = (await groq(MARKDOWN_PROMPT(angle, kws, track), { maxTokens: 980 })).replace(/^```(markdown)?\n?|\n?```$/g, '').trim();
+      // 2600 tokens ≈ 1000+ words of markdown — the old 980 cap silently
+      // truncated drafts at ~400 words, which is exactly the thin-content
+      // pattern Google's "Crawled - currently not indexed" punishes.
+      const markdown = (await groq(MARKDOWN_PROMPT(angle, kws, track), { maxTokens: 2600 })).replace(/^```(markdown)?\n?|\n?```$/g, '').trim();
       let meta = { title: angle.slice(0, 55), description: '' };
       try {
         const raw = await groq(META_PROMPT(markdown, kws), { json: true, maxTokens: 200 });
@@ -565,7 +592,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/humanize' && req.method === 'POST') {
       const { markdown } = await readBody(req, 1024 * 1024);
       if (!markdown?.trim()) return json(res, 400, { error: 'markdown required' });
-      const out = await groq(HUMANIZE_PROMPT(markdown), { maxTokens: 980 });
+      const out = await groq(HUMANIZE_PROMPT(markdown), { maxTokens: 2600 });
       return json(res, 200, { markdown: out });
     }
 
