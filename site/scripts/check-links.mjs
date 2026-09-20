@@ -55,7 +55,14 @@ let checked = 0;
 
 for (const page of pages) {
   const route = routeOf(page);
-  const html = fs.readFileSync(page, 'utf8');
+  // Strip script/style CONTENT before scanning: inline JS legitimately
+  // contains strings like `href="${r}"` (Pagefind result templates) that are
+  // code, not page links. The tags themselves stay so src/href attributes
+  // on the tags (e.g. <script src="/pagefind/pagefind.js">) are still checked.
+  const html = fs
+    .readFileSync(page, 'utf8')
+    .replace(/(<script\b[^>]*>)[\s\S]*?<\/script>/gi, '$1</script>')
+    .replace(/(<style\b[^>]*>)[\s\S]*?<\/style>/gi, '$1</style>');
   const refs = [
     ...html.matchAll(/(?:href|src)="([^"]+)"/g),
   ].map((m) => m[1]);
