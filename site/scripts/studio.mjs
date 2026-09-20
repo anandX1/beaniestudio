@@ -47,93 +47,6 @@ function extractJson(text) {
   return JSON.parse(text.slice(start, end + 1));
 }
 
-async function groq(messages, { json = false, maxTokens = 980 } = {}) {
-  const key = process.env.GROQ_API_KEY;
-  if (!key) throw new Error('GROQ_API_KEY missing — put it in site/.env');
-  const models = ['openai/gpt-oss-20b', 'openai/gpt-oss-120b', 'qwen/qwen3.8-27b'];
-  const call = (model, useJsonMode, extraMsg) =>
-    fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
-      body: JSON.stringify({
-        model,
-        messages: extraMsg ? [...messages, { role: 'user', content: extraMsg }] : messages,
-        temperature: 0.7,
-        max_tokens: maxTokens,
-        ...(useJsonMode ? { response_format: { type: 'json_object' } } : {}),
-      }),
-    });
-
-  let last = '';
-  for (const model of models) {
-    // Up to 3 attempts per model: json-mode → json-mode+guardrail → plain + extraction.
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const useJson = json && attempt < 2;
-      const guard = attempt === 1 ? 'Your previous reply was empty or invalid JSON. Output STRICT valid JSON only — no markdown fences, no commentary, escape all newlines inside string values as \\n. Keep it under 200 words.' : undefined;
-      const res = await call(model, useJson, guard);
-      if (res.ok) {
-        const data = await res.json();
-        const choice = data.choices?.[0];
-        const content = choice?.message?.content ?? '';
-        // Reasoning models can burn the token budget before emitting content —
-        // an empty or length-truncated reply is a retryable failure, not a result.
-        if (!content.trim() || choice?.finish_reason === 'length') {
-          last = `${model}: empty/length-capped output`;
-          continue;
-        }
-        return content;
-      }
-      const body = await res.text().catch(() => '');
-      last = `${model}: ${res.status}`;
-      if (res.status === 429) { await new Promise((r) => setTimeout(r, 4000)); break; } // next model
-      if (res.status === 400 && body.includes('json_validate_failed') && attempt < 2) continue; // repair loop
-      if (res.status !== 404 && res.status !== 400) throw new Error(`Groq ${res.status}: ${body.slice(0, 200)}`);
-      if (res.status === 400 && attempt >= 2) break; // next model
-    }
-  }
-  throw new Error(`all Groq models failed (${last})`);
-}
-
-const BRAND = `Brand: Beanie Studio — indie team making "STATIC: Salvage vs Hunter", a free 5v1 horror game on Roblox. Five Scrapper players salvage fuel from a wrecked shuttle; the sixth player, the Hunter, is blind and hunts entirely by sound (sprints, dropped scrap, panicked breathing, proximity voice chat). No radar, no minimap. Crossplay, tuned for low-end phones. Launch window Q4 2026. Playtest nights via Discord. Site: https://beaniestudio.site — Discord: https://discord.gg/z8kPT6cRbG — Roblox community: https://www.roblox.com/communities/1108819917/Beanies-studios`;
-
-/** Topic tracks: the blog is not only about the game — indie-dev lessons and
- *  Roblox-technical posts earn links from audiences the game posts can't reach. */
-const BLOG_TRACKS = {
-  game: {
-    label: 'Game — STATIC itself',
-    seeds: ['roblox horror game', 'asymmetrical horror', 'roblox horror multiplayer', 'hide and seek horror game', '5v1 horror game', 'roblox horror with friends', 'roblox sound based horror', 'new roblox horror 2026', 'roblox horror no radar', 'scary roblox games to play with friends'],
-    brief: 'Post topic: STATIC itself — mechanics, the Hunter, sound design, the wreck, playtest stories, dev progress. Speak as the studio. End CTA: one line inviting readers to the playtest Discord.',
-  },
-  indie: {
-    label: 'Indie dev — lessons & process',
-    seeds: ['indie game marketing', 'how to market an indie game', 'roblox game dev tips', 'solo game developer', 'game dev devlog', 'how to grow a discord server', 'indie game launch checklist', 'game development motivation'],
-    brief: 'Post topic: indie game development lessons from building STATIC — marketing experiments (real numbers), cutting features, solo-dev process, community building. Useful to ANY indie dev; STATIC is the case study, not the subject. End CTA: one soft line like "we document everything we learn on this blog and in our Discord" — do NOT hard-sell the game.',
-  },
-  technical: {
-    label: 'Roblox technical — how it\u2019s built',
-    seeds: ['roblox sound design', 'roblox proximity chat', 'roblox ai npc', 'roblox horror map ideas', 'roblox game optimization', 'roblox studio tips', 'how to make a horror game on roblox', 'roblox asymmetrical gameplay'],
-    brief: 'Post topic: Roblox development technique shown through STATIC — sound design, listening AI, optimization for low-end phones, proximity chat. Practical, technical, generous. End CTA: one line pointing to the devlog for more build notes.',
-  },
-};
-
-const MARKDOWN_PROMPT = (angle, keywords, track = 'game') => {
-  const t = BLOG_TRACKS[track] || BLOG_TRACKS.game;
-  return [
-    { role: 'system', content: `${BRAND}\n${t.brief}\n\nKEYWORD RULES (critical — violation makes the post useless):\nThese search phrases must be woven into NORMAL sentences so a reader never notices them: ${keywords.join(', ')}.\n- NEVER put a keyword in quotation marks.\n- NEVER use a keyword phrase as a heading by itself — headings must be descriptive sentences or phrases that may CONTAIN a keyword naturally (e.g. \"Why our Hunter hunts by sound alone\", not \"roblox horror game\").\n- Use each phrase at most once. If a phrase cannot fit naturally into a sentence, skip it — natural readability beats keyword presence.\n\nSTYLE: short paragraphs (2-4 sentences). Concrete details over adjectives. Never use "unleash", "elevate", "delve", "seamless", "game-changer", "revolutionize", "testament", "furthermore", "moreover", "utilize", "leverage". Voice: a smart, candid developer. Output ONLY the markdown body (900-1100 words — search depth matters more than brevity; fill it honestly with concrete detail, numbers, examples and mini-stories, never padding. H2 headings with ##, no H1, no title line). No preamble, no code fences.` },
-    { role: 'user', content: `Post angle: ${angle}` },
-  ];
-};
-
-const META_PROMPT = (markdown, keywords) => [
-  { role: 'system', content: 'Return ONLY strict JSON: {"title": string, "description": string}. Title: max 55 chars, compelling, no clickbait. Description: max 150 chars meta description including one of the keywords. No extra keys.' },
-  { role: 'user', content: `Keywords: ${keywords.join(', ')}\n\nPost:\n${markdown.slice(0, 1500)}` },
-];
-
-const HUMANIZE_PROMPT = (md) => [
-  { role: 'system', content: `You are a humanizing editor. Rewrite the text so it reads like a real developer wrote it fast and honestly: use contractions, vary sentence length (some very short), keep every fact/link/heading intact, kill any remaining AI-isms ("delve", "elevate", "seamless", "robust", "landscape", "testament"), no new facts, no emoji. PRESERVE the full length — the input is ~1000 words on purpose for search depth; output must stay 900+ words and keep every section. Return ONLY the rewritten markdown.` },
-  { role: 'user', content: md },
-];
-
 // ---- SEO lint (pure heuristics, instant, no AI) ----
 function seoLint({ title = '', description = '', markdown = '', keywords = [] }) {
   const text = markdown.replace(/[#*`>\-\[\]()!]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -327,6 +240,7 @@ async function publish(body, res, onLine) {
 // The whole page (markup + client JS) lives in studio-ui.mjs so it can be
 // redesigned without touching server logic. All IDs and API contracts stay
 // identical; the boot self-check below still verifies the page script parses.
+import { groq, BRAND, BLOG_TRACKS, MARKDOWN_PROMPT, META_PROMPT, HUMANIZE_PROMPT } from './blog-ai.mjs';
 import { UI } from './studio-ui.mjs';
 
 // ---- boot self-check: the page script must parse, or the UI dies silently ----
@@ -502,20 +416,96 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/stats' && req.method === 'GET') {
       const token = process.env.CF_API_TOKEN;
       if (!token) {
-        return json(res, 200, { configured: false, hint: 'Add CF_API_TOKEN to site/.env (Cloudflare dash → My Profile → API Tokens → "Web Analytics reports:read" permission). Until then, use the utm breakdown in the Web Analytics dashboard.' });
+        return json(res, 200, { configured: false, hint: 'Add CF_API_TOKEN to site/.env (Cloudflare dash → My Profile → API Tokens → "Web Analytics reports:read" permission). Or paste a token in the Traffic tab — it is saved to .env automatically.' });
       }
-      const since = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
-      const until = new Date().toISOString().slice(0, 10);
       const siteTag = process.env.CF_SITE_TAG || '';
-      const q = `query { viewer { accounts(filter: {}) { webAnalyticsReports(limit: 1, filter: { siteTag: "${siteTag}", date_geq: "${since}", date_leq: "${until}" }) { topPages { pageInfo { count } rows: topPages(limit: 20) { pageViews date } } } } } }`;
+      const days = Math.min(90, Math.max(1, Number(new URL(req.url, 'http://x').searchParams.get('days')) || 30));
+      const since = new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
+      const until = new Date().toISOString().slice(0, 10);
+      const filter = `siteTag: "${siteTag}", date_geq: "${since}", date_leq: "${until}"`;
+      // One query per dataset; each dataset fails independently so one unknown
+      // field can never blank the whole panel.
+      const q = `query {
+        viewer { accounts(filter: {}) { webAnalyticsReports(limit: 1, filter: { ${filter} }) {
+          topPages      { pageInfo { count } rows { pageViews date } }
+          topReferrers  { pageInfo { count } rows { referrer pageViews } }
+          topCountries  { pageInfo { count } rows { countryAlpha2 pageViews } }
+          topDevices    { pageInfo { count } rows { deviceType pageViews } }
+          topPaths      { pageInfo { count } rows { path pageViews } }
+        } } }
+      }`;
       const r = await fetch('https://api.cloudflare.com/client/v4/graphql', {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
         body: JSON.stringify({ query: q }),
       });
       const body = await r.json().catch(() => null);
-      if (!r.ok || !body?.data) return json(res, 200, { configured: true, ok: false, hint: `CF API said ${r.status} — check token permission or site tag. Raw: ${JSON.stringify(body).slice(0, 200)}` });
-      return json(res, 200, { configured: true, ok: true, data: body.data });
+      if (!r.ok || !body?.data) {
+        // fall back to the minimal known-good shape (topPages only)
+        const q2 = `query { viewer { accounts(filter: {}) { webAnalyticsReports(limit: 1, filter: { siteTag: "${siteTag}", date_geq: "${since}", date_leq: "${until}" }) { topPages { pageInfo { count } rows { pageViews date } } } } } }`;
+        const r2 = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+          method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+          body: JSON.stringify({ query: q2 }),
+        });
+        const b2 = await r2.json().catch(() => null);
+        if (!r2.ok || !b2?.data) return json(res, 200, { configured: true, ok: false, hint: `CF API said ${r.status}/${r2.status} — check token permission or site tag.` });
+        return json(res, 200, { configured: true, ok: true, data: b2.data, partial: true, errors: body?.errors?.map((e) => e.message)?.slice(0, 4) });
+      }
+      return json(res, 200, { configured: true, ok: true, days, data: body.data, errors: body.errors?.map((e) => e.message)?.slice(0, 4) });
+    }
+
+    // Save Cloudflare token from the Traffic tab into site/.env (local only).
+    if (url.pathname === '/api/stats/token' && req.method === 'POST') {
+      const { token, siteTag } = await readBody(req, 16 * 1024);
+      if (!token || token.length < 30) return json(res, 400, { error: 'that does not look like a Cloudflare API token' });
+      const envPath = path.join(SITE_ROOT, '.env');
+      let env = '';
+      try { env = fs.readFileSync(envPath, 'utf8'); } catch { /* new file */ }
+      const upsert = (key, val) => {
+        const re = new RegExp(`^${key}=.*$`, 'm');
+        if (re.test(env)) env = env.replace(re, `${key}=${val}`);
+        else env += (env && !env.endsWith('\n') ? '\n' : '') + `${key}=${val}\n`;
+      };
+      upsert('CF_API_TOKEN', String(token).trim());
+      if (siteTag) upsert('CF_SITE_TAG', String(siteTag).trim());
+      fs.writeFileSync(envPath, env);
+      process.env.CF_API_TOKEN = String(token).trim();
+      if (siteTag) process.env.CF_SITE_TAG = String(siteTag).trim();
+      return json(res, 200, { ok: true });
+    }
+
+    // ---- Autopilot ----
+    if (url.pathname === '/api/autopilot' && req.method === 'GET') {
+      const out = await new Promise((resolve) => {
+        const child = spawn(process.execPath, [path.join(SITE_ROOT, 'tools', 'autopilot.mjs'), 'status'], { cwd: SITE_ROOT, windowsHide: true });
+        let buf = '';
+        child.stdout.on('data', (d) => { buf += d; });
+        child.on('close', () => { try { resolve(JSON.parse(buf)); } catch { resolve({ error: 'status failed' }); } });
+      });
+      // queue details for the pipeline table
+      const queue = listQueue().map((q) => {
+        try {
+          const d = JSON.parse(fs.readFileSync(path.join(QUEUE_DIR, q.file), 'utf8'));
+          return { id: q.id, title: q.title, words: q.words, idea: q.idea || null, scheduledFor: d.scheduledFor || null, track: d.track || null, file: q.file };
+        } catch { return { id: q.id, title: q.title, words: q.words, file: q.file, broken: true } ; }
+      }).sort((a, b) => String(a.scheduledFor || '9999').localeCompare(String(b.scheduledFor || '9999')));
+      const logLines = [];
+      try { logLines.push(...fs.readFileSync(path.join(CONTENT_DIR, 'autopilot-log.jsonl'), 'utf8').trim().split('\n').slice(-40).reverse().map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)); } catch { /* none */ }
+      return json(res, 200, { ...out, queue, log: logLines });
+    }
+    if (url.pathname === '/api/autopilot/run' && req.method === 'POST') {
+      const LOCK = path.join(CONTENT_DIR, 'autopilot-run.lock');
+      if (fs.existsSync(LOCK)) {
+        if (Date.now() - fs.statSync(LOCK).mtimeMs < 20 * 60_000) return json(res, 409, { error: 'an autopilot action is already running' });
+        fs.rmSync(LOCK);
+      }
+      const body = await readBody(req, 4096).catch(() => ({}));
+      const cmd = body?.cmd === 'fill' ? 'fill' : 'tick';
+      fs.writeFileSync(LOCK, String(Date.now()));
+      const child = spawn(process.execPath, [path.join(SITE_ROOT, 'tools', 'autopilot.mjs'), cmd], { cwd: SITE_ROOT, detached: true, stdio: 'ignore', windowsHide: true });
+      child.unref();
+      child.on('exit', () => fs.rmSync(LOCK, { force: true }));
+      return json(res, 200, { ok: true, cmd, note: cmd === 'fill' ? 'generation started — posts appear in the pipeline as they finish (about 1/min)' : 'publish tick started' });
     }
 
     if (url.pathname === '/api/humanize' && req.method === 'POST') {

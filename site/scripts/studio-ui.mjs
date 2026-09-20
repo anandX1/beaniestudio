@@ -117,6 +117,30 @@ a{color:var(--amber)}
 .searchbox input{margin:4px 0 8px;padding-left:28px}
 .searchbox:before{content:'⌕';position:absolute;left:9px;top:7px;color:var(--dim2);font-size:14px}
 .ideat{font-size:11px;color:var(--dim2);text-transform:uppercase;letter-spacing:.08em;margin:10px 0 4px;font-weight:700}
+/* ---- kpi cards (autopilot/analytics) ---- */
+.kpicards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:6px 0 4px}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.kpi .v{font-size:24px;font-weight:800;line-height:1.2}
+.kpi .k{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+.kpi.hot .v{color:var(--amber)}
+.kpi.good .v{color:var(--green)}
+/* ---- pipeline table ---- */
+.ptab{width:100%;border-collapse:collapse;font-size:12.5px}
+.ptab td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.ptab tr:hover td{background:var(--panel2)}
+.ptab .when{white-space:nowrap;color:var(--dim);width:92px}
+.ptab .st{white-space:nowrap}
+.dotto{display:inline-block;width:8px;height:8px;border-radius:99px;margin-right:6px;vertical-align:0}
+.dot-sched{background:var(--blue)}.dot-today{background:var(--amber);box-shadow:0 0 8px var(--amber)}.dot-past{background:var(--dim2)}
+/* ---- analytics blocks ---- */
+.angrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:6px}
+.anlist .rowitem{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.anlist .v{font-weight:700;color:var(--amber2);white-space:nowrap}
+.bar{height:5px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:3px}
+.barfill{height:100%;background:var(--amber);border-radius:5px}
+.countryrow{display:flex;align-items:center;gap:8px}
+.cflag{font-size:16px}
+.pvrow td:last-child{text-align:right;font-weight:700;color:var(--amber2)}
 </style></head><body>
 
 <header id="top">
@@ -124,8 +148,9 @@ a{color:var(--amber)}
   <nav id="tabs">
     <button data-tab="compose" class="on">✍️ Compose</button>
     <button data-tab="queue">📥 Queue <span class="n" id="nqueue">0</span></button>
+    <button data-tab="autopilot">🤖 Autopilot</button>
+    <button data-tab="analytics">📊 Analytics</button>
     <button data-tab="rank">📈 Rankings</button>
-    <button data-tab="traffic">🚀 Traffic</button>
     <button data-tab="posts">🗂 Posts <span class="n" id="nposts">0</span></button>
   </nav>
   <div id="topright">
@@ -218,6 +243,43 @@ a{color:var(--amber)}
   </div>
 </main>
 
+<!-- ============ AUTOPILOT ============ -->
+<main id="tab-autopilot">
+  <div class="card" style="margin-bottom:16px">
+    <h2>Autopilot <span class="spacer"></span>
+      <span id="apstate" class="badge gray" style="font-size:11px">…</span>
+      <button class="sec" id="aptick" style="padding:6px 12px;font-size:12px">▶ Run publish tick</button>
+      <button class="sec" id="apfill" style="padding:6px 12px;font-size:12px">⚙ Generate more posts</button>
+    </h2>
+    <div id="apcards" class="kpicards"></div>
+    <div class="hint">One post ships per day at the configured time (config: tools/autopilot-config.json) — the anti-spam law that keeps Google trusting the domain. Generation is AI; publishing is real (build → deploy → IndexNow → Discord/Bluesky). Your job stays the same: swap in real screenshots via the Queue tab before a post's date, or just let it run.</div>
+  </div>
+  <div class="card">
+    <h2>Pipeline — every scheduled post</h2>
+    <div class="searchbox"><input id="apsearch" placeholder="Filter the pipeline…"></div>
+    <div id="aptable"></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2>Recent autopilot activity</h2>
+    <div id="aplog" style="font:11.5px/1.7 ui-monospace,monospace;color:var(--dim);max-height:220px;overflow:auto"></div>
+  </div>
+</main>
+
+<!-- ============ ANALYTICS ============ -->
+<main id="tab-analytics">
+  <div class="card" style="margin-bottom:16px">
+    <h2>Where traffic comes from <span class="spacer"></span>
+      <select id="andays" style="width:auto;margin:0"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select>
+      <button class="ghost" id="anrefresh" style="padding:6px 10px;font-size:12px">↻</button>
+    </h2>
+    <div id="anbody">loading…</div>
+  </div>
+  <div class="card">
+    <h2>Per-post traffic (top pages × published posts)</h2>
+    <div id="anpages">loading…</div>
+  </div>
+</main>
+
 <!-- ============ RANKINGS ============ -->
 <main id="tab-rank">
   <div class="card">
@@ -228,20 +290,6 @@ a{color:var(--amber)}
     <div id="rankmeta" class="hint" style="margin:0 0 10px"></div>
     <div id="rankpanel" style="color:var(--dim);font-size:13px">loading…</div>
     <div class="hint">Real Bing + DuckDuckGo SERP positions via OpenSERP (local Chrome). ~5 min per full run; green = top 3, amber = top 10, sparkline = last runs (up = better). Google positions live in Search Console — Google blocks anonymous scraping.</div>
-  </div>
-</main>
-
-<!-- ============ TRAFFIC ============ -->
-<main id="tab-traffic">
-  <div class="grid2">
-    <div></div>
-    <div class="card">
-      <h2>Traffic <span class="spacer"></span><button class="ghost" id="statrefresh2" style="padding:3px 9px;font-size:11px">↻</button></h2>
-      <div id="stats2" style="font-size:12.5px;color:var(--dim)">loading…</div>
-      <hr>
-      <h2>Trending queries</h2>
-      <div id="kwtop" style="font-size:12.5px"></div>
-    </div>
   </div>
 </main>
 
@@ -605,19 +653,10 @@ function renderStats(target,data){
   el.innerHTML=data.ok?'<b style="color:var(--green)">✓ connected</b> — per-path pageviews flowing.<br><a href="https://dash.cloudflare.com/?to=/:account/web-analytics" target="_blank">Open full analytics ↗</a>':'token issue — check CF_API_TOKEN / CF_SITE_TAG in site/.env';
 }
 async function loadStats(){
-  try{var d=await api('/api/stats');renderStats('stats',d);renderStats('stats2',d)}
-  catch(e){$('stats').textContent='stats: '+e.message;$('stats2').textContent=''}
-}
-async function loadKwTop(){
-  try{
-    var d=await api('/api/keywords');
-    var ks=(d.keywords||[]).slice(0,10);
-    var el=$('kwtop');
-    el.innerHTML='<div style="line-height:2.2">'+ks.map(function(k){return '<span class="chip" style="cursor:default">'+esc(k)+'</span>'}).join(' ')+'</div><div class="hint">real Google searches people type — refreshed by the harvest button</div>';
-  }catch(e){}
+  try{var d=await api('/api/stats');renderStats('stats',d)}
+  catch(e){$('stats').textContent='stats: '+e.message}
 }
 $('statrefresh').onclick=loadStats;
-$('statrefresh2').onclick=loadStats;
 
 // ================= rank tracker =================
 function spark(hist){
@@ -680,15 +719,133 @@ $('rankrun').onclick=function(){
   }).catch(function(e){toast('rank run: '+e.message,'err');rankBusy=false;b.disabled=false;b.textContent='▶ Track rankings now'});
 };
 
+// ================= autopilot =================
+var AP=null, apBusy=false;
+function apStateBadge(s){
+  var el=$('apstate');
+  if(!s){el.textContent='offline';el.className='badge gray';return}
+  if(s.dueNow){el.textContent='due now';el.className='badge';el.style.color='var(--amber)';el.style.borderColor='var(--amber)'}
+  else{el.textContent=s.dueReason||'idle';el.className='badge gray';el.style.color='';el.style.borderColor=''}
+}
+async function loadAutopilot(){
+  try{
+    AP=await api('/api/autopilot');
+    apStateBadge(AP);
+    var published=AP.publishedTotal||0, queued=AP.queueSize||0;
+    var upcoming=(AP.queue||[]).filter(function(q){return q.scheduledFor});
+    var overdue=(AP.queue||[]).filter(function(q){return q.scheduledFor&&q.scheduledFor<=new Date().toISOString().slice(0,10)});
+    $('apcards').innerHTML=
+      kpi(published,'published')+
+      kpi(queued,'in pipeline')+
+      kpi(Math.max(0,(AP.target||100)-published),'remaining to 100')+
+      kpi(overdue.length?overdue.length+' ⚠':'0','scheduled ≤ today',overdue.length?'hot':'')+
+      kpi(AP.lastPublished?AP.lastPublished:'—','last ship date',AP.lastPublished===new Date().toISOString().slice(0,10)?'good':'');
+    renderApTable(AP.queue||[]);
+    var lg=$('aplog');
+    lg.innerHTML=(AP.log||[]).map(function(l){
+      var icon=l.op==='publish-ok'?'✅':l.op==='publish-fail'?'❌':l.op==='generate-error'?'⚠️':'•';
+      return '<div>'+icon+' '+esc(l.at.slice(0,16).replace('T',' '))+' — '+esc(l.op)+(l.id?' · '+esc(l.id):'')+(l.title?' · '+esc(l.title):'')+(l.error?' — <span style="color:var(--red)">'+esc(l.error)+'</span>':'')+(l.url?' — <a href="'+l.url+'" target="_blank">live ↗</a>':'')+'</div>';
+    }).join('')||'<div>no activity yet</div>';
+  }catch(e){$('apcards').textContent='autopilot: '+e.message}
+}
+function kpi(v,k,cls){return '<div class="kpi '+(cls||'')+'"><div class="v">'+v+'</div><div class="k">'+k+'</div></div>'}
+function renderApTable(queue){
+  var q=($('apsearch').value||'').toLowerCase();
+  var rows=queue.filter(function(p){return !q||p.title.toLowerCase().indexOf(q)>=0||String(p.idea||'').indexOf(q)>=0});
+  var today=new Date().toISOString().slice(0,10);
+  $('aptable').innerHTML='<table class="ptab"><tbody>'+rows.map(function(p){
+    var when=p.scheduledFor||'unscheduled';
+    var dot=p.scheduledFor<today?'dot-past':p.scheduledFor===today?'dot-today':'dot-sched';
+    var st=p.scheduledFor===today?'<span class="badge">today</span>':p.scheduledFor<today?'<span style="color:var(--amber2)">awaiting slot</span>':'<span style="color:var(--dim)">scheduled</span>';
+    return '<tr><td class="when"><span class="dotto '+dot+'"></span>'+when+'</td><td><b>'+esc(p.title)+'</b>'+(p.idea?' <span class="badge gray">#'+p.idea+'</span>':'')+'<div style="color:var(--dim2);font-size:11px">'+(p.track||'')+' · '+(p.words||0)+' words'+(p.broken?' · <span style="color:var(--red)">broken file</span>':'')+'</div></td><td class="st">'+st+'</td></tr>';
+  }).join('')+'</tbody></table>';
+  if(!rows.length)$('aptable').innerHTML='<div class="empty">nothing matches</div>';
+}
+$('apsearch').oninput=function(){if(AP)renderApTable(AP.queue||[])};
+$('aptick').onclick=function(){var b=this;if(apBusy)return;apBusy=true;b.disabled=true;b.textContent='starting…';
+  api('/api/autopilot/run',{cmd:'tick'}).then(function(d){toast(d.note||'tick started','ok');log(' autopilot tick started\\n');setTimeout(loadAutopilot,8000)})
+  .catch(function(e){toast('tick: '+e.message,'err')}).finally(function(){b.disabled=false;b.textContent='▶ Run publish tick';apBusy=false})};
+$('apfill').onclick=function(){var b=this;if(apBusy)return;apBusy=true;b.disabled=true;b.textContent='generating…';
+  api('/api/autopilot/run',{cmd:'fill'}).then(function(d){toast(d.note,'ok',6000);log(' autopilot fill started\\n');var n=0;var iv=setInterval(function(){n++;loadAutopilot();if(n>30){clearInterval(iv)}},30000)})
+  .catch(function(e){toast('fill: '+e.message,'err')}).finally(function(){b.disabled=false;b.textContent='⚙ Generate more posts';apBusy=false})};
+
+// ================= analytics =================
+var ANDAYS=30;
+function bar(v,max){var w=max?Math.max(2,Math.round(v/max*100)):0;return '<div class="bar"><div class="barfill" style="width:'+w+'%"></div></div>'}
+function anList(title,rows,valFmt){
+  if(!rows||!rows.length)return '';
+  var max=Math.max.apply(null,rows.map(function(r){return r.v}))||1;
+  return '<div class="card" style="padding:12px"><h2 style="margin-bottom:8px">'+title+'</h2><div class="anlist">'+
+    rows.slice(0,8).map(function(r){return '<div class="rowitem"><span>'+esc(r.k)+'</span><span class="v">'+valFmt(r.v)+'</span></div>'+bar(r.v,max)}).join('')+'</div></div>';
+}
+var FLAGS={IN:'🇮🇳',US:'🇺🇸',GB:'🇬🇧',BR:'🇧🇷',ID:'🇮🇩',PH:'🇵🇭',DE:'🇩🇪',FR:'🇫🇷',CA:'🇨🇦',AU:'🇦🇺',RU:'🇷🇺',TR:'🇹🇷',MX:'🇲🇽',PL:'🇵🇱',NL:'🇳🇱',ES:'🇪🇸',IT:'🇮🇹',JP:'🇯🇵',KR:'🇰🇷',VN:'🇻🇳',TH:'🇹🇭',PK:'🇵🇰',BD:'🇧🇩',NG:'🇳🇬',ZA:'🇿🇦',AR:'🇦🇷',CO:'🇨🇴',MY:'🇲🇾',SG:'🇸🇬',RO:'🇷🇴',UA:'🇺🇦',EG:'🇪🇬',SA:'🇸🇦',AE:'🇦🇪',SE:'🇸🇪',NO:'🇳🇴',FI:'🇫🇮',DK:'🇩🇰',BE:'🇧🇪',AT:'🇦🇹',CH:'🇨🇭',PT:'🇵🇹',GR:'🇬🇷',CZ:'🇨🇿',HU:'🇭🇺',IL:'🇮🇱',CL:'🇨🇱',PE:'🇵🇪'};
+function referrerName(r){
+  if(!r||r==='(direct)')return '🔗 direct / typed';
+  if(/discord/.test(r))return '💬 Discord';if(/twitter|t\.co|x\.com/.test(r))return '🐦 X';
+  if(/youtube|youtu\.be/.test(r))return '▶️ YouTube';if(/reddit/.test(r))return '👽 Reddit';
+  if(/google/.test(r))return '🔎 Google';if(/bing/.test(r))return '🔎 Bing';if(/duckduckgo/.test(r))return '🦆 DuckDuckGo';
+  if(/roblox/.test(r))return '🎮 Roblox';if(/tiktok/.test(r))return '🎵 TikTok';if(/instagram/.test(r))return '📷 Instagram';
+  if(/facebook|fb\./.test(r))return '📘 Facebook';if(/bluesky|bsky/.test(r))return '🦋 Bluesky';
+  return '🌐 '+r;
+}
+async function loadAnalytics(){
+  var el=$('anbody');
+  try{
+    var d=await api('/api/stats?days='+ANDAYS);
+    if(!d.configured){
+      el.innerHTML='<div style="border:1px solid var(--line);border-radius:12px;padding:18px;max-width:560px">'+
+      '<b style="color:var(--txt)">Connect Cloudflare Web Analytics — it is free and already running on your site</b>'+
+      '<ol style="margin:10px 0 10px 20px;padding:0;color:var(--dim);line-height:1.8">'+
+      '<li>Cloudflare dash → <b>My Profile → API Tokens → Create Token</b><br><span style="color:var(--dim2)">permission: <i>Web Analytics Reports: Read</i></span></li>'+
+      '<li>(optional but better) also grab your <b>site tag</b> — the "token" value inside the beacon script on your site</li>'+
+      '<li>paste below — saved locally to site/.env, never uploaded anywhere</li></ol>'+
+      '<div style="display:flex;gap:8px"><input id="antoken" placeholder="CF API token (paste here)" style="margin:0"><input id="antag" placeholder="site tag (optional)" style="margin:0;max-width:200px"></div>'+
+      '<div style="margin-top:10px"><button id="ansave">Connect →</button> <a href="https://dash.cloudflare.com/?to=/:account/web-analytics" target="_blank">open Cloudflare analytics ↗</a></div></div>';
+      $('ansave').onclick=function(){
+        var b=this;b.disabled=true;b.textContent='saving…';
+        api('/api/stats/token',{token:$('antoken').value,siteTag:$('antag').value}).then(function(){toast('connected — loading data','ok');loadAnalytics()}).catch(function(e){toast(e.message,'err');b.disabled=false;b.textContent='Connect →'})
+      };
+      return;
+    }
+    if(!d.ok){el.innerHTML='<div class="empty">'+esc(d.hint||'analytics error')+'</div>';return}
+    var rep=d.data.viewer.accounts[0].webAnalyticsReports[0]||{};
+    var pages=(rep.topPages?.rows||[]).map(function(r){return {k:r.date||'/',v:r.pageViews||0}});
+    var refs=(rep.topReferrers?.rows||[]).map(function(r){return {k:referrerName(r.referrer),v:r.pageViews||0}});
+    var ctry=(rep.topCountries?.rows||[]).map(function(r){return {k:(FLAGS[r.countryAlpha2]||'🏳')+' '+(r.countryAlpha2||'??'),v:r.pageViews||0}});
+    var devs=(rep.topDevices?.rows||[]).map(function(r){return {k:r.deviceType||'?',v:r.pageViews||0}});
+    var total=pages.reduce(function(a,b){return a+b.v},0);
+    el.innerHTML=
+      '<div class="kpicards" style="margin-bottom:14px">'+kpi(total.toLocaleString(),'page views · '+ANDAYS+'d','hot')+kpi((rep.topPages?.pageInfo?.count||0),'distinct pages')+kpi((rep.topCountries?.pageInfo?.count||0),'countries')+(d.partial?'<div class="kpi"><div class="v" style="font-size:13px;color:var(--amber)">partial</div><div class="k">some datasets unavailable</div></div>':'')+'</div>'+
+      '<div class="angrid">'+
+      anList('🏆 Where visitors came from',refs,function(v){return v.toLocaleString()})+
+      anList('🌍 Top countries',ctry,function(v){return v.toLocaleString()})+
+      anList('📱 Devices',devs,function(v){return v.toLocaleString()})+
+      '</div>'+(d.errors&&d.errors.length?'<div class="hint">note: '+esc(d.errors.join('; '))+'</div>':'');
+    // per-post table: join published posts with page views by path
+    var posts=await api('/api/posts');
+    var pv={};(rep.topPages?.rows||[]).forEach(function(r){pv[r.date||'/']=(pv[r.date||'/']||0)+(r.pageViews||0)});
+    var rows=posts.posts.map(function(p){
+      var path='/blog/'+p.file.replace(/\.md$/,'')+'/';
+      return {title:p.title,path:path,v:pv[path]||0,draft:p.draft};
+    }).sort(function(a,b){return b.v-a.v});
+    var max=Math.max.apply(null,rows.map(function(r){return r.v}).concat([1]));
+    $('anpages').innerHTML='<table class="ptab"><tbody>'+rows.map(function(r){
+      return '<tr><td><a href="https://beaniestudio.site'+r.path+'" target="_blank">'+esc(r.title)+'</a>'+(r.draft?' <span class="badge">draft</span>':'')+'<div class="bar" style="width:200px"><div class="barfill" style="width:'+Math.max(2,Math.round(r.v/max*100))+'%"></div></div></td><td class="pvrow" style="text-align:right;font-weight:700;color:var(--amber2)">'+r.v+' views</td></tr>';
+    }).join('')+'</tbody></table>';
+  }catch(e){el.innerHTML='<div class="empty">analytics: '+esc(e.message)+'</div>'}
+}
+$('anrefresh').onclick=loadAnalytics;
+$('andays').onchange=function(){ANDAYS=Number(this.value);loadAnalytics()};
+
 // ================= log drawer + shortcuts =================
 $('logtoggle').onclick=function(){$('logdrawer').classList.toggle('open')};
 document.addEventListener('keydown',function(e){
   if(e.ctrlKey&&!e.shiftKey&&(e.key==='d'||e.key==='D')){e.preventDefault();$('draft').click()}
   else if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();$('publish').click()}
-  else if(e.altKey&&e.key>='1'&&e.key<='5'){e.preventDefault();showTab(['compose','queue','rank','traffic','posts'][Number(e.key)-1])}
+  else if(e.altKey&&e.key>='1'&&e.key<='6'){e.preventDefault();showTab(['compose','queue','autopilot','analytics','rank','posts'][Number(e.key)-1])}
 });
 
 // ================= init =================
-loadKeywords();loadIdeas();loadQueue();loadStats();loadKwTop();loadPosts();loadRank();
+loadKeywords();loadIdeas();loadQueue();loadStats();loadPosts();loadRank();loadAutopilot();loadAnalytics();
 renderImgs();renderChosen();countWords();lint();
 </script></body></html>`;
