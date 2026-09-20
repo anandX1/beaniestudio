@@ -58,7 +58,15 @@ const organizationLd = {
   url: SITE.url,
   email: SITE.contact,
   logo: new URL('/logo.png', SITE.url).href,
-  sameAs: [LINKS.roblox, LINKS.discord, LINKS.youtube, LINKS.instagram, LINKS.x],
+  sameAs: [
+    LINKS.roblox,
+    LINKS.discord,
+    LINKS.youtube,
+    LINKS.instagram,
+    LINKS.x,
+    // Wikidata entity — the knowledge-graph anchor AI engines resolve (2026-09-21)
+    'https://www.wikidata.org/wiki/Q141511863',
+  ],
 };
 
 const websiteLd = {

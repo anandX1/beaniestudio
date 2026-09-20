@@ -52,6 +52,9 @@ const videoGameLd = {
   },
   author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
   publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  // Wikidata entity — machine-ties this page to the game's knowledge-graph item
+  sameAs: ['https://www.wikidata.org/wiki/Q141512786', 'https://www.wikidata.org/wiki/Q141511863'],
+  subjectOf: { '@type': 'WebPage', url: SITE.url },
 };
 
 const featuredVideoLd = {
