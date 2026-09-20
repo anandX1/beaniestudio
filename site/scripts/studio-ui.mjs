@@ -800,7 +800,7 @@ async function loadAnalytics(){
       '<li>Cloudflare dash → <b>My Profile → API Tokens → Create Token</b><br><span style="color:var(--dim2)">permission: <i>Web Analytics Reports: Read</i></span></li>'+
       '<li>(optional but better) also grab your <b>site tag</b> — the "token" value inside the beacon script on your site</li>'+
       '<li>paste below — saved locally to site/.env, never uploaded anywhere</li></ol>'+
-      '<div style="display:flex;gap:8px"><input id="antoken" placeholder="CF API token (paste here)" style="margin:0"><input id="antag" placeholder="site tag (optional)" style="margin:0;max-width:200px"></div>'+
+      '<div style="display:flex;gap:8px"><input id="antoken" placeholder="CF API token (paste here)" style="margin:0"><input id="antag" placeholder="site tag — arms the beacon too" style="margin:0;max-width:220px"></div>'+
       '<div style="margin-top:10px"><button id="ansave">Connect →</button> <a href="https://dash.cloudflare.com/?to=/:account/web-analytics" target="_blank">open Cloudflare analytics ↗</a></div></div>';
       $('ansave').onclick=function(){
         var b=this;b.disabled=true;b.textContent='saving…';

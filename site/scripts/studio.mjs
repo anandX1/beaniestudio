@@ -467,7 +467,13 @@ const server = http.createServer(async (req, res) => {
         else env += (env && !env.endsWith('\n') ? '\n' : '') + `${key}=${val}\n`;
       };
       upsert('CF_API_TOKEN', String(token).trim());
-      if (siteTag) upsert('CF_SITE_TAG', String(siteTag).trim());
+      if (siteTag) {
+        upsert('CF_SITE_TAG', String(siteTag).trim());
+        // Same value drives the on-page beacon (BaseLayout reads it at build
+        // time). Without it the site never reports visits and the API has
+        // nothing to show — so saving the tag here also arms the beacon.
+        upsert('PUBLIC_CF_BEACON_TOKEN', String(siteTag).trim());
+      }
       fs.writeFileSync(envPath, env);
       process.env.CF_API_TOKEN = String(token).trim();
       if (siteTag) process.env.CF_SITE_TAG = String(siteTag).trim();
