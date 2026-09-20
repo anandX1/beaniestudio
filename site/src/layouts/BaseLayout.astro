@@ -137,7 +137,7 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
     <!-- Cloudflare Web Analytics — cookie-free, GDPR-friendly, zero CWV cost.
          Loads only when PUBLIC_CF_BEACON_TOKEN is set at build time. -->
     {analyticsToken && (
-      <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "${analyticsToken}"}'></script>
+      <script defer src="https://static.cloudflareinsights.com/beacon.min.js" set:html={`data-cf-beacon='{"token": "${analyticsToken}"}'`} />
     )}
   </head>
   <body>
