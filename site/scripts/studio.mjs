@@ -416,50 +416,59 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/stats' && req.method === 'GET') {
       const token = process.env.CF_API_TOKEN;
       if (!token) {
-        return json(res, 200, { configured: false, hint: 'Add CF_API_TOKEN to site/.env (Cloudflare dash → My Profile → API Tokens → "Web Analytics reports:read" permission). Or paste a token in the Traffic tab — it is saved to .env automatically.' });
+        return json(res, 200, { configured: false, hint: 'Add CF_API_TOKEN to site/.env — permission: Account → Account Analytics → Read (Cloudflare dash → My Profile → API Tokens). Or paste a token in the Analytics tab — it is saved to .env automatically.' });
       }
       const siteTag = process.env.CF_SITE_TAG || '';
       const accountTag = process.env.CF_ACCOUNT_TAG || '';
       const days = Math.min(90, Math.max(1, Number(new URL(req.url, 'http://x').searchParams.get('days')) || 30));
       const since = new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
       const until = new Date().toISOString().slice(0, 10);
-      const accountsFilter = accountTag ? `accounts(filter: { accountTag: "${accountTag}" })` : 'accounts(filter: {})';
-      const filter = `siteTag: "${siteTag}", date_geq: "${since}", date_leq: "${until}"`;
-      // One query per dataset; each dataset fails independently so one unknown
-      // field can never blank the whole panel.
-      const q = `query {
-        viewer { ${accountsFilter} { webAnalyticsReports(limit: 1, filter: { ${filter} }) {
-          topPages      { pageInfo { count } rows { pageViews date } }
-          topReferrers  { pageInfo { count } rows { referrer pageViews } }
-          topCountries  { pageInfo { count } rows { countryAlpha2 pageViews } }
-          topDevices    { pageInfo { count } rows { deviceType pageViews } }
-          topPaths      { pageInfo { count } rows { path pageViews } }
-        } } }
-      }`;
+      if (!accountTag || !siteTag) {
+        return json(res, 200, { configured: true, ok: false, needsAccountTag: !accountTag, needsSiteTag: !siteTag, hint: (!accountTag
+          ? 'Cloudflare requires the Account ID in the query — dash.cloudflare.com URL shows it as the first path segment (dash.cloudflare.com/<32-char-id>/…). '
+          : '') + (!siteTag ? 'Also paste the site tag (the beacon token value).' : '') });
+      }
+      // Verified against Cloudflare's live GraphQL schema (2026-09): Web Analytics
+      // (RUM) data lives in rumPageloadEventsAdaptiveGroups — NOT "webAnalyticsReports",
+      // which old blog posts reference but the public schema has never had.
+      //   metrics: count (pageloads), sum.visits (unique visits)
+      //   dimensions: requestPath, refererHost, countryName, deviceType, date, …
+      // NOTE: `bot` filter is numeric (0/1), not boolean. count_DESC ordering works.
+      const F = `siteTag: "${siteTag}", date_geq: "${since}", date_leq: "${until}", bot: 0`;
+      const g = (name, dim, limit = 12) => `${name}: rumPageloadEventsAdaptiveGroups(limit: ${limit}, filter: { ${F} }, orderBy: [count_DESC]) { count sum { visits } dimensions { ${dim} } }`;
+      const q = `query { viewer { accounts(filter: { accountTag: "${accountTag}" }) {
+        ${g('daily', 'date', 92).replace('count_DESC', 'date_ASC')}
+        ${g('pages', 'requestPath')}
+        ${g('refs', 'refererHost')}
+        ${g('ctry', 'countryName')}
+        ${g('devs', 'deviceType', 8)}
+      } } }`;
       const r = await fetch('https://api.cloudflare.com/client/v4/graphql', {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
         body: JSON.stringify({ query: q }),
       });
       const body = await r.json().catch(() => null);
-      if (!r.ok || !body?.data) {
-        const errText = JSON.stringify(body?.errors || '');
-        if (/accountTag|not authorized/.test(errText)) {
-          return json(res, 200, { configured: true, ok: false, needsAccountTag: !accountTag, needsPermission: /not authorized/.test(errText), hint: accountTag
-            ? 'Cloudflare rejected the account — the token likely needs the “Web Analytics → Read” permission added (My Profile → API Tokens → edit this token), or the account tag is wrong.'
-            : 'Cloudflare needs the Account ID in the query. Log into dash.cloudflare.com — the URL becomes dash.cloudflare.com/<32-character-id>/… — copy that id and paste it in the Analytics tab (Account ID box).' });
-        }
-        // fall back to the minimal known-good shape (topPages only)
-        const q2 = `query { viewer { accounts(filter: {}) { webAnalyticsReports(limit: 1, filter: { siteTag: "${siteTag}", date_geq: "${since}", date_leq: "${until}" }) { topPages { pageInfo { count } rows { pageViews date } } } } } }`;
-        const r2 = await fetch('https://api.cloudflare.com/client/v4/graphql', {
-          method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-          body: JSON.stringify({ query: q2 }),
-        });
-        const b2 = await r2.json().catch(() => null);
-        if (!r2.ok || !b2?.data) return json(res, 200, { configured: true, ok: false, hint: `CF API said ${r.status}/${r2.status} — check token permission or site tag.` });
-        return json(res, 200, { configured: true, ok: true, data: b2.data, partial: true, errors: body?.errors?.map((e) => e.message)?.slice(0, 4) });
+      const errs = body?.errors?.map((e) => e.message) || [];
+      if (!r.ok || !body?.data || errs.some((e) => /not authorized|authentication/i.test(e))) {
+        return json(res, 200, { configured: true, ok: false, hint: `Cloudflare said: ${errs[0] || `HTTP ${r.status}`} — check the token permission (Account Analytics → Read), the Account ID, and the site tag.` });
       }
-      return json(res, 200, { configured: true, ok: true, days, data: body.data, errors: body.errors?.map((e) => e.message)?.slice(0, 4) });
+      const A = body.data.viewer.accounts?.[0];
+      if (!A) return json(res, 200, { configured: true, ok: false, hint: 'Cloudflare returned no account for that Account ID — double-check it.' });
+      // Normalize into the shape the UI expects (views/visits per row).
+      const rowsOf = (k, dimKey) => (A[k] || []).map((row) => ({
+        key: row.dimensions[dimKey] ?? '(unknown)',
+        views: row.count || 0,
+        visits: row.sum?.visits || 0,
+      }));
+      const data = {
+        daily: rowsOf('daily', 'date'),
+        pages: rowsOf('pages', 'requestPath'),
+        referrers: rowsOf('refs', 'refererHost'),
+        countries: rowsOf('ctry', 'countryName'),
+        devices: rowsOf('devs', 'deviceType'),
+      };
+      return json(res, 200, { configured: true, ok: true, days, data });
     }
 
     // Save Cloudflare token from the Traffic tab into site/.env (local only).

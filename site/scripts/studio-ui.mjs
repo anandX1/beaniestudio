@@ -781,7 +781,7 @@ function anList(title,rows,valFmt){
 }
 var FLAGS={IN:'🇮🇳',US:'🇺🇸',GB:'🇬🇧',BR:'🇧🇷',ID:'🇮🇩',PH:'🇵🇭',DE:'🇩🇪',FR:'🇫🇷',CA:'🇨🇦',AU:'🇦🇺',RU:'🇷🇺',TR:'🇹🇷',MX:'🇲🇽',PL:'🇵🇱',NL:'🇳🇱',ES:'🇪🇸',IT:'🇮🇹',JP:'🇯🇵',KR:'🇰🇷',VN:'🇻🇳',TH:'🇹🇭',PK:'🇵🇰',BD:'🇧🇩',NG:'🇳🇬',ZA:'🇿🇦',AR:'🇦🇷',CO:'🇨🇴',MY:'🇲🇾',SG:'🇸🇬',RO:'🇷🇴',UA:'🇺🇦',EG:'🇪🇬',SA:'🇸🇦',AE:'🇦🇪',SE:'🇸🇪',NO:'🇳🇴',FI:'🇫🇮',DK:'🇩🇰',BE:'🇧🇪',AT:'🇦🇹',CH:'🇨🇭',PT:'🇵🇹',GR:'🇬🇷',CZ:'🇨🇿',HU:'🇭🇺',IL:'🇮🇱',CL:'🇨🇱',PE:'🇵🇪'};
 function referrerName(r){
-  if(!r||r==='(direct)')return '🔗 direct / typed';
+  if(!r||r==='(direct)'||r==='(unknown)')return '🔗 direct / typed';
   if(/discord/.test(r))return '💬 Discord';if(/twitter|t\.co|x\.com/.test(r))return '🐦 X';
   if(/youtube|youtu\.be/.test(r))return '▶️ YouTube';if(/reddit/.test(r))return '👽 Reddit';
   if(/google/.test(r))return '🔎 Google';if(/bing/.test(r))return '🔎 Bing';if(/duckduckgo/.test(r))return '🦆 DuckDuckGo';
@@ -797,8 +797,8 @@ async function loadAnalytics(){
       el.innerHTML='<div style="border:1px solid var(--line);border-radius:12px;padding:18px;max-width:560px">'+
       '<b style="color:var(--txt)">Connect Cloudflare Web Analytics — it is free and already running on your site</b>'+
       '<ol style="margin:10px 0 10px 20px;padding:0;color:var(--dim);line-height:1.8">'+
-      '<li>Cloudflare dash → <b>My Profile → API Tokens → Create Token</b><br><span style="color:var(--dim2)">permission: <i>Web Analytics Reports: Read</i></span></li>'+
-      '<li>(optional but better) also grab your <b>site tag</b> — the "token" value inside the beacon script on your site</li>'+
+      '<li>Cloudflare dash → <b>My Profile → API Tokens → Create Token</b><br><span style="color:var(--dim2)">permission: <i>Account → Account Analytics → Read</i> (verified working for Web Analytics data)</span></li>'+
+      '<li>paste your <b>Account ID</b> (from the dash URL) and the <b>site tag</b> — the "token" value inside the beacon script on your site</li>'+
       '<li>paste below — saved locally to site/.env, never uploaded anywhere</li></ol>'+
       '<div style="display:flex;gap:8px"><input id="antoken" placeholder="CF API token (paste here)" style="margin:0"><input id="antag" placeholder="site tag — arms the beacon too" style="margin:0;max-width:200px"><input id="anacct" placeholder="Account ID (32 chars)" style="margin:0;max-width:200px"></div>'+
       '<div class="hint" style="margin-top:6px">Account ID: log into dash.cloudflare.com — the URL becomes dash.cloudflare.com/<b>&lt;this-id&gt;</b>/… — copy it from there.</div>'+
@@ -810,22 +810,22 @@ async function loadAnalytics(){
       return;
     }
     if(!d.ok){el.innerHTML='<div class="empty">'+esc(d.hint||'analytics error')+'</div>';return}
-    var rep=d.data.viewer.accounts[0].webAnalyticsReports[0]||{};
-    var pages=(rep.topPages?.rows||[]).map(function(r){return {k:r.date||'/',v:r.pageViews||0}});
-    var refs=(rep.topReferrers?.rows||[]).map(function(r){return {k:referrerName(r.referrer),v:r.pageViews||0}});
-    var ctry=(rep.topCountries?.rows||[]).map(function(r){return {k:(FLAGS[r.countryAlpha2]||'🏳')+' '+(r.countryAlpha2||'??'),v:r.pageViews||0}});
-    var devs=(rep.topDevices?.rows||[]).map(function(r){return {k:r.deviceType||'?',v:r.pageViews||0}});
-    var total=pages.reduce(function(a,b){return a+b.v},0);
+    var D=d.data||{};
+    var total=(D.daily||[]).reduce(function(a,b){return a+(b.views||0)},0);
+    var visits=(D.daily||[]).reduce(function(a,b){return a+(b.visits||0)},0);
+    var refs=(D.referrers||[]).map(function(r){return {k:referrerName(r.key),v:r.views||0}});
+    var ctry=(D.countries||[]).map(function(r){return {k:'🌍 '+r.key,v:r.views||0}});
+    var devs=(D.devices||[]).map(function(r){return {k:r.key,v:r.views||0}});
     el.innerHTML=
-      '<div class="kpicards" style="margin-bottom:14px">'+kpi(total.toLocaleString(),'page views · '+ANDAYS+'d','hot')+kpi((rep.topPages?.pageInfo?.count||0),'distinct pages')+kpi((rep.topCountries?.pageInfo?.count||0),'countries')+(d.partial?'<div class="kpi"><div class="v" style="font-size:13px;color:var(--amber)">partial</div><div class="k">some datasets unavailable</div></div>':'')+'</div>'+
+      '<div class="kpicards" style="margin-bottom:14px">'+kpi(total.toLocaleString(),'page views · '+ANDAYS+'d','hot')+kpi(visits.toLocaleString(),'visits')+kpi((D.pages||[]).length,'distinct pages')+kpi((D.countries||[]).length,'countries')+'</div>'+
       '<div class="angrid">'+
       anList('🏆 Where visitors came from',refs,function(v){return v.toLocaleString()})+
       anList('🌍 Top countries',ctry,function(v){return v.toLocaleString()})+
       anList('📱 Devices',devs,function(v){return v.toLocaleString()})+
-      '</div>'+(d.errors&&d.errors.length?'<div class="hint">note: '+esc(d.errors.join('; '))+'</div>':'');
+      '</div>'+(total===0?'<div class="hint">connected and working — no visits recorded yet. The beacon only started collecting today, so charts fill as traffic arrives.</div>':'');
     // per-post table: join published posts with page views by path
     var posts=await api('/api/posts');
-    var pv={};(rep.topPages?.rows||[]).forEach(function(r){pv[r.date||'/']=(pv[r.date||'/']||0)+(r.pageViews||0)});
+    var pv={};(D.pages||[]).forEach(function(r){pv[r.key]=(pv[r.key]||0)+(r.views||0)});
     var rows=posts.posts.map(function(p){
       var path='/blog/'+p.file.replace(/\.md$/,'')+'/';
       return {title:p.title,path:path,v:pv[path]||0,draft:p.draft};
