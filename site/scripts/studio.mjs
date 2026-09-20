@@ -419,14 +419,16 @@ const server = http.createServer(async (req, res) => {
         return json(res, 200, { configured: false, hint: 'Add CF_API_TOKEN to site/.env (Cloudflare dash → My Profile → API Tokens → "Web Analytics reports:read" permission). Or paste a token in the Traffic tab — it is saved to .env automatically.' });
       }
       const siteTag = process.env.CF_SITE_TAG || '';
+      const accountTag = process.env.CF_ACCOUNT_TAG || '';
       const days = Math.min(90, Math.max(1, Number(new URL(req.url, 'http://x').searchParams.get('days')) || 30));
       const since = new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
       const until = new Date().toISOString().slice(0, 10);
+      const accountsFilter = accountTag ? `accounts(filter: { accountTag: "${accountTag}" })` : 'accounts(filter: {})';
       const filter = `siteTag: "${siteTag}", date_geq: "${since}", date_leq: "${until}"`;
       // One query per dataset; each dataset fails independently so one unknown
       // field can never blank the whole panel.
       const q = `query {
-        viewer { accounts(filter: {}) { webAnalyticsReports(limit: 1, filter: { ${filter} }) {
+        viewer { ${accountsFilter} { webAnalyticsReports(limit: 1, filter: { ${filter} }) {
           topPages      { pageInfo { count } rows { pageViews date } }
           topReferrers  { pageInfo { count } rows { referrer pageViews } }
           topCountries  { pageInfo { count } rows { countryAlpha2 pageViews } }
@@ -441,6 +443,12 @@ const server = http.createServer(async (req, res) => {
       });
       const body = await r.json().catch(() => null);
       if (!r.ok || !body?.data) {
+        const errText = JSON.stringify(body?.errors || '');
+        if (/accountTag|not authorized/.test(errText)) {
+          return json(res, 200, { configured: true, ok: false, needsAccountTag: !accountTag, needsPermission: /not authorized/.test(errText), hint: accountTag
+            ? 'Cloudflare rejected the account — the token likely needs the “Web Analytics → Read” permission added (My Profile → API Tokens → edit this token), or the account tag is wrong.'
+            : 'Cloudflare needs the Account ID in the query. Log into dash.cloudflare.com — the URL becomes dash.cloudflare.com/<32-character-id>/… — copy that id and paste it in the Analytics tab (Account ID box).' });
+        }
         // fall back to the minimal known-good shape (topPages only)
         const q2 = `query { viewer { accounts(filter: {}) { webAnalyticsReports(limit: 1, filter: { siteTag: "${siteTag}", date_geq: "${since}", date_leq: "${until}" }) { topPages { pageInfo { count } rows { pageViews date } } } } } }`;
         const r2 = await fetch('https://api.cloudflare.com/client/v4/graphql', {
@@ -456,7 +464,7 @@ const server = http.createServer(async (req, res) => {
 
     // Save Cloudflare token from the Traffic tab into site/.env (local only).
     if (url.pathname === '/api/stats/token' && req.method === 'POST') {
-      const { token, siteTag } = await readBody(req, 16 * 1024);
+      const { token, siteTag, accountTag } = await readBody(req, 16 * 1024);
       if (!token || token.length < 30) return json(res, 400, { error: 'that does not look like a Cloudflare API token' });
       const envPath = path.join(SITE_ROOT, '.env');
       let env = '';
@@ -474,9 +482,11 @@ const server = http.createServer(async (req, res) => {
         // nothing to show — so saving the tag here also arms the beacon.
         upsert('PUBLIC_CF_BEACON_TOKEN', String(siteTag).trim());
       }
+      if (accountTag) upsert('CF_ACCOUNT_TAG', String(accountTag).trim());
       fs.writeFileSync(envPath, env);
       process.env.CF_API_TOKEN = String(token).trim();
       if (siteTag) process.env.CF_SITE_TAG = String(siteTag).trim();
+      if (accountTag) process.env.CF_ACCOUNT_TAG = String(accountTag).trim();
       return json(res, 200, { ok: true });
     }
 

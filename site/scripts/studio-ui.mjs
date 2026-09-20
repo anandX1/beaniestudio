@@ -800,11 +800,12 @@ async function loadAnalytics(){
       '<li>Cloudflare dash → <b>My Profile → API Tokens → Create Token</b><br><span style="color:var(--dim2)">permission: <i>Web Analytics Reports: Read</i></span></li>'+
       '<li>(optional but better) also grab your <b>site tag</b> — the "token" value inside the beacon script on your site</li>'+
       '<li>paste below — saved locally to site/.env, never uploaded anywhere</li></ol>'+
-      '<div style="display:flex;gap:8px"><input id="antoken" placeholder="CF API token (paste here)" style="margin:0"><input id="antag" placeholder="site tag — arms the beacon too" style="margin:0;max-width:220px"></div>'+
+      '<div style="display:flex;gap:8px"><input id="antoken" placeholder="CF API token (paste here)" style="margin:0"><input id="antag" placeholder="site tag — arms the beacon too" style="margin:0;max-width:200px"><input id="anacct" placeholder="Account ID (32 chars)" style="margin:0;max-width:200px"></div>'+
+      '<div class="hint" style="margin-top:6px">Account ID: log into dash.cloudflare.com — the URL becomes dash.cloudflare.com/<b>&lt;this-id&gt;</b>/… — copy it from there.</div>'+
       '<div style="margin-top:10px"><button id="ansave">Connect →</button> <a href="https://dash.cloudflare.com/?to=/:account/web-analytics" target="_blank">open Cloudflare analytics ↗</a></div></div>';
       $('ansave').onclick=function(){
         var b=this;b.disabled=true;b.textContent='saving…';
-        api('/api/stats/token',{token:$('antoken').value,siteTag:$('antag').value}).then(function(){toast('connected — loading data','ok');loadAnalytics()}).catch(function(e){toast(e.message,'err');b.disabled=false;b.textContent='Connect →'})
+        api('/api/stats/token',{token:$('antoken').value,siteTag:$('antag').value,accountTag:$('anacct')?$('anacct').value:''}).then(function(){toast('connected — loading data','ok');loadAnalytics()}).catch(function(e){toast(e.message,'err');b.disabled=false;b.textContent='Connect →'})
       };
       return;
     }
