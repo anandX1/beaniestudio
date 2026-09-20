@@ -486,7 +486,7 @@ const server = http.createServer(async (req, res) => {
       const queue = listQueue().map((q) => {
         try {
           const d = JSON.parse(fs.readFileSync(path.join(QUEUE_DIR, q.file), 'utf8'));
-          return { id: q.id, title: q.title, words: q.words, idea: q.idea || null, scheduledFor: d.scheduledFor || null, track: d.track || null, file: q.file };
+          return { id: q.id, title: q.title, words: q.words, idea: q.idea || null, scheduledFor: d.scheduledFor || null, track: d.track || null, file: q.file, source: d.source || null, needsResearch: !!d.needsResearch, researchedOn: d.researchedOn || null };
         } catch { return { id: q.id, title: q.title, words: q.words, file: q.file, broken: true } ; }
       }).sort((a, b) => String(a.scheduledFor || '9999').localeCompare(String(b.scheduledFor || '9999')));
       const logLines = [];

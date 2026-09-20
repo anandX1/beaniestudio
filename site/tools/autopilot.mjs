@@ -80,6 +80,22 @@ function keywordsFor(track) {
   return (BLOG_TRACKS[track] || BLOG_TRACKS.game).seeds.slice(0, 5);
 }
 
+// ---------- idea classification: live-fact vs evergreen ----------
+// Live-fact posts make claims about the CURRENT world (which games exist,
+// what things cost, platform policies, trend charts). A model without
+// research hallucinates exactly these — game titles, prices, IDs. They are
+// RESERVED FOR THE AGENT (web + SERP research) and the tick will never
+// auto-publish them as stubs. Evergreen posts (tutorials, definitions,
+// our own mechanics, process lessons) are safe for generation.
+const LIVE_PATTERNS = [
+  /best-|scariest-|top-\d|new-|-2025|-2026|recap|trending|tiktok|reddit-says|under-the-radar|watch-on-twitch/,
+  /sound-ids|music-and-sound|sound-codes|thumbnail-downloader/,
+  /how-much-do-.*-make|devex-explained|budget-breakdown/,
+  /voice-chat-not-working|vc-|proximity-chat/,
+  /rat-horror|horror-movies|not-roblox/,
+];
+const isLiveIdea = (slug) => LIVE_PATTERNS.some((re) => re.test(slug));
+
 // ---------- generation ----------
 async function generatePost(idea, kwOverride) {
   const keywords = kwOverride || keywordsFor(idea.track);
@@ -126,6 +142,17 @@ async function fill() {
     if (existing.has(qid) || fs.existsSync(path.join(QUEUE_DIR, qid + '.json'))) continue;
     const date = new Date(startDate);
     date.setDate(date.getDate() + day);
+    // LIVE-FACT ideas: placeholder only — the agent researches and writes
+    // these with real sources. No date, no generation, never auto-published.
+    if (isLiveIdea(idea.slug)) {
+      fs.writeFileSync(path.join(QUEUE_DIR, qid + '.json'), JSON.stringify({
+        id: qid, idea: idea.n, track: idea.track, title: idea.slug.replace(/-/g, ' '),
+        needsResearch: true, scheduledFor: null,
+        note: 'LIVE-FACT post — reserved for agent research (real games, real numbers, real sources). Pinged in Studio → Autopilot.',
+      }, null, 1));
+      log({ op: 'reserve-live', id: qid });
+      continue; // does not consume a day
+    }
     scheduled.push({ qid, idea, date: date.toISOString().slice(0, 10) });
     day++;
   }
@@ -153,27 +180,39 @@ async function fill() {
   console.log(`✓ generated ${made} posts. Queue: ${queueFiles().length}. Re-run 'fill' anytime to top up.`);
 }
 
+/** Thin-generation guard: a token-capped stub (we shipped 38-word posts once)
+ *  gets ONE retry at higher budget; if still thin it is parked needsHuman —
+ *  never scheduled, never auto-published. */
+
+/** Single source of truth for "should we publish now?" — used by tick AND
+ *  status. Eligibility = scheduled today-or-earlier AND written AND ≥600w
+ *  AND not flagged needsResearch/needsHuman. */
 function dueCheck() {
   const now = new Date();
-  const [h, m] = (cfg.publishTime || '09:00').split(':').map(Number);
-  const dueTime = new Date(now);
-  dueTime.setHours(h, m, 0, 0);
   const today = now.toISOString().slice(0, 10);
   if (cfg.nextPublishDate && today < cfg.nextPublishDate) return { due: false, reason: `autopilot arms on ${cfg.nextPublishDate}` };
   const last = lastPublishedDate();
   if (last === today) return { due: false, reason: `already published today (${last})` };
+  const [h, m] = (cfg.publishTime || '09:00').split(':').map(Number);
+  const dueTime = new Date(now); dueTime.setHours(h, m, 0, 0);
   if (now < dueTime) return { due: false, reason: `before publish time ${cfg.publishTime}` };
-  const files = queueFiles();
-  let next = null, nextFile = null;
-  for (const f of files) {
+  let post = null, file = null;
+  const skipped = [];
+  for (const f of queueFiles()) {
     try {
       const p = JSON.parse(fs.readFileSync(path.join(QUEUE_DIR, f), 'utf8'));
-      if (!next || (p.scheduledFor || '') < (next.scheduledFor || '')) { next = p; nextFile = f; }
+      const wc = String(p.markdown || '').replace(/\[\s*photo\s*\]/gi, ' ').trim().split(/\s+/).filter(Boolean).length;
+      if (p.needsResearch || p.needsHuman) { skipped.push(`${p.id} (${p.needsResearch ? 'needs agent research' : 'needs human'})`); continue; }
+      if (!p.markdown || wc < 600) { skipped.push(`${p.id} (thin: ${wc}w)`); continue; }
+      if ((p.scheduledFor || '9999') > today) continue;
+      post = p; file = f; break;
     } catch { continue; }
   }
-  if (!next) return { due: false, reason: 'queue empty' };
-  if (next.scheduledFor && next.scheduledFor > today) return { due: false, reason: `next scheduled for ${next.scheduledFor}` };
-  return { due: true, post: next, file: nextFile };
+  if (!post) {
+    const reason = queueFiles().length ? `no eligible post — waiting on: ${skipped.slice(0, 3).join(', ') || 'future schedule'}` : 'queue empty';
+    return { due: false, reason };
+  }
+  return { due: true, post, file };
 }
 
 function lastPublishedDate() {
@@ -188,15 +227,17 @@ function lastPublishedDate() {
 }
 
 async function tick() {
+  await maybeTopUp();
   const c = dueCheck();
-  if (!c.due) { console.log('autopilot: not due —', c.reason); log({ op: 'tick-skip', reason: c.reason }); await maybeTopUp(); return; }
-  const post = c.post;
+  if (!c.due) { console.log('autopilot: not due —', c.reason); log({ op: 'tick-skip', reason: c.reason }); return; }
+  const post = c.post, file = c.file;
+  const today = new Date().toISOString().slice(0, 10);
   console.log(`autopilot: publishing ${post.id} — "${post.title}"`);
   log({ op: 'publish-start', id: post.id, title: post.title });
   const res = await publishAsync({ title: post.title, description: post.description, tag: post.tag || 'design', markdown: post.markdown, keywords: post.keywords || [], images: [], draft: false });
   res.log.forEach((l) => console.log('  ' + l));
   if (res.ok && !res.draft) {
-    fs.rmSync(path.join(QUEUE_DIR, c.file), { force: true });
+    fs.rmSync(path.join(QUEUE_DIR, file), { force: true });
     log({ op: 'publish-ok', id: post.id, url: res.url, date: new Date().toISOString().slice(0, 10) });
     console.log('✓ live:', res.url);
   } else {

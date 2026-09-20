@@ -755,9 +755,10 @@ function renderApTable(queue){
   var today=new Date().toISOString().slice(0,10);
   $('aptable').innerHTML='<table class="ptab"><tbody>'+rows.map(function(p){
     var when=p.scheduledFor||'unscheduled';
-    var dot=p.scheduledFor<today?'dot-past':p.scheduledFor===today?'dot-today':'dot-sched';
-    var st=p.scheduledFor===today?'<span class="badge">today</span>':p.scheduledFor<today?'<span style="color:var(--amber2)">awaiting slot</span>':'<span style="color:var(--dim)">scheduled</span>';
-    return '<tr><td class="when"><span class="dotto '+dot+'"></span>'+when+'</td><td><b>'+esc(p.title)+'</b>'+(p.idea?' <span class="badge gray">#'+p.idea+'</span>':'')+'<div style="color:var(--dim2);font-size:11px">'+(p.track||'')+' · '+(p.words||0)+' words'+(p.broken?' · <span style="color:var(--red)">broken file</span>':'')+'</div></td><td class="st">'+st+'</td></tr>';
+    var dot=p.scheduledFor&&p.scheduledFor<today?'dot-past':p.scheduledFor===today?'dot-today':'dot-sched';
+    var st=p.scheduledFor===today?'<span class="badge">today</span>':(p.scheduledFor&&p.scheduledFor<today)?'<span style="color:var(--amber2)">awaiting slot</span>':'<span style="color:var(--dim)">'+(p.scheduledFor?'scheduled':'queued')+'</span>';
+    var src=p.needsResearch?'<span class="badge" style="color:var(--blue);border-color:var(--blue)">needs research</span>':p.source==='agent'?'<span class="badge" style="color:var(--green);border-color:var(--green)">researched</span>':p.source==='hand'?'<span class="badge gray">hand-written</span>':p.source==='groq'?'<span class="badge gray">drafted</span>':'';
+    return '<tr><td class="when"><span class="dotto '+dot+'"></span>'+esc(when)+'</td><td><b>'+esc(p.title)+'</b>'+(p.idea?' <span class="badge gray">#'+p.idea+'</span>':'')+' '+src+'<div style="color:var(--dim2);font-size:11px">'+(p.track||'')+' · '+(p.words||0)+' words'+(p.broken?' · <span style="color:var(--red)">broken file</span>':'')+'</div></td><td class="st">'+st+'</td></tr>';
   }).join('')+'</tbody></table>';
   if(!rows.length)$('aptable').innerHTML='<div class="empty">nothing matches</div>';
 }

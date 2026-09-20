@@ -137,6 +137,7 @@ These don't sell the game; they make beaniestudio.site a place devs cite.
 
 ## The operating system (how these ship)
 
+- **WHO WRITES WHAT (the 2026-09-20 doctrine):** posts are classified **live-fact vs evergreen** by `tools/autopilot.mjs` (`LIVE_PATTERNS`). Live-fact posts — anything claiming which games exist, prices, platform policies, real sound IDs, "best of 2026" surveys — are **reserved for the agent** (me, with web + SERP research; invented game titles are the failure mode, and Groq produced them). Groq drafts evergreen material only. The tick **refuses** to auto-publish any post flagged `needsResearch` or thinner than 600 words — it logs what it's waiting on instead. Proven by audit: the first Groq batch shipped 4 token-capped stubs (38–227 words) and invented games like "Horror Games Flip"; all were caught before publish.
 - **Track mapping:** 1–45 → `game`, 46–62 + 86–100 → `indie`, 21–33 + 63–75 → `technical`. Studio's track dropdown filters keyword pools automatically.
 - **Interlink rule:** every new post links to 2 older posts + 1 pillar (/play/, /creators/, or a Tier-1 listicle). This is what turns 100 posts into a *site*.
 - **Refresh rule:** every post gets `updatedDate` + real re-edit every ~90 days. Google rewards updates on evergreen queries; our schema already surfaces `dateModified`.
