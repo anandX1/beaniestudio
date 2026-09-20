@@ -1,0 +1,43 @@
+# Cloudflare static-asset headers (Workers/Pages `_headers` — copied verbatim
+# from public/ into every deploy, verified live after deploy).
+#
+# WHY: the zone serves default `Cache-Control: public, max-age=0, must-revalidate`
+# for everything, so repeat visitors re-download fonts/CSS/JS every visit.
+# This file fixes that at the origin — no dashboard access needed, version-controlled.
+#
+# CONTRACT: /_astro/* filenames are content-hashed by Astro (safe to cache forever).
+# /fonts/* filenames are STABLE by design (see scripts/copy-fonts.mjs) — if you ever
+# replace a font file in place, give it a new filename or purge the CDN cache.
+
+# ---- immutable: content-hashed Astro assets, fonts, search index ----
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/pagefind/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ---- static asset directories that contain no HTML (verified: images only) ----
+/og/*
+  Cache-Control: public, max-age=2592000
+
+/yt/*
+  Cache-Control: public, max-age=2592000
+
+# ---- site chrome icons ----
+/favicon.png
+  Cache-Control: public, max-age=2592000
+
+/logo.png
+  Cache-Control: public, max-age=2592000
+
+/apple-touch-icon.png
+  Cache-Control: public, max-age=2592000
+
+# ---- security headers on everything (cheap, zero-risk) ----
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
