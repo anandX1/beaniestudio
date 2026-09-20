@@ -29,6 +29,7 @@ const CONTENT_DIR = path.join(SITE_ROOT, 'content');
 const KW_PATH = path.join(CONTENT_DIR, 'keywords.json');
 const DEVLOG_DIR = path.join(SITE_ROOT, 'src', 'blog'); // folder + public URLs are "blog" now (collection key kept for compat)
 const BLOG_IMG_DIR = path.join(SITE_ROOT, 'public', 'blog');
+const RANK_LOCK = path.join(CONTENT_DIR, 'rank-run.lock');
 
 // ---- env ----
 try {
@@ -367,6 +368,15 @@ label{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.0
   <div id="queue" style="font-size:12px;color:var(--dim)">loading…</div>
 </section>
 <section>
+  <h2>Rank tracker <span style="font-weight:400;font-size:11px;color:var(--dim)">· Bing+DDG via OpenSERP · history local</span></h2>
+  <div class="row" style="margin-bottom:6px">
+    <button class="sec" id="rankrun" style="padding:4px 10px;font-size:11px">Track rankings now</button>
+    <button class="sec" id="rankrefresh" style="padding:4px 10px;font-size:11px">Refresh</button>
+    <span id="rankmeta" style="font-size:11px;color:var(--dim)"></span>
+  </div>
+  <div id="rankpanel" style="font-size:12px;color:var(--dim)">loading…</div>
+</section>
+<section>
   <h2>Draft</h2>
   <label>Topic track</label>
   <select id="track"><option value="game">Game — STATIC itself</option><option value="indie">Indie dev — lessons &amp; process</option><option value="technical">Roblox technical — how it's built</option></select>
@@ -533,7 +543,35 @@ async function loadQueue(){try{var d=await api('/api/queue');var el=$('queue');i
 el.innerHTML='';d.queue.forEach(function(q){var e=document.createElement('div');e.className='post';e.style.cursor='pointer';e.title='Load into the editor';e.innerHTML='<div>'+q.title+'</div><div class="d">'+q.words.toLocaleString()+' words'+(q.idea?' · idea #'+q.idea:'')+'</div>';
 e.onclick=function(){if(!confirm('Load "'+q.title+'" into the editor? Current unsaved edits are replaced (autosave is cleared).'))return;api('/api/queue/load',{id:q.id}).then(function(p){chosen=[];images=[];$('title').value=p.title||'';$('desc').value=p.description||'';$('md').value=p.markdown||'';$('tag').value=['design','production','systems'].indexOf(p.tag)>=0?p.tag:'design';if(p.keywords){chosen=p.keywords.slice(0,6)}renderChosen();renderImgs();lint();countWords();log('\\nqueued post loaded: '+q.title+' — add [photo] images and publish.\\n')}).catch(function(err){log('queue load: '+err.message+'\\n')})};
 el.appendChild(e)});var hint=document.createElement('div');hint.style.cssText='margin-top:6px;opacity:.7';hint.textContent=d.queue.length+' in queue · publishing auto-removes';el.appendChild(hint)}catch(e){$('queue').textContent='queue: '+e.message}}
-loadKeywords();loadIdeas();loadQueue();loadStats();loadKwTop();loadPosts();renderImgs();renderChosen();countWords();
+// ---- rank tracker panel: positions, movement arrows, run button ----
+var rankBusy=false;
+async function loadRank(){try{var d=await api('/api/rank');var el=$('rankpanel');var runs=d.runs||[];
+if(!runs.length){el.textContent='no runs yet — click “Track rankings now” (takes ~5 min, renders real Bing/DDG pages)';$('rankmeta').textContent='';return}
+var last=runs[runs.length-1];var prev=runs.length>1?runs[runs.length-2]:null;
+var when=new Date(last.date).toLocaleString();
+var eng=Object.keys(last.engineResults);
+var html='';
+eng.forEach(function(e){
+  var prevMap={};if(prev&&prev.engineResults&&prev.engineResults[e]){prev.engineResults[e].forEach(function(r){prevMap[r.keyword]=r.rank})}
+  html+='<div style="margin:8px 0 4px"><b style="color:var(--txt)">'+e+'</b></div>';
+  html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
+  last.engineResults[e].forEach(function(r){
+    var pos=r.rank?'#'+r.rank:'—';var color=r.rank&&r.rank<=10?'var(--green)':r.rank?'var(--amber)':'var(--dim)';
+    var delta='';if(r.error){delta='<span style="color:var(--amber)">'+r.error+'</span>'}
+    else{var was=prevMap[r.keyword];if(was&&r.rank){delta=r.rank<was?' <span style="color:var(--green)">▲'+(was-r.rank)+'</span>':r.rank>was?' <span style="color:var(--amber)">▼'+(r.rank-was)+'</span>':' <span style="opacity:.5">=</span>'}else if(!was&&r.rank){delta=' <span style="color:var(--green)">★new</span>'}else if(was&&!r.rank){delta=' <span style="color:var(--amber)">(out)</span>'}}
+    html+='<tr><td style="padding:2px 0;color:'+color+';width:44px"><b>'+pos+'</b></td><td style="opacity:.85">'+r.keyword+'</td><td style="text-align:right">'+delta+'</td></tr>';
+  });
+  html+='</table>';
+});
+el.innerHTML=html;$('rankmeta').textContent='last run '+when;
+}catch(e){$('rankpanel').textContent='rank: '+e.message}}
+$('rankrefresh').onclick=loadRank;
+$('rankrun').onclick=function(){var b=this;if(rankBusy)return;rankBusy=true;b.disabled=true;b.textContent='starting…';
+api('/api/rank/run',{}).then(function(d){if(d.error){log(' rank run: '+d.error+'\\n');rankBusy=false;b.disabled=false;b.textContent='Track rankings now';return}
+log(' rank tracking started — watch this panel (~5 min)\\n');b.textContent='running…';var poll=setInterval(function(){api('/api/rank').then(function(){})},30000);
+setTimeout(function(){clearInterval(poll);rankBusy=false;b.disabled=false;b.textContent='Track rankings now';loadRank()},330000);
+}).catch(function(e){log(' rank run: '+e.message+'\\n');rankBusy=false;b.disabled=false;b.textContent='Track rankings now'})};
+loadKeywords();loadIdeas();loadQueue();loadStats();loadKwTop();loadPosts();loadRank();renderImgs();renderChosen();countWords();
 </script></body></html>`;
 
 // ---- boot self-check: the page script must parse, or the UI dies silently ----
@@ -607,6 +645,33 @@ const server = http.createServer(async (req, res) => {
       if (!item) return json(res, 404, { error: 'queue item not found' });
       fs.rmSync(path.join(QUEUE_DIR, item.file));
       return json(res, 200, { ok: true, remaining: listQueue().length });
+    }
+
+    // ---- rank tracking (community OpenSERP → Bing/DDG, local-only history) ----
+    if (url.pathname === '/api/rank' && req.method === 'GET') {
+      const histPath = path.join(SITE_ROOT, 'content', 'rank-history.jsonl');
+      if (!fs.existsSync(histPath)) return json(res, 200, { runs: [], note: 'no runs yet — click “Track rankings now”' });
+      const lines = fs.readFileSync(histPath, 'utf8').trim().split('\n');
+      const runs = lines.slice(-30).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+      return json(res, 200, { runs });
+    }
+    if (url.pathname === '/api/rank/run' && req.method === 'POST') {
+      // Spawn the tracker detached from the request; the UI polls /api/rank
+      // (last-run date changes) instead of holding a 5-minute HTTP call open.
+      if (fs.existsSync(RANK_LOCK)) {
+        const age = Date.now() - fs.statSync(RANK_LOCK).mtimeMs;
+        if (age < 15 * 60_000) return json(res, 409, { error: 'a rank run is already in progress' });
+        fs.rmSync(RANK_LOCK); // stale lock (crashed run)
+      }
+      fs.writeFileSync(RANK_LOCK, String(Date.now()));
+      const child = spawn(process.execPath, [path.join(SITE_ROOT, 'tools', 'rank-track.mjs')], {
+        cwd: SITE_ROOT,
+        detached: true,
+        stdio: 'ignore',
+      });
+      child.unref();
+      child.on('exit', () => fs.rmSync(RANK_LOCK, { force: true }));
+      return json(res, 200, { ok: true, note: 'tracking started — takes ~4–6 min for all keywords on both engines' });
     }
 
     if (url.pathname === '/api/seo' && req.method === 'POST') {

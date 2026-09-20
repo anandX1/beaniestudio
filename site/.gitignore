@@ -8,3 +8,4 @@ dist/
 # Content engine: drafts + state are local ops; keep only the keyword harvest
 content/*
 !content/keywords.json
+tools/bin/

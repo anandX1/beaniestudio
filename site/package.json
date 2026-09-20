@@ -25,7 +25,9 @@
     "search:index": "pagefind --site dist",
     "deploy:dry": "node scripts/deploy-site.mjs --dry-run",
     "studio": "node scripts/studio.mjs",
-    "seo": "npm run check:links && npm run ping:indexnow:dry"
+    "seo": "npm run check:links && npm run ping:indexnow:dry",
+    "rank": "node tools/rank-track.mjs",
+    "rank:setup": "node tools/setup-openserp.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
