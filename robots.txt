@@ -4,8 +4,8 @@
 
 User-agent: *
 Allow: /
-Disallow: /og/
-Disallow: /yt/
+# /og/ and /yt/ stay crawlable: OG images and video thumbnails referenced by
+# structured data MUST be crawlable or Google flags Video/image rich results.
 
 Sitemap: https://beaniestudio.site/sitemap-index.xml
 
