@@ -12,7 +12,11 @@ A quick note on honesty: some of these games are rivals of ours. They still belo
 
 
 
-<!-- photo slot: attach an image in Studio to fill this spot -->
+
+
+![Scary Roblox Games to Play With Friends (2026 Shortlist)](/blog/scary-roblox-games-to-play-with-friends-2026-shortlist-1.webp)
+
+
 
 
 
@@ -40,7 +44,11 @@ Keep those three in mind as you read. They are exactly the criteria we used to b
 
 
 
-<!-- photo slot: attach an image in Studio to fill this spot -->
+
+
+![Scary Roblox Games to Play With Friends (2026 Shortlist)](/blog/scary-roblox-games-to-play-with-friends-2026-shortlist-2.webp)
+
+
 
 
 
