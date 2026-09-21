@@ -4,6 +4,13 @@
 $ErrorActionPreference = 'SilentlyContinue'
 $site = 'D:\roblox game 4 research\site'
 $today = Get-Date -Format 'yyyy-MM-dd'
+# Skip entirely if today's post already went out (e.g. a wake-up catch-up beat the clock)
+$log = "$site\content\autopilot-log.jsonl"
+if (Test-Path $log) {
+  $hit = Get-Content $log | ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } |
+    Where-Object { $_.op -eq 'publish-ok' -and $_.date -eq $today } | Select-Object -First 1
+  if ($hit) { exit }
+}
 $title = $null
 Get-ChildItem "$site\content\queue\*.json" | ForEach-Object {
   try { $j = Get-Content $_.FullName -Raw | ConvertFrom-Json } catch { return }
