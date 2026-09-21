@@ -1,8 +1,8 @@
 {
   "targetCount": 100,
-  "publishTime": "09:00",
+  "publishTime": "22:00",
   "nextPublishDate": "2026-09-21",
   "groqBatchSize": 4,
   "batchPauseMs": 600000,
-  "note": "publishTime is local machine time (IST here). nextPublishDate gates the first auto-post; after each publish the autopilot stamps its log so 'one per day' is enforced. batchPauseMs keeps Groq's free tier happy during fill; fill is resumable."
+  "note": "publishTime is local machine time (IST here) — 22:00 = prime Roblox evening traffic. nextPublishDate gates the first auto-post; after each publish the autopilot stamps its log so 'one per day' is enforced. batchPauseMs keeps Groq's free tier happy during fill; fill is resumable."
 }

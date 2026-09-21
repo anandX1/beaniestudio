@@ -11,7 +11,7 @@
  *   • ONE post per day, never more (the anti-spam law — see BLOG-100 honest math).
  *     `tick` is idempotent: a second run the same day does nothing.
  *   • Preferred publish window comes from content/autopilot-config.json
- *     (default 09:00 IST ≈ when Roblox's audience + Indian evening overlap;
+ *     (default 22:00 IST ≈ prime Roblox evening traffic;
  *     the "perfect time" is a hypothesis the analytics tab will confirm/refute).
  *   • Generation is SLOW (Groq free tier) → `fill` writes posts in batches and
  *     is resumable: re-run and it continues where it stopped.
