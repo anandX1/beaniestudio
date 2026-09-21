@@ -283,6 +283,38 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { posts: listPosts() });
     }
 
+    // Load a PUBLISHED post back into the editor (edit + republish path).
+    // Images return as base64 so the editor's image tray renders them and a
+    // republish re-saves them identically (same filenames, no orphans).
+    if (url.pathname === '/api/post/load' && req.method === 'POST') {
+      const { slug } = await readBody(req, 4 * 1024);
+      if (!/^[a-z0-9-]+$/.test(String(slug || ''))) return json(res, 400, { error: 'bad slug' });
+      const file = path.join(DEVLOG_DIR, `${slug}.md`);
+      if (!fs.existsSync(file)) return json(res, 404, { error: 'published post not found' });
+      const raw = fs.readFileSync(file, 'utf8');
+      const fm = raw.match(/^---\n([\s\S]*?)\n---/)?.[1] || '';
+      const pick = (k) => (fm.match(new RegExp(`${k}:\\s*(.+)`)) || [])[1]?.replace(/^['"]|['"]$/g, '') || '';
+      const body = raw.replace(/^---\n[\s\S]*?\n---\n*/, '').trim();
+      // Body markdown keeps image refs as ![](/blog/<file>) — convert those
+      // back into [photo] markers + base64 images for the editor tray.
+      const images = [];
+      const imgDir = path.join(SITE_ROOT, 'public', 'blog');
+      const files = fs.existsSync(imgDir) ? fs.readdirSync(imgDir).filter((f) => f.startsWith(`${slug}-`)) : [];
+      for (const f of files) {
+        const ext = f.split('.').pop();
+        const mime = ext === 'jpg' ? 'jpeg' : ext;
+        if (!['png', 'jpeg', 'webp', 'gif'].includes(mime)) continue;
+        images.push({ name: f, alt: pick('title'), data: `data:image/${mime};base64,${fs.readFileSync(path.join(imgDir, f)).toString('base64')}` });
+      }
+      let md = body.replace(/\n*!\[[^\]]*\]\(\/blog\/[a-z0-9-]+\.[a-z]+\)\n*/gi, '\n\n[photo]\n\n');
+      md = md.replace(/<!-- photo slot[^>]*-->/g, '[photo]').replace(/(\n\[photo\]\n+)(\[photo\]\n*)+/g, '$1').trim();
+      return json(res, 200, {
+        slug, pubDate: pick('pubDate'), title: pick('title'), description: pick('description'),
+        tag: ['design', 'production', 'systems'].includes(pick('tag')) ? pick('tag') : 'design',
+        markdown: md, images,
+      });
+    }
+
     if (url.pathname === '/api/ideas' && req.method === 'GET') {
       const parsed = parseIdeas();
       const published = new Set(listPosts().map((p) => p.file.replace(/\.md$/, '')));
@@ -545,6 +577,12 @@ const server = http.createServer(async (req, res) => {
       const lines = [];
       const onLine = (s) => { lines.push(s); process.stdout.write(`[studio] ${String(s).split('\n')[0]}\n`); };
       const result = await publish(body, res, onLine);
+      // Title changed during an edit → new slug; remove the old post file so
+      // we don't ship two copies. (Old images stay in public/blog — harmless.)
+      if (result?.ok && !result?.draft && body?.oldSlug && /^[a-z0-9-]+$/.test(body.oldSlug) && body.oldSlug !== result.slug) {
+        const oldFile = path.join(DEVLOG_DIR, `${body.oldSlug}.md`);
+        if (fs.existsSync(oldFile)) { fs.rmSync(oldFile); onLine(`old post removed: src/blog/${body.oldSlug}.md (title changed)`); }
+      }
       // Published (not merely saved-as-draft) → drop the queue item so the
       // queue reflects reality. Match by title; queue ids map 1:1 to titles.
       if (result?.ok && !result?.draft && body?.title) {

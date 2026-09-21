@@ -33,7 +33,7 @@ function runStep(cmd) {
   });
 }
 
-export async function publishAsync({ title, description, tag = 'design', markdown, keywords = [], images = [], draft = false }) {
+export async function publishAsync({ title, description, tag = 'design', markdown, keywords = [], images = [], draft = false, pubDate = null }) {
   const log = [];
   const say = (m) => log.push(m);
   try {
@@ -73,9 +73,20 @@ export async function publishAsync({ title, description, tag = 'design', markdow
     if (leftovers.length) say(`${leftovers.length} image(s) had no [photo] marker — appended at the end`);
     const markerCount = (markdown.match(/\[\s*photo\s*\]/gi) || []).length;
     if (markerCount > saved.length) say(`${markerCount - saved.length} [photo] slot(s) left empty — attach more images next time`);
+
+    // Future-link guard: a link to /blog/<slug>/ whose post is not published
+    // yet (it may be scheduled for next week) breaks check:links → the CI
+    // SEO guard → a failed-workflow notification. Rewrite such links to their
+    // label text; when the target eventually ships, new posts can link it.
+    bodyMd = bodyMd.replace(/\[([^\]]+)\]\(\/blog\/([^\/#?)]+)\/?\)/g, (full, label, slug) => {
+      const target = path.join(DEVLOG_DIR, `${slug}.md`);
+      if (fs.existsSync(target)) return full;
+      say(`future-link rewritten to plain text: ${label} (target /blog/${slug}/ not published yet)`);
+      return label;
+    });
     const imageBlock = leftovers.length ? `\n${leftovers.map((s) => s.markdown).join('\n\n')}\n` : '';
     const kwLine = keywords.length ? `\n<!-- studio-keywords: ${keywords.join(' | ')} -->\n` : '';
-    const post = `---\ntitle: '${title.replace(/'/g, "\\'")}'\ndescription: '${description.replace(/'/g, "\\'")}'\npubDate: ${new Date().toISOString().slice(0, 10)}\ntag: ${['design', 'production', 'systems'].includes(tag) ? tag : 'design'}\ndraft: ${draft ? 'true' : 'false'}\n---\n\n${bodyMd}\n${imageBlock}${kwLine}`;
+    const post = `---\ntitle: '${title.replace(/'/g, "\\'")}'\ndescription: '${description.replace(/'/g, "\\'")}'\npubDate: ${pubDate || new Date().toISOString().slice(0, 10)}\ntag: ${['design', 'production', 'systems'].includes(tag) ? tag : 'design'}\ndraft: ${draft ? 'true' : 'false'}\n---\n\n${bodyMd}\n${imageBlock}${kwLine}`;
     const postPath = path.join(DEVLOG_DIR, `${slug}.md`);
     fs.writeFileSync(postPath, post);
     say(`post written: src/blog/${slug}.md`);

@@ -308,6 +308,8 @@ a{color:var(--amber)}
 // ================= utilities =================
 var chosen = [];
 var images = [];
+var editingSlug = null;   // set while editing a published post → republish keeps slug/date
+var editingPubDate = null;
 var IDEAS = null;
 var ideaDone = 0, ideaTotal = 0;
 function $(id){return document.getElementById(id)}
@@ -413,6 +415,21 @@ async function loadPosts(){
     d.posts.forEach(function(p){
       var e=document.createElement('div');e.className='rowitem';
       e.innerHTML='<div>'+esc(p.title)+(p.draft?' <span class="badge">draft</span>':'')+'</div><div class="d">'+esc(p.pubDate||'')+' · '+esc(p.file)+'</div>';
+      var edit=document.createElement('button');edit.textContent='✎ Edit';edit.style.marginLeft='8px';
+      edit.title='open this published post in the editor (republish keeps URL and date)';
+      edit.onclick=function(){
+        if(editingSlug&&!window.confirm('You are already editing "'+editingSlug+'". Load this post instead? Unsaved edits are replaced.'))return;
+        api('/api/post/load',{slug:p.file.replace(/\.md$/,'')}).then(function(post){
+          editingSlug=post.slug;editingPubDate=post.pubDate||null;
+          chosen=[];images=(post.images||[]).slice(0,6);
+          $('title').value=post.title||'';$('desc').value=post.description||'';$('md').value=post.markdown||'';
+          $('tag').value=['design','production','systems'].indexOf(post.tag)>=0?post.tag:'design';$('angle').value='';
+          renderImgs();renderChosen();lint();countWords();queueSave();showTab('compose');
+          toast('editing "'+post.title+'" — republish keeps the same URL and date','ok',6000);
+          log('editing published post: '+post.slug+'\\n');
+        }).catch(function(err){toast('load failed: '+err.message,'err')});
+      };
+      e.appendChild(edit);
       el.appendChild(e);
     });
     if(!d.posts.length)el.innerHTML='<div class="empty">no posts yet — publish your first from Compose</div>';
@@ -579,14 +596,16 @@ $('adapt').onclick=function(){
 $('publish').onclick=function(){
   var b=this;var asDraft=document.getElementById('asDraft').checked;
   b.disabled=true;b.textContent=asDraft?'saving draft…':'publishing…';log('\\npublishing…\\n');
-  api('/api/publish',{title:$('title').value,description:$('desc').value,tag:$('tag').value,markdown:$('md').value,keywords:chosen,images:images,draft:asDraft})
+  api('/api/publish',{title:$('title').value,description:$('desc').value,tag:$('tag').value,markdown:$('md').value,keywords:chosen,images:images,draft:asDraft,pubDate:editingPubDate,oldSlug:editingSlug})
   .then(function(d){
     log('\\n✓ '+(d.draft?'saved as draft post (not on site yet)':'LIVE: '+d.url)+'\\n');
     toast(d.draft?'draft saved — flip draft:false when ready':'<b>Live!</b> <a href="'+d.url+'" target="_blank">'+d.url+'</a>','ok',8000);
     try{localStorage.removeItem(ASKEY)}catch(e){}
     $('savedat').textContent='';$('discard').style.display='none';
+    var wasEdit=!!editingSlug;editingSlug=null;editingPubDate=null;
     images=[];chosen=[];$('title').value='';$('desc').value='';$('md').value='';$('angle').value='';
     renderImgs();renderChosen();lint();countWords();loadPosts();loadQueue();
+    toast(wasEdit?'post updated ✓':'published ✓','ok');
     showTab('posts');
   })
   .catch(function(e){toast('publish failed: '+e.message,'err',8000);log('publish: '+e.message+'\\n')})
@@ -621,6 +640,7 @@ try{
 $('discard').onclick=function(){
   if(!window.confirm('Discard the current draft? This cannot be undone.'))return;
   try{localStorage.removeItem(ASKEY)}catch(e){}
+  editingSlug=null;editingPubDate=null;
   images=[];chosen=[];$('title').value='';$('desc').value='';$('md').value='';$('angle').value='';
   $('savedat').textContent='';$('discard').style.display='none';
   renderImgs();renderChosen();lint();countWords();toast('draft discarded');

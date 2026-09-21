@@ -63,6 +63,6 @@ We kept running into the same gap: games that were either too shallow to care ab
 
 It is free, and it is in active development with regular playtest nights. If that sounds like your kind of horror night, the Discord is right here - playtest slots are announced there first, and early players genuinely shape the balance. Bring your squad.
 
-**More from us:** read [what asymmetrical horror actually means](/blog/what-is-asymmetrical-horror-1-blind-hunter-vs-5-scrappers/) or see [the full game overview](/play/).
+**More from us:** read [what asymmetrical horror actually means](/blog/asymmetrical-horror-1-blind-hunter-vs-5-scrappers/) or see [the full game overview](/play/).
 
 <!-- studio-keywords: scary roblox games to play with friends | roblox horror games with friends | scary roblox games to play with friends 5 players | roblox horror with friends -->
