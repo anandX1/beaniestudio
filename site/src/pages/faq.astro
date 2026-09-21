@@ -5,27 +5,47 @@ import { SITE, LINKS } from '../site.config';
 const faqs = [
   {
     q: 'When does STATIC release?',
-    a: 'We are targeting Q4 2026. The countdown on the home page tracks the start of the launch window, and the Discord gets every schedule update first.',
+    a: 'STATIC targets a Q4 2026 release on Roblox. The countdown on the home page tracks the start of the launch window, and the Discord gets every schedule update first.',
   },
   {
     q: 'How much will STATIC cost?',
-    a: 'Nothing. STATIC is free to play on Roblox at launch. If you have Roblox installed, you already have everything you need.',
+    a: 'Nothing — STATIC is free to play on Roblox at launch. If you have Roblox installed, you already have everything you need.',
   },
   {
     q: 'What platforms does STATIC support?',
-    a: 'Mobile, PC, and console — all in the same matches. Performance is tuned to run on iPhone-8-class phones, so the whole squad can play together regardless of device.',
+    a: 'Mobile, PC, and console — all in the same matches. Performance is tuned to run on iPhone-8-class phones, so the whole squad plays together regardless of device.',
   },
   {
     q: 'How many players are in a match?',
-    a: 'Four to five Scrappers versus one Hunter — up to six players per round, with rounds running five to ten minutes.',
+    a: 'STATIC matches are 5v1: five Scrappers versus one Hunter, up to six players per round. Rounds run five to ten minutes.',
   },
   {
     q: 'What is the game about?',
-    a: 'Scrappers salvage fuel from a wrecked shuttle while one player, the Hunter, stalks the wreck. Scrappers are outmatched and win by stealth, teamwork, and nerve. The Hunter is faster and stronger, and hunts entirely by sound.',
+    a: 'Five Scrappers salvage scrap from a wrecked shuttle while one player — the Hunter — stalks the wreck. Scrappers win by finishing the job and escaping; the Hunter is faster, stronger, and hunts entirely by sound.',
   },
   {
     q: 'How does the Hunter track players?',
-    a: 'By sound alone. There is no radar and no minimap — for anyone. Sprinting, dropping heavy objects, and yelling over comms all carry through the wreck. Move quietly or do not move at all.',
+    a: 'By sound alone — there is no radar and no minimap for anyone. Noises players cause, like failed repairs or mishandled heavy scrap, carry through the wreck and pull the Hunter in. Move quietly or do not move at all.',
+  },
+  {
+    q: 'How do scrap deposits and repairs work?',
+    a: 'Each match has five deposit areas with different scrap limits. Scrappers feed scrap until an area hits its limit, then complete a repair minigame to secure it. Failing the minigame makes noise the Hunter can hear.',
+  },
+  {
+    q: 'How do you escape in STATIC?',
+    a: 'Once enough deposits are secured, two exit doors power up and only one opens — and it is chosen randomly. The endgame is a race the Hunter can still ruin.',
+  },
+  {
+    q: 'What happens if the Hunter catches me?',
+    a: 'The first hit knocks you down; a second kills. Downed Scrappers crawl and can recover, but the Hunter can carry them over a shoulder to a siphon pod. Teammates see captured players highlighted and can rescue before it is too late.',
+  },
+  {
+    q: 'Can I revive myself in STATIC?',
+    a: 'Yes — a downed Scrapper who goes for a self-revive gambles it: roughly a five percent chance to get back up, otherwise they die. Calling a teammate is the safe play; the gamble is the story.',
+  },
+  {
+    q: 'Are there classes or progression?',
+    a: 'Classes arrive in the first major update — each resists or disrupts the Hunter differently, from stuns to slows. Between rounds you earn frags and coins from scrap filled, repairs, and revives, spendable on cosmetics.',
   },
   {
     q: 'Is STATIC scary or funny?',
@@ -37,27 +57,23 @@ const faqs = [
   },
   {
     q: 'Is STATIC on PlayStation, Xbox, or Switch?',
-    a: 'STATIC runs inside Roblox, so it is on every platform Roblox is on — including PlayStation, Xbox, mobile, and PC — with full crossplay in the same matches. There is no separate console download.',
+    a: 'STATIC runs inside Roblox, so it is on every platform Roblox is on — PlayStation, Xbox, mobile, and PC — with full crossplay in the same matches. There is no separate console download.',
   },
   {
     q: 'Can I play STATIC solo?',
-    a: 'No — STATIC is built around crew dynamics. As a Scrapper you need teammates to haul the heavy fuel and cover your noise, and the Hunter role needs a full crew to stalk. The minimum round is two players.',
+    a: 'Not as designed — STATIC is built around crew dynamics. Scrappers need teammates to cover noise and haul heavy scrap, and the minimum round is two players.',
   },
   {
     q: 'Will there be a voice chat?',
-    a: 'The plan is proximity voice chat: you hear other Scrappers only when they are close, and loud talking is exactly as dangerous as sprinting. It is being tested in playtests before launch.',
+    a: 'Yes — proximity voice chat is planned: you hear other Scrappers only when they are close, and loud talking is exactly as dangerous as sprinting. It is being tested in playtests before launch.',
   },
   {
     q: 'How long is a match?',
-    a: 'Five to ten minutes. Rounds are built to fit between other things you are doing — one more round should never be a big decision.',
-  },
-  {
-    q: 'What happens if the Hunter catches me?',
-    a: 'You are out of the round — but your crew can still finish the job. Caught Scrappers become spectators, and the best rounds are the ones where the last survivor pulls the fuel home with everyone watching.',
+    a: 'Five to ten minutes. Rounds are built to fit between other things — one more round should never be a big decision.',
   },
   {
     q: 'Will STATIC be monetized? Are there skins or battle passes?',
-    a: 'The game is free at launch. Cosmetic customization is planned down the line, but no pay-to-win mechanics — nothing you can buy will make you quieter or faster.',
+    a: 'The game is free at launch. Cosmetic customization is planned, bought with in-game currency earned by playing — no pay-to-win. Nothing you can buy will make you quieter or faster.',
   },
   {
     q: 'Does the game run on older phones?',
