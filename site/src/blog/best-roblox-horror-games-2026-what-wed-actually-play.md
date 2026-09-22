@@ -61,7 +61,7 @@ Three trends stand out this year:
 
 All three trends are exactly why we are building STATIC the way we are. If you want to watch a small studio bet on all three at once, the devlog is open - and the playtest Discord always has a slot for one more squad.
 
-**Keep reading:** [scary Roblox games to play with friends](/blog/scary-roblox-games-to-play-with-friends/), or the [game overview](/play/).
+**Keep reading:** [scary Roblox games to play with friends](/blog/scary-roblox-games-to-play-with-friends-2026-shortlist/), or the [game overview](/play/).
 
 ![Best Roblox Horror Games 2026: What We'd Actually Play](/blog/best-roblox-horror-games-2026-what-wed-actually-play-3.webp)
 
