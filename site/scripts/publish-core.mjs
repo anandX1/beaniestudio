@@ -86,8 +86,20 @@ export async function publishAsync({ title, description, tag = 'design', markdow
     });
     const imageBlock = leftovers.length ? `\n${leftovers.map((s) => s.markdown).join('\n\n')}\n` : '';
     const kwLine = keywords.length ? `\n<!-- studio-keywords: ${keywords.join(' | ')} -->\n` : '';
-    const post = `---\ntitle: '${title.replace(/'/g, "\\'")}'\ndescription: '${description.replace(/'/g, "\\'")}'\npubDate: ${pubDate || new Date().toISOString().slice(0, 10)}\ntag: ${['design', 'production', 'systems'].includes(tag) ? tag : 'design'}\ndraft: ${draft ? 'true' : 'false'}\n---\n\n${bodyMd}\n${imageBlock}${kwLine}`;
+    // Freshness signal: on an edit-republish, keep the ORIGINAL pubDate and
+    // stamp updatedDate → surfaces as dateModified in the BlogPosting JSON-LD
+    // (Google's freshness/ranking signal; without it dateModified always
+    // equals datePublished no matter how often a post improves).
     const postPath = path.join(DEVLOG_DIR, `${slug}.md`);
+    const prevPub = fs.existsSync(postPath)
+      ? fs.readFileSync(postPath, 'utf8').match(/^pubDate:\s*(\S+)/m)?.[1]
+      : null;
+    const effPub = pubDate || prevPub || new Date().toISOString().slice(0, 10);
+    const updLine = prevPub ? `\nupdatedDate: ${new Date().toISOString()}` : '';
+    // YAML: inside single-quoted scalars an apostrophe is escaped by DOUBLING it
+    // (''), never backslash — \' corrupts frontmatter and bricks the build.
+    const yq = (s) => s.replace(/'/g, "''");
+    const post = `---\ntitle: '${yq(title)}'\ndescription: '${yq(description)}'\npubDate: ${effPub}\ntag: ${['design', 'production', 'systems'].includes(tag) ? tag : 'design'}\ndraft: ${draft ? 'true' : 'false'}${updLine}\n---\n\n${bodyMd}\n${imageBlock}${kwLine}`;
     fs.writeFileSync(postPath, post);
     say(`post written: src/blog/${slug}.md`);
 

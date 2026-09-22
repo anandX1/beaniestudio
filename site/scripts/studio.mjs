@@ -199,8 +199,18 @@ async function publish(body, res, onLine) {
   if (markerCount > saved.length) onLine(`${markerCount - saved.length} [photo] slot(s) left empty — attach more images next time\n`);
   const imageBlock = leftovers.length ? `\n${leftovers.map((s) => s.markdown).join('\n\n')}\n` : '';
   const kwLine = keywords.length ? `\n<!-- studio-keywords: ${keywords.join(' | ')} -->\n` : '';
-  const post = `---\ntitle: '${title.replace(/'/g, "\\'")}'\ndescription: '${description.replace(/'/g, "\\'")}'\npubDate: ${new Date().toISOString().slice(0, 10)}\ntag: ${['design', 'production', 'systems'].includes(tag) ? tag : 'design'}\ndraft: ${draft ? 'true' : 'false'}\n---\n\n${bodyMd}\n${imageBlock}${kwLine}`;
   const postPath = path.join(DEVLOG_DIR, `${slug}.md`);
+  // Freshness signal: preserve original pubDate + stamp updatedDate on republish
+  // → dateModified in BlogPosting JSON-LD (Google freshness signal).
+  const prevPub = fs.existsSync(postPath)
+    ? fs.readFileSync(postPath, 'utf8').match(/^pubDate:\s*(\S+)/m)?.[1]
+    : null;
+  const effPub = prevPub || new Date().toISOString().slice(0, 10);
+  const updLine = prevPub ? `\nupdatedDate: ${new Date().toISOString()}` : '';
+  // YAML: inside single-quoted scalars an apostrophe is escaped by DOUBLING it
+  // (''), never backslash — \' corrupts frontmatter and bricks the build.
+  const yq = (s) => s.replace(/'/g, "''");
+  const post = `---\ntitle: '${yq(title)}'\ndescription: '${yq(description)}'\npubDate: ${effPub}\ntag: ${['design', 'production', 'systems'].includes(tag) ? tag : 'design'}\ndraft: ${draft ? 'true' : 'false'}${updLine}\n---\n\n${bodyMd}\n${imageBlock}${kwLine}`;
 
   // Thin-content guard: sub-400-word posts are exactly what Google shelved as
   // "Crawled - currently not indexed". Production refuses them; drafts are free.
