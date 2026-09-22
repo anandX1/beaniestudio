@@ -4,6 +4,7 @@ description: 'Our honest 2026 shortlist of the best Roblox horror games, ranked 
 pubDate: 2026-09-21
 tag: design
 draft: false
+updatedDate: 2026-09-22T18:12:33.923Z
 ---
 
 "Best" lists are usually ads in disguise, so let's set the rules first. A horror game earns a spot on this list by doing three things: scaring you with design instead of jumpscare spam, respecting your time with short rounds, and running on the hardware people actually own - which on Roblox, in 2026, very often means a mid-range phone. We evaluated games against those rules. One of them is ours, and we will tell you exactly where we think it stands and why.
@@ -16,7 +17,7 @@ draft: false
 
 
 
-![Best Roblox Horror Games 2026: What We'd Actually Play](/blog/best-roblox-horror-games-2026-what-wed-actually-play-1.webp)
+<!-- photo slot: attach an image in Studio to fill this spot -->
 
 
 
@@ -41,7 +42,7 @@ Where does it rank on this list? Honestly: it is the newest entry with the small
 
 
 
-![Best Roblox Horror Games 2026: What We'd Actually Play](/blog/best-roblox-horror-games-2026-what-wed-actually-play-2.webp)
+<!-- photo slot: attach an image in Studio to fill this spot -->
 
 
 
@@ -62,9 +63,5 @@ Three trends stand out this year:
 All three trends are exactly why we are building STATIC the way we are. If you want to watch a small studio bet on all three at once, the devlog is open - and the playtest Discord always has a slot for one more squad.
 
 **Keep reading:** [scary Roblox games to play with friends](/blog/scary-roblox-games-to-play-with-friends-2026-shortlist/), or the [game overview](/play/).
-
-![Best Roblox Horror Games 2026: What We'd Actually Play](/blog/best-roblox-horror-games-2026-what-wed-actually-play-3.webp)
-
-![Best Roblox Horror Games 2026: What We'd Actually Play](/blog/best-roblox-horror-games-2026-what-wed-actually-play-4.webp)
 
 <!-- studio-keywords: best roblox horror games 2026 | good horror games on roblox 2026 | roblox horror games 2026 | scariest horror game on roblox 2026 -->
