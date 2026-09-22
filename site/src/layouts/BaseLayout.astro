@@ -48,7 +48,14 @@ const analyticsToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN || '';
 const normPath = path === '/' ? '/' : path.endsWith('/') ? path : `${path}/`;
 const canonical = new URL(normPath, SITE.url);
 const ogImageAbs = new URL(ogImage, SITE.url);
-const fullTitle = title.includes('Beanie Studio') ? title : `${title} — Beanie Studio`;
+// Title budget: SERP snippets truncate ~60 chars. Append the brand only when the
+// total stays within budget; when the page title alone fills it, let the page
+// title stand alone (better a complete page title than a truncated brand tail).
+const brandSuffix = ' — Beanie Studio';
+const fullTitle =
+  title.includes('Beanie Studio') || title.length + brandSuffix.length > 60
+    ? title
+    : `${title}${brandSuffix}`;
 
 /** Site-wide Organization graph, present on every page. */
 const organizationLd = {
