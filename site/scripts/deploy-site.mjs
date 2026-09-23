@@ -57,6 +57,32 @@ if (fs.existsSync(kwSrc)) {
   fs.copyFileSync(kwSrc, path.join(destSite, 'content', 'keywords.json'));
 }
 
+// Keep the broadcast ledger in the repo too. CI broadcasts with the real
+// secrets and commits content/social-state.json back; before every local
+// deploy we UNION-merge the repo's copy into ours (CI may have delivered
+// posts since our last sync), then ship the merged ledger up. A memory
+// shared by both writers — neither can clobber the other.
+const ledgerSrc = path.join(SITE_ROOT, 'content', 'social-state.json');
+const ledgerDst = path.join(destSite, 'content', 'social-state.json');
+if (fs.existsSync(ledgerSrc)) {
+  fs.mkdirSync(path.dirname(ledgerDst), { recursive: true });
+  if (fs.existsSync(ledgerDst)) {
+    try {
+      const local = JSON.parse(fs.readFileSync(ledgerSrc, 'utf8'));
+      const repoLedger = JSON.parse(fs.readFileSync(ledgerDst, 'utf8'));
+      let merged = 0;
+      for (const [k, v] of Object.entries(repoLedger.posted || {})) {
+        if (!local.posted[k]) { local.posted[k] = v; merged++; }
+      }
+      if (merged) {
+        fs.writeFileSync(ledgerSrc, JSON.stringify(local, null, 2) + '\n');
+        log(`ledger: absorbed ${merged} entr(y/ies) broadcast by CI`);
+      }
+    } catch { log('ledger: repo copy unreadable — local version wins'); }
+  }
+  fs.copyFileSync(ledgerSrc, ledgerDst);
+}
+
 // 3. Sync build → repo root (Cloudflare direct-upload model).
 const dist = path.join(SITE_ROOT, 'dist');
 if (!fs.existsSync(dist)) { console.error('[deploy] ✗ dist missing — build failed'); process.exit(1); }
@@ -76,6 +102,12 @@ if (!status) {
   log('changed files:\n' + status.split('\n').map((l) => '  ' + l).join('\n'));
   git('add -A');
   git(`-c core.safecrlf=false commit -m "Deploy: content update ${new Date().toISOString().slice(0, 16)}"`);
+  // The broadcast ledger gets committed back by CI after each delivery; absorb
+  // that history instead of racing it (rebase may be a no-op — both fine).
+  try { git(`pull --rebase origin ${BRANCH}`); } catch {
+    try { git('rebase --abort'); } catch { /* nothing to abort */ }
+    log('pull --rebase failed — pushing anyway (will retry on next deploy if rejected)');
+  }
   git(`push origin ${BRANCH}`);
 }
 

@@ -11,6 +11,8 @@ on:
 jobs:
   guard:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # the broadcast ledger is committed back after broadcasting
     steps:
       - uses: actions/checkout@v4
 
@@ -74,16 +76,10 @@ jobs:
 
       # ---- Autonomous distribution ----
       # Post new blog entries to Discord/Bluesky with UTM-tagged links.
-      # State roll-forward via cache; if the cache is ever lost the script
-      # reseeds and stays silent — it can never re-spam the feed.
-      - name: Restore social broadcast state
-        if: github.event_name != 'pull_request'
-        uses: actions/cache/restore@v4
-        with:
-          path: site/.state
-          key: social-state-v1-${{ github.run_id }}
-          restore-keys: social-state-v1-
-
+      # The ledger (site/content/social-state.json) is a TRACKED file — the
+      # repo itself is the broadcast memory, shared with local deploys via a
+      # union-merge. A fresh checkout always knows what was already delivered;
+      # no cache can evaporate and cause a silent re-seed.
       - name: Broadcast new blog entries
         if: github.event_name != 'pull_request'
         env:
@@ -93,9 +89,18 @@ jobs:
         run: npm run social:post
         working-directory: site
 
-      - name: Save social broadcast state
+      # Persist deliveries so nothing ever broadcasts twice. [skip ci] keeps
+      # this commit from re-triggering this workflow and Cloudflare's build.
+      - name: Commit broadcast ledger
         if: github.event_name != 'pull_request'
-        uses: actions/cache/save@v4
-        with:
-          path: site/.state
-          key: social-state-v1-${{ github.run_id }}
+        working-directory: site
+        run: |
+          git config user.name "beanie-broadcast-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if git diff --quiet content/social-state.json; then
+            echo "ledger unchanged — nothing delivered"
+          else
+            git add content/social-state.json
+            git commit -m "chore: broadcast ledger update [skip ci]"
+            git push
+          fi

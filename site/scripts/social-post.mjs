@@ -8,9 +8,11 @@
  * the broadcast memory (auditable, diffable, no external service).
  *
  * DESIGN RULES — read before editing:
- *  1. SAFE BY DEFAULT: the first run only SEEDS state (marks everything as
- *     posted) and tells you so. Auto-broadcasting your whole back catalog on
- *     day one is spam. After seeding, ONLY genuinely new items post.
+ *  1. SAFE BY DEFAULT: the very first run (no ledger file at all) only SEEDS
+ *     state (marks everything as posted) and tells you so. Auto-broadcasting
+ *     your whole back catalog on day one is spam. After that, ONLY genuinely
+ *     new items post. The ledger is tracked in git, so CI and local share one
+ *     memory and a lost cache can never cause a re-seed.
  *  2. Every post ends with the UTM-tagged site URL — attribution is automatic
  *     (utm_source=discord / utm_source=bluesky, utm_medium=social).
  *  3. Partial failure never aborts the pipeline: a Discord webhook outage
@@ -35,7 +37,10 @@ const opt = (name, fallback) => {
 
 const SITE_URL = 'https://beaniestudio.site';
 const RSS_PATH = opt('rss', 'dist/rss.xml');
-const STATE_PATH = opt('state', '.state/social-state.json');
+// The ledger is a TRACKED file (content/social-state.json) — the repo itself is
+// the broadcast memory, surviving forever (unlike CI caches, which evaporate
+// and trigger a silent re-seed). Explicit --state still wins for tests.
+const STATE_PATH = opt('state', 'content/social-state.json');
 const SEED_ONLY = has('--seed');
 
 const discordWebhook = process.env.DISCORD_WEBHOOK_URL || '';
@@ -150,9 +155,10 @@ async function main() {
   const state = loadState();
   const fresh = items.filter((it) => !state.posted[it.link]);
 
-  // First-ever run: seed, don't spam. The back catalog stays unposted; the
-  // operator can pin/share it manually. Everything after this is incremental.
-  if (Object.keys(state.posted).length === 0) {
+  // First-ever run (no ledger file on disk at all): seed, don't spam. The
+  // back catalog stays unposted; the operator can pin/share it manually.
+  // With the tracked ledger present, this branch is unreachable in CI.
+  if (!fs.existsSync(STATE_PATH)) {
     for (const it of items) state.posted[it.link] = SEED_ONLY ? new Date().toISOString() : new Date().toISOString();
     saveState(state);
     log(`SEEDED ${items.length} existing entries — no auto-posts sent. From now on, only new devlog entries broadcast.`);
@@ -164,41 +170,47 @@ async function main() {
     return;
   }
 
-  let discordOk = true;
-  let blueskyOk = true;
+  let anyConfigured = false;
+  let anyDelivered = false;
+  let anyFailed = false;
 
   for (const it of fresh) {
+    let delivered = false;
     log(`New entry: "${it.title}"`);
     if (discordWebhook) {
+      anyConfigured = true;
       try {
         await postDiscord(composePost(it, 'discord'));
+        delivered = true; anyDelivered = true;
         log('  → Discord posted');
       } catch (e) {
-        discordOk = false;
+        anyFailed = true;
         log('  → Discord FAILED:', e.message);
       }
     } else {
       log('  → Discord skipped (DISCORD_WEBHOOK_URL not set)');
     }
     if (blueskyId && blueskyPass) {
+      anyConfigured = true;
       try {
         await postBluesky(composePost(it, 'bluesky'));
+        delivered = true; anyDelivered = true;
         log('  → Bluesky posted');
       } catch (e) {
-        blueskyOk = false;
+        anyFailed = true;
         log('  → Bluesky FAILED:', e.message);
       }
     } else {
       log('  → Bluesky skipped (BLUESKY_IDENTIFIER / BLUESKY_APP_PASSWORD not set)');
     }
-    // Mark posted even on channel failure? No — retry next run, but avoid
-    // infinite retry loops on permanently-bad config: mark when at least one
-    // channel succeeded, else leave unposted for the next cron to retry.
-    if (discordOk || blueskyOk) state.posted[it.link] = new Date().toISOString();
+    // Mark ONLY when something was actually delivered. Skipped channels are
+    // not success — otherwise a run without env vars silently swallows the
+    // entries forever (this exact bug once hid 4 posts from broadcast).
+    if (delivered) state.posted[it.link] = new Date().toISOString();
   }
   saveState(state);
 
-  if (!discordOk && !blueskyOk) {
+  if (anyConfigured && !anyDelivered) {
     log('All configured channels failed — leaving entries unposted for retry.');
     process.exitCode = 1;
   }
