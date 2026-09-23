@@ -6,6 +6,8 @@ dist/
 .env
 .env.*
 # Content engine: drafts + state are local ops; keep only the keyword harvest
+# and the broadcast ledger (tracked so CI + local share one broadcast memory).
 content/*
 !content/keywords.json
+!content/social-state.json
 tools/bin/

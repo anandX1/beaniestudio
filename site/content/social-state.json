@@ -1,0 +1,25 @@
+{
+  "note": "Broadcast ledger — tracked in git. seeded:true = deliberately not broadcast (pre-program posts). Entries appear here only after real delivery.",
+  "posted": {
+    "https://beaniestudio.site/blog/static-the-roblox-horror-game-where-sound-is-your-only/": {
+      "seeded": true,
+      "at": "2026-09-14T00:15:27.277Z"
+    },
+    "https://beaniestudio.site/blog/what-is-static-on-roblox-asymmetrical-horror-game/": {
+      "seeded": true,
+      "at": "2026-09-14T00:15:27.279Z"
+    },
+    "https://beaniestudio.site/blog/why-we-removed-the-radar/": {
+      "seeded": true,
+      "at": "2026-09-14T00:15:27.279Z"
+    },
+    "https://beaniestudio.site/blog/why-roblox-is-the-best-game-engine-for-solo-developers/": {
+      "seeded": true,
+      "at": "2026-09-23T08:54:26.026Z"
+    },
+    "https://beaniestudio.site/blog/best-roblox-horror-games-2026-what-wed-actually-play/": {
+      "seeded": true,
+      "at": "2026-09-23T08:54:26.028Z"
+    }
+  }
+}
