@@ -4,7 +4,7 @@ description: 'Asymmetrical horror explained simply: one powerful hunter against 
 pubDate: 2026-09-25
 tag: design
 draft: false
-updatedDate: 2026-09-25T17:13:46.362Z
+updatedDate: 2026-09-26T18:12:34.979Z
 ---
 
 You have probably played an asymmetrical horror game without ever hearing the term. If you have ever been one of four friends running from one player who is hunting you - that was it. Asymmetrical horror simply means a horror game where the two sides are deliberately unequal: one side is stronger, faster, scarier, and the other side is weaker but has numbers, tools and teamwork. This post explains the format in plain words, why it produces some of the best scares in gaming, and what it looks like on Roblox in 2026.
@@ -21,11 +21,7 @@ The format is old - it evolved from hide-and-seek and predator-style game modes 
 
 
 
-
-
 <!-- photo slot: attach an image in Studio to fill this spot -->
-
-
 
 
 
@@ -56,11 +52,7 @@ We build STATIC: Salvage vs Hunter, and every classic ingredient above is presen
 
 
 
-
-
 <!-- photo slot: attach an image in Studio to fill this spot -->
-
-
 
 
 
