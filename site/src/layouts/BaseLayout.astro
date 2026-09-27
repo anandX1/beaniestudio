@@ -44,6 +44,26 @@ const {
 /** Cloudflare Web Analytics token — injected only when the environment provides it, so nothing loads until the user opts in by setting the token in DEPLOY.md. */
 const analyticsToken = import.meta.env.PUBLIC_CF_BEACON_TOKEN || '';
 
+/** Beacon loader: waits for window load + the first idle window, then injects
+ *  the beacon. Analytics is not load-bearing; its startup work (measured
+ *  325–500ms of main-thread on a throttled phone) must not compete with
+ *  first paint. Same behavior, quieter window. */
+const beaconLoader = `(function () {
+  var fire = function () {
+    var s = document.createElement("script");
+    s.defer = true;
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.setAttribute("data-cf-beacon", '${JSON.stringify({ token: analyticsToken }).replace(/'/g, '&#39;')}');
+    document.head.appendChild(s);
+  };
+  var go = function () {
+    if ("requestIdleCallback" in window) requestIdleCallback(fire, { timeout: 3000 });
+    else setTimeout(fire, 1200);
+  };
+  if (document.readyState === "complete") go();
+  else window.addEventListener("load", go, { once: true });
+})();`;
+
 /** Canonical URLs use the trailing-slash directory form Astro actually serves. */
 const normPath = path === '/' ? '/' : path.endsWith('/') ? path : `${path}/`;
 const canonical = new URL(normPath, SITE.url);
@@ -114,6 +134,7 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
     <link rel="preload" as="font" type="font/woff2" href="/fonts/jetbrains-mono-latin-wght-normal.woff2" crossorigin="anonymous" />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/chakra-petch-latin-700-normal.woff2" crossorigin="anonymous" />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/chakra-petch-latin-500-normal.woff2" crossorigin="anonymous" />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/public-sans-latin-wght-normal.woff2" crossorigin="anonymous" />
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
@@ -149,10 +170,12 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
 
     <script type="application/ld+json" set:html={JSON.stringify(allLd)} />
 
-    <!-- Cloudflare Web Analytics — cookie-free, GDPR-friendly, zero CWV cost.
+    <!-- Cloudflare Web Analytics — cookie-free, GDPR-friendly. The beacon's
+         startup burns 300–500ms of main-thread time on a throttled phone, so
+         it loads after the page goes idle instead of competing with paint.
          Loads only when PUBLIC_CF_BEACON_TOKEN is set at build time. -->
     {analyticsToken && (
-      <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: analyticsToken })}></script>
+      <script is:inline set:html={beaconLoader} />
     )}
   </head>
   <body>
@@ -180,10 +203,19 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
         if (!('IntersectionObserver' in window)) return;
 
         const GLYPHS = '#$%&@/\\<>*+=?!01';
-        const decodeOne = function (el: Element) {
+        const decodeOne = function (el: HTMLElement) {
           const final = el.getAttribute('data-decode') || '';
           let frame = 0;
           const total = Math.max(14, Math.min(34, final.length * 2));
+          // Scrambled glyphs have different widths than the real string, so
+          // unlocked text re-wraps line-by-line and drags the whole page
+          // (measured 0.179 CLS on a long devlog headline). Lock the box to
+          // its real-text height for the duration; border-box sizing makes
+          // offsetHeight directly assignable. Brief clipping of noise glyphs
+          // is invisible — it's noise.
+          const locked = el.offsetHeight;
+          el.style.height = locked + 'px';
+          el.style.overflow = 'hidden';
           const id = window.setInterval(function () {
             frame++;
             const settled = Math.floor((frame / total) * final.length);
@@ -192,7 +224,12 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
               out += i < settled || final[i] === ' ' ? final[i] : GLYPHS[(Math.random() * GLYPHS.length) | 0];
             }
             el.textContent = out;
-            if (frame >= total) { window.clearInterval(id); el.textContent = final; }
+            if (frame >= total) {
+              window.clearInterval(id);
+              el.textContent = final;
+              el.style.height = '';
+              el.style.overflow = '';
+            }
           }, 42);
         };
 
@@ -200,7 +237,7 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
           for (const e of entries) {
             if (!e.isIntersecting) continue;
             io.unobserve(e.target);
-            decodeOne(e.target);
+            decodeOne(e.target as HTMLElement);
           }
         }, { threshold: 0.5 });
         els.forEach((el) => {

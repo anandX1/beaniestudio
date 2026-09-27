@@ -11,3 +11,4 @@ content/*
 !content/keywords.json
 !content/social-state.json
 tools/bin/
+reports/

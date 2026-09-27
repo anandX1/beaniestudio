@@ -23,13 +23,46 @@ const BLOG_IMG_DIR = path.join(SITE_ROOT, 'public', 'blog');
 
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').slice(0, 60);
 
-function runStep(cmd) {
+// Pipeline steps get a hard timeout (env-overridable). A wedged build/deploy
+// must fail LOUDLY inside the tick's try/catch instead of hanging forever —
+// a hung tick is indistinguishable from a dead one from the outside.
+const STEP_TIMEOUT_MS = Number(process.env.PUBLISH_STEP_TIMEOUT_MS) || 10 * 60_000;
+const OUT_CAP = 4000; // keep the last 4KB of any step's output for the failure ledger
+
+// Exported for tooling/tests (autopilot hardening, 2026-09-27): lets checks
+// exercise step timeout + spawn-error handling without a real deploy.
+export function runStep(cmd, { timeoutMs = STEP_TIMEOUT_MS } = {}) {
   return new Promise((resolve) => {
-    const child = spawn('cmd.exe', ['/c', cmd], { cwd: SITE_ROOT, windowsHide: true });
+    const child = spawn('cmd.exe', ['/d', '/s', '/c', cmd], { cwd: SITE_ROOT, windowsHide: true });
     let out = '';
-    child.stdout.on('data', (d) => { out += String(d); });
-    child.stderr.on('data', (d) => { out += String(d); });
-    child.on('close', (code) => resolve({ code, out }));
+    let done = false;
+    let timer = null;
+    const append = (d) => { out = (out + String(d)).slice(-OUT_CAP); };
+    // taskkill /T kills the whole tree (npm → node → wrangler), not just the shell.
+    const killTree = () => {
+      try { spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true }); } catch { /* best effort */ }
+    };
+    const finish = (result) => {
+      if (done) return;
+      done = true;
+      if (timer) clearTimeout(timer);
+      resolve(result);
+    };
+    timer = setTimeout(() => {
+      append(`\n[publish-core] step "${cmd}" exceeded ${Math.round(timeoutMs / 1000)}s — killed process tree`);
+      killTree();
+      finish({ code: 124, out, timedOut: true });
+    }, timeoutMs);
+    child.stdout.on('data', append);
+    child.stderr.on('data', append);
+    // A spawn failure used to leave the promise pending forever (no 'close'
+    // ever fires) — the silent-death bug. Now it resolves as a failure.
+    child.on('error', (e) => {
+      append(`\n[publish-core] spawn error: ${e.message}`);
+      killTree();
+      finish({ code: -1, out, spawnError: e.message });
+    });
+    child.on('close', (code) => finish({ code, out }));
   });
 }
 

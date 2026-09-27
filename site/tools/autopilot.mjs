@@ -39,6 +39,13 @@ const BLOG_DIR = path.join(SITE_ROOT, 'src', 'blog');
 const cfg = JSON.parse(fs.readFileSync(CFG_PATH, 'utf8'));
 const log = (obj) => fs.appendFileSync(LOG_PATH, JSON.stringify({ at: new Date().toISOString(), ...obj }) + '\n');
 
+// Wrong-CWD guard: the scheduler must never run from a moved checkout and
+// silently start scribbling into a fresh content/ dir.
+if (!fs.existsSync(CONTENT_DIR)) {
+  console.error(`autopilot: content dir missing at ${CONTENT_DIR} — wrong working directory?`);
+  process.exit(1);
+}
+
 // ---------- idea bank (same parser as Studio) ----------
 function parseIdeas() {
   if (!fs.existsSync(IDEAS_PATH)) return [];
@@ -219,32 +226,66 @@ function lastPublishedDate() {
   try {
     const lines = fs.readFileSync(LOG_PATH, 'utf8').trim().split('\n');
     for (let i = lines.length - 1; i >= 0; i--) {
-      const l = JSON.parse(lines[i]);
-      if (l.op === 'publish-ok') return l.date;
+      // A torn final line (process killed mid-append — happened 2026-09-27)
+      // must be skipped, never allowed to brick the recovery logic.
+      let l = null;
+      try { l = JSON.parse(lines[i]); } catch { continue; }
+      if (l && l.op === 'publish-ok') return l.date;
     }
   } catch { /* none */ }
   return null;
 }
 
+/** How many real publish attempts (fail or crash) did this post already burn
+ *  today? Feeds the circuit breaker in tick(). */
+function publishAttemptsToday(id, today) {
+  try {
+    return fs.readFileSync(LOG_PATH, 'utf8').split('\n').filter(Boolean).filter((line) => {
+      try {
+        const l = JSON.parse(line);
+        return (l.op === 'publish-fail' || l.op === 'publish-crash') && l.id === id && String(l.at || '').slice(0, 10) === today;
+      } catch { return false; }
+    }).length;
+  } catch { return 0; }
+}
+
+const MAX_ATTEMPTS_PER_DAY = 3; // circuit breaker: a doomed post stands down instead of retrying forever
+
 async function tick() {
-  await maybeTopUp();
-  const c = dueCheck();
-  if (!c.due) { console.log('autopilot: not due —', c.reason); log({ op: 'tick-skip', reason: c.reason }); return; }
-  const post = c.post, file = c.file;
-  const today = new Date().toISOString().slice(0, 10);
-  console.log(`autopilot: publishing ${post.id} — "${post.title}"`);
-  log({ op: 'publish-start', id: post.id, title: post.title });
-  const res = await publishAsync({ title: post.title, description: post.description, tag: post.tag || 'design', markdown: post.markdown, keywords: post.keywords || [], images: [], draft: false });
-  res.log.forEach((l) => console.log('  ' + l));
-  if (res.ok && !res.draft) {
-    fs.rmSync(path.join(QUEUE_DIR, file), { force: true });
-    log({ op: 'publish-ok', id: post.id, url: res.url, date: new Date().toISOString().slice(0, 10) });
-    console.log('✓ live:', res.url);
-  } else {
-    log({ op: 'publish-fail', id: post.id, error: res.error });
-    console.log('✗ failed:', res.error, '— will retry next tick');
+  const t0 = Date.now();
+  let c = null; // hoisted so the crash path can attribute the failure to a post
+  try {
+    c = dueCheck();
+    if (!c.due) { console.log('autopilot: not due —', c.reason); log({ op: 'tick-skip', reason: c.reason }); return; }
+    const today = new Date().toISOString().slice(0, 10);
+    const attempts = publishAttemptsToday(c.post.id, today);
+    if (attempts >= MAX_ATTEMPTS_PER_DAY) {
+      console.log(`autopilot: ${c.post.id} already failed ${attempts}x today — standing down until tomorrow`);
+      log({ op: 'tick-skip', reason: `publish attempts exhausted (${attempts}/${MAX_ATTEMPTS_PER_DAY}) for ${c.post.id}`, id: c.post.id });
+      return;
+    }
+    const post = c.post, file = c.file;
+    console.log(`autopilot: publishing ${post.id} — "${post.title}" (attempt ${attempts + 1})`);
+    log({ op: 'publish-start', id: post.id, title: post.title, attempt: attempts + 1 });
+    const res = await publishAsync({ title: post.title, description: post.description, tag: post.tag || 'design', markdown: post.markdown, keywords: post.keywords || [], images: [], draft: false });
+    res.log.forEach((l) => console.log('  ' + l));
+    if (res.ok && !res.draft) {
+      fs.rmSync(path.join(QUEUE_DIR, file), { force: true });
+      log({ op: 'publish-ok', id: post.id, url: res.url, date: today, ms: Date.now() - t0 });
+      console.log('✓ live:', res.url);
+    } else {
+      log({ op: 'publish-fail', id: post.id, error: res.error, tail: (res.log || []).slice(-6), ms: Date.now() - t0 });
+      console.log('✗ failed:', res.error, '— will retry next tick');
+    }
+  } catch (e) {
+    // The 2026-09-27 blind spot: publishAsync throwing (or anything above)
+    // used to escape unlogged — a publish-start with no outcome, no process,
+    // and no trace. Every path through the tick must land in the ledger.
+    log({ op: 'publish-crash', id: c && c.post ? c.post.id : null, error: e && e.stack ? e.stack.split('\n').slice(0, 4).join(' | ') : String(e), ms: Date.now() - t0 });
+    console.error('autopilot: publish crashed:', e && e.message);
+  } finally {
+    await maybeTopUp().catch(() => {});
   }
-  await maybeTopUp();
 }
 
 /** Queue top-up: twice a day max, only when runway is low. Fill is resumable
@@ -307,7 +348,17 @@ async function refresh(slug) {
 }
 
 // ---------- main ----------
+// Last-resort crash capture: whatever kills this process (uncaught throw,
+// unhandled rejection) leaves a line in the ledger with the active command.
+// The scheduled tick runs with stdio ignored — this file is the only witness.
 const [cmd, arg] = process.argv.slice(2);
+const crashNote = (kind, e) => {
+  const detail = e && (e.stack || e.message) ? String(e.stack || e.message).split('\n').slice(0, 5).join(' | ') : String(e);
+  try { log({ op: 'process-crash', cmd: cmd || '(none)', kind, error: detail }); } catch { /* ledger unwritable — nothing left to do */ }
+};
+process.on('uncaughtException', (e) => { crashNote('uncaughtException', e); process.exit(1); });
+process.on('unhandledRejection', (e) => { crashNote('unhandledRejection', e); process.exit(1); });
+
 if (cmd === 'fill') await fill();
 else if (cmd === 'tick') await tick();
 else if (cmd === 'status') status();

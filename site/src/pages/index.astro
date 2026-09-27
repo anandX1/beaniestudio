@@ -503,8 +503,6 @@ const featuredVideoLd = {
   <!-- Scroll cinema: progress rail + beat reveals. IO-driven, zero scroll jank. -->
   <script>
     (function () {
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
       // Progress rail: writes only inside rAF, one read per frame at most.
       const fill = document.getElementById('progressFill');
       if (fill) {
@@ -538,27 +536,51 @@ const featuredVideoLd = {
       if (reduce) return;
 
       let level = 0;          // 0..100
+      // Decay interval only runs while there is noise to decay. An idle page
+      // must do zero DOM work per tick — every write below invalidates styles,
+      // so a same-value rewrite every 250ms is the most expensive thing on the
+      // page for no visible change.
+      let decayId = 0;
+      const startDecay = function () {
+        if (!decayId) decayId = window.setInterval(decay, 250);
+      };
+      const stopDecay = function () {
+        if (decayId) { window.clearInterval(decayId); decayId = 0; }
+      };
       const decay = function () {
         level = level > 0.5 ? level * 0.86 : 0;
         render();
+        if (level === 0) stopDecay();
       };
-      setInterval(decay, 250);
 
       const render = function () {
-        meter.style.setProperty('--noise-level', String(Math.round(level)));
-        meter.setAttribute('aria-valuenow', String(Math.round(level)));
-        const state = level >= 65 ? 'CRITICAL' : level >= 30 ? 'ELEVATED' : 'CALM';
-        if (stateLabel && stateLabel.textContent !== 'STATUS: ' + state) {
-          stateLabel.textContent = 'STATUS: ' + state;
-          stateLabel.classList.toggle('text-status-red', state === 'CRITICAL');
-          stateLabel.classList.toggle('text-signal', state === 'ELEVATED');
+        const shown = Math.round(level);
+        // Change-gated writes: skip the DOM entirely when the rounded level
+        // and the derived state are unchanged.
+        if (shown !== lastShown) {
+          lastShown = shown;
+          meter.style.setProperty('--noise-level', String(shown));
+          meter.setAttribute('aria-valuenow', String(shown));
         }
-        document.body.dataset.noise = state.toLowerCase();
+        const state = level >= 65 ? 'CRITICAL' : level >= 30 ? 'ELEVATED' : 'CALM';
+        if (state !== lastState) {
+          lastState = state;
+          if (stateLabel) {
+            stateLabel.textContent = 'STATUS: ' + state;
+            stateLabel.classList.toggle('text-status-red', state === 'CRITICAL');
+            stateLabel.classList.toggle('text-signal', state === 'ELEVATED');
+          }
+          document.body.dataset.noise = state.toLowerCase();
+        }
       };
+      let lastShown = -1;
+      let lastState = '';
+      render();
 
       const add = function (amount: number) {
         level = Math.min(100, level + amount);
         render();
+        startDecay();
       };
 
       // Scroll velocity → noise. dx/dt scored, hard-capped per event.
@@ -664,8 +686,8 @@ const featuredVideoLd = {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      const W = 220;
-      const H = 124;
+      const W = 110;   // half-res buffer, scaled up — reads MORE like VHS static
+      const H = 62;    // and costs 4x less per frame on throttled phones
       const buf = document.createElement('canvas');
       buf.width = W; buf.height = H;
       const bctx = buf.getContext('2d');
@@ -683,8 +705,11 @@ const featuredVideoLd = {
       window.addEventListener('resize', sizeCanvas);
 
       let rafId = 0;
+      let parity = 0;
       const draw = function () {
-        if (running) {
+        // 30fps: static is noise — 60 adds nothing but main-thread cost.
+        parity ^= 1;
+        if (parity && running) {
           const d = img.data;
           for (let i = 0; i < d.length; i += 4) {
             const v = (Math.random() * 255) | 0;
@@ -698,7 +723,18 @@ const featuredVideoLd = {
       };
       // Paint only while the hero is on screen — off-screen, the loop is
       // cancelled entirely (rAF keeps burning battery even when idle).
-      const start = function () { if (!rafId) rafId = requestAnimationFrame(draw); };
+      // First frame waits for an idle slice so loop warm-up never competes
+      // with load-critical work (measured: 946ms long task @1.1s on a
+      // throttled phone otherwise).
+      const start = function () {
+        if (rafId) return;
+        const kick = function () { if (!rafId) rafId = requestAnimationFrame(draw); };
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(kick, { timeout: 600 });
+        } else {
+          (window as any).setTimeout(kick, 120);
+        }
+      };
       const stop = function () { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } };
       if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver(function (entries) {

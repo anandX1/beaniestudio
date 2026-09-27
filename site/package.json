@@ -11,6 +11,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "check:links": "node scripts/check-links.mjs",
+    "test:pipeline": "node scripts/test-publish-core.mjs && node scripts/test-autopilot-hardening.mjs",
     "audit:live": "node scripts/audit-live.mjs",
     "ping:indexnow": "node scripts/ping-indexnow.mjs",
     "ping:indexnow:dry": "node scripts/ping-indexnow.mjs --dry",
