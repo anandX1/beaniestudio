@@ -164,7 +164,7 @@ const videoGameLd = {
   <section class="hero-cine" aria-label="STATIC">
     <div class="hero-cine-bg" aria-hidden="true">
       <!-- Phones see this backdrop under a heavy shade: 50vw picks the 640 file. -->
-      <Shot id="central-room-globe" sizes="(min-width: 768px) 100vw, 50vw" eager alt="" />
+      <Shot id="central-room-globe" sizes="(min-width: 768px) 100vw, 50vw" eager />
     </div>
     <div class="hero-cine-shade" aria-hidden="true"></div>
     <canvas id="staticNoise" class="static-noise" aria-hidden="true"></canvas>
@@ -275,7 +275,7 @@ const videoGameLd = {
       <div class="story-media" aria-hidden="true">
         {loop.map((st) => (
           <div class="shot-frame">
-            <Shot id={st.shot} sizes="(min-width: 1024px) 760px, 1px" alt="" imgClass="h-full w-full object-cover" imgStyle={`object-position: ${st.pos}`} />
+            <Shot id={st.shot} sizes="(min-width: 1024px) 760px, 1px" imgClass="h-full w-full object-cover" imgStyle={`object-position: ${st.pos}`} />
             <div class="shot-caption">
               <p class="font-mono text-[0.68rem] tracking-[0.2em] text-signal">STEP {st.n}</p>
               <p class="mt-1 font-display text-3xl font-bold uppercase tracking-wide text-facility-100">{st.t}</p>
@@ -473,12 +473,12 @@ const videoGameLd = {
     <a href="/screenshots/" class="block" tabindex="-1" aria-hidden="true">
       <div class="ribbon">
         <div class="ribbon-track">
-          {[...ribbonA, ...ribbonA].map((id) => (<div><Shot id={id} sizes="288px" alt="" /></div>))}
+          {[...ribbonA, ...ribbonA].map((id) => (<div><Shot id={id} sizes="288px" /></div>))}
         </div>
       </div>
       <div class="ribbon mt-3">
         <div class="ribbon-track rev">
-          {[...ribbonB, ...ribbonB].map((id) => (<div><Shot id={id} sizes="288px" alt="" /></div>))}
+          {[...ribbonB, ...ribbonB].map((id) => (<div><Shot id={id} sizes="288px" /></div>))}
         </div>
       </div>
     </a>
@@ -561,7 +561,7 @@ const videoGameLd = {
 
   <!-- Full-bleed parallax band -->
   <div class="parallax relative h-[42svh] overflow-hidden border-y border-facility-800 sm:h-[60svh]" aria-hidden="true">
-    <Shot id="cargo-dock-shuttle" sizes="100vw" alt="" imgClass="absolute inset-0 h-full w-full object-cover" />
+    <Shot id="cargo-dock-shuttle" sizes="100vw" imgClass="absolute inset-0 h-full w-full object-cover" />
     <div class="absolute inset-0 bg-gradient-to-b from-facility-950/70 via-transparent to-facility-950/80"></div>
   </div>
 
@@ -617,7 +617,7 @@ const videoGameLd = {
 
   <!-- ================= FINAL CTA ================= -->
   <section class="parallax relative overflow-hidden border-t border-facility-800" aria-labelledby="cta-h">
-    <Shot id="control-room-hologram" sizes="100vw" alt="" imgClass="absolute inset-0 h-full w-full object-cover opacity-40" />
+    <Shot id="control-room-hologram" sizes="100vw" imgClass="absolute inset-0 h-full w-full object-cover opacity-40" />
     <div class="absolute inset-0 bg-gradient-to-b from-facility-950 via-facility-950/60 to-facility-950" aria-hidden="true"></div>
     <div class="relative mx-auto w-full max-w-6xl px-4 py-28 text-center sm:px-6 sm:py-40">
       <p class="kicker">Free · {GAME.platforms.join(' + ')} · Roblox</p>
