@@ -1,5 +1,6 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
+import ShotFigure from '../../components/ShotFigure.astro';
 import { POD, JINGLES, MOVEMENT, SCRAPPER } from '../../data/game';
 ---
 
@@ -14,9 +15,11 @@ import { POD, JINGLES, MOVEMENT, SCRAPPER } from '../../data/game';
 >
   <p class="text-lg">
     Getting caught in STATIC isn't the end of your round. Jingles has to knock you down, carry
-    you to a pod, and then keep you there for <strong>{POD.timerSec} seconds</strong> while your
-    team tries to get you out.
+    you to a <strong>{POD.name}</strong>, and then keep you there for
+    <strong>{POD.timerSec} seconds</strong> while your team tries to get you out.
   </p>
+
+  <ShotFigure ids={['pod-active', 'pod-idle']} caption={`A ${POD.name} holding a captured Scrapper (left) and an empty one (right).`} gallery="pods" aspect="16 / 10" />
 
   <h2 id="downed">1. Getting downed</h2>
   <ul>

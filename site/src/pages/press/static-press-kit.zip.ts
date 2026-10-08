@@ -8,6 +8,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import { SITE, LINKS } from '../../site.config';
 import { GAME, CRUSHERS, MINIGAMES, SCRAP, JINGLES, POD, TEAM, EXTRACTION } from '../../data/game';
+import { SHOTS } from '../../data/media';
 
 const ASSETS = ['jingles-render.png', 'static-key-art.png', 'beanie-studios-logo.png', 'beanie-studios-icon.png'];
 
@@ -24,7 +25,8 @@ Players:      Up to ${GAME.serverSize} per server (${GAME.scrappers.min}–${GAM
 Round length: Up to ${GAME.roundLimitMin} minutes
 Genre:        Co-op asymmetrical horror
 Play:         ${LINKS.game}
-Contact:      ${SITE.contact}
+Press:        ${SITE.press}
+General:      ${SITE.contact}
 
 SHORT DESCRIPTION
 STATIC is a free co-op horror game on Roblox by ${SITE.name}. Up to ${GAME.scrappers.max} players search an abandoned bunker for scrap and feed ${CRUSHERS.totalKg} kg of it into ${CRUSHERS.count} crushers to open the way out, while one player hunts them as Jingles, a clockwork jester.
@@ -38,7 +40,7 @@ KEY FACTS
 - Escape through the ${EXTRACTION.room} within ${EXTRACTION.windowSec} seconds
 
 TEAM
-${TEAM.map((t) => `- ${t.name}: ${t.role}`).join('\n')}
+${TEAM.map((t) => `- ${t.name} (${t.title}): ${t.role} — ${t.email}`).join('\n')}
 
 All text and images in this kit are free to use for coverage, videos and streams.
 `;
@@ -99,6 +101,10 @@ export function GET() {
   const files = [
     { name: 'STATIC-press-kit/fact-sheet.txt', data: Buffer.from(factSheet(), 'utf8') },
     ...ASSETS.map((f) => ({ name: `STATIC-press-kit/${f}`, data: fs.readFileSync(path.join(dir, f)) })),
+    ...SHOTS.filter((s) => s.press).map((s) => ({
+      name: `STATIC-press-kit/screenshots/static-${s.id}.jpg`,
+      data: fs.readFileSync(path.resolve(process.cwd(), 'public', 'media', 'press', `static-${s.id}.jpg`)),
+    })),
   ];
   return new Response(new Uint8Array(zip(files)), { headers: { 'Content-Type': 'application/zip' } });
 }

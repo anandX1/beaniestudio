@@ -1,0 +1,29 @@
+---
+/**
+ * A captioned screenshot (or a row of them) for long-form pages. Opens in the
+ * page's Lightbox. Caption defaults to the registry alt text.
+ */
+import Shot from './Shot.astro';
+
+interface Props {
+  ids: string[];
+  caption?: string;
+  gallery?: string;
+  /** Aspect ratio for each tile when there's more than one. */
+  aspect?: string;
+}
+
+const { ids, caption, gallery = 'page', aspect = '16 / 9' } = Astro.props;
+const multi = ids.length > 1;
+---
+
+<figure class="my-8">
+  <div class:list={['grid gap-3', multi && (ids.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3')]}>
+    {ids.map((id) => (
+      <div class="reveal shot-frame" style={`aspect-ratio: ${multi ? aspect : 'auto'}`}>
+        <Shot id={id} lightbox={gallery} sizes={multi ? '(min-width: 1024px) 360px, 100vw' : '(min-width: 1024px) 736px, 100vw'} imgClass={multi ? 'h-full w-full object-cover' : 'h-auto w-full'} />
+      </div>
+    ))}
+  </div>
+  {caption && <figcaption class="mt-3 font-mono text-xs leading-relaxed tracking-[0.08em] text-facility-500">{caption}</figcaption>}
+</figure>

@@ -8,6 +8,7 @@ import '../styles/fonts.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { SITE, LINKS } from '../site.config';
+import { TEAM } from '../data/game';
 
 interface Props {
   /** Page title — rendered as "%page% — Beanie Studio" (or verbatim if it already contains the brand). */
@@ -87,6 +88,12 @@ const organizationLd = {
   url: SITE.url,
   email: SITE.contact,
   logo: new URL('/logo.png', SITE.url).href,
+  contactPoint: [
+    { '@type': 'ContactPoint', contactType: 'customer support', email: SITE.contact, availableLanguage: 'en' },
+    { '@type': 'ContactPoint', contactType: 'press', email: SITE.press, availableLanguage: 'en' },
+  ],
+  founder: TEAM.map((t) => ({ '@type': 'Person', name: t.name, jobTitle: t.title, email: t.email })),
+  foundingDate: '2026-07',
   sameAs: [
     LINKS.roblox,
     LINKS.discord,
@@ -173,6 +180,8 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
     <meta name="twitter:image:alt" content={ogImageAlt} />
 
     <script type="application/ld+json" set:html={JSON.stringify(allLd)} />
+
+    <slot name="head" />
 
     <!-- Cloudflare Web Analytics — cookie-free, GDPR-friendly. The beacon's
          startup burns 300–500ms of main-thread time on a throttled phone, so

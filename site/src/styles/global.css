@@ -524,6 +524,303 @@ body[data-noise='critical'] .dread-vignette {
   color: var(--color-facility-100);
 }
 
+/* ============================================================
+   MEDIA LAYER — real screenshots, scroll-driven motion.
+   All motion below runs on the compositor via CSS scroll/view
+   timelines (no JS, no scroll listeners). Browsers without
+   scroll-driven animations (and reduced-motion users) get the
+   static layout — every image is fully visible either way.
+   ============================================================ */
+
+/* Full-bleed hero backdrop: real screenshot under a vignette. */
+.hero-cine {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+.hero-cine-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+.hero-cine-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+  filter: saturate(1.08) brightness(0.8);
+}
+/* Over a photo the static is texture, not a wash. */
+.hero-cine .static-noise {
+  opacity: 0.06;
+}
+/* The cutout's floor fade is for flat backgrounds; on the photo it would
+   read as a dark box. */
+.hero-cine .hero-art::after {
+  display: none;
+}
+.hero-cine .hero-art::before {
+  opacity: 0.55;
+}
+.hero-cine .hero-art img {
+  filter: drop-shadow(0 24px 48px oklch(0 0 0 / 0.75)) contrast(1.05);
+}
+.hero-cine-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, var(--color-facility-950) 6%, oklch(0.16 0.012 240 / 0.7) 40%, oklch(0.16 0.012 240 / 0.1) 72%, oklch(0.16 0.012 240 / 0.4)),
+    linear-gradient(to top, var(--color-facility-950) 2%, transparent 38%),
+    linear-gradient(to bottom, oklch(0.16 0.012 240 / 0.7), transparent 22%);
+}
+@media (max-width: 1023px) {
+  .hero-cine-shade {
+    background:
+      linear-gradient(to bottom, oklch(0.16 0.012 240 / 0.82) 0%, oklch(0.16 0.012 240 / 0.6) 45%, var(--color-facility-950) 92%);
+  }
+}
+
+/* Framed screenshot (link or plain) */
+.shot-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-facility-900);
+  border: 1px solid var(--color-facility-700);
+}
+.shot-frame img,
+.shot-link img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.shot-link {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+.shot-frame > .shot-link {
+  height: 100%;
+}
+.shot-link img {
+  transition: transform 0.6s var(--ease-terminal), filter 0.6s var(--ease-terminal);
+}
+.shot-link:hover img,
+.shot-link:focus-visible img {
+  transform: scale(1.04);
+  filter: brightness(1.12);
+}
+.shot-zoom {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.6rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.95rem;
+  color: var(--color-facility-950);
+  background: var(--color-signal);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+.shot-link:hover .shot-zoom,
+.shot-link:focus-visible .shot-zoom {
+  opacity: 1;
+  transform: none;
+}
+
+/* Caption bar over the bottom of a frame */
+.shot-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2.5rem 1.1rem 0.9rem;
+  background: linear-gradient(to top, oklch(0.12 0.01 240 / 0.92), transparent);
+  pointer-events: none;
+}
+
+/* Horizontal strip: native scroll-snap (touch-first, and the fallback for
+   the pinned tour). */
+.strip {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1rem;
+  padding-inline: 1rem;
+  padding-bottom: 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-facility-600) transparent;
+}
+.strip > * {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+@media (min-width: 640px) {
+  .strip {
+    scroll-padding-inline: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
+    padding-inline: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
+  }
+}
+
+/* Tour card */
+.tour-card {
+  width: min(82vw, 44rem);
+}
+.tour-card .shot-frame {
+  aspect-ratio: 16 / 9;
+}
+
+/* Lightbox */
+.lightbox {
+  width: 100vw;
+  height: 100svh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: oklch(0.1 0.01 240 / 0.96);
+  color: var(--color-facility-100);
+}
+.lightbox::backdrop {
+  background: oklch(0 0 0 / 0.7);
+}
+.lb-btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-family: var(--font-mono);
+  color: var(--color-facility-100);
+  border: 1px solid var(--color-facility-600);
+  background: var(--color-facility-900);
+}
+.lb-btn:hover {
+  border-color: var(--color-signal);
+  color: var(--color-signal);
+}
+.lb-close { top: 1rem; right: 1rem; }
+.lb-prev { left: 1rem; top: 50%; transform: translateY(-50%); }
+.lb-next { right: 1rem; top: 50%; transform: translateY(-50%); }
+@media (max-width: 639px) {
+  .lb-prev, .lb-next { top: auto; bottom: 1rem; transform: none; }
+}
+
+/* ---------- Scroll-driven motion (progressive enhancement) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    /* Hero: backdrop drifts and darkens, the Hunter rises toward you. */
+    .hero-cine-bg img {
+      animation: hero-drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100svh;
+    }
+    @keyframes hero-drift {
+      to { transform: scale(1.16) translateY(6%); filter: saturate(1) brightness(0.3); }
+    }
+    .hero-cine-fg {
+      animation: hero-rise linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100svh;
+    }
+    @keyframes hero-rise {
+      to { transform: translateY(-9%) scale(1.06); }
+    }
+    .hero-cine-copy {
+      animation: hero-copy linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 80svh;
+    }
+    @keyframes hero-copy {
+      to { transform: translateY(-14%); opacity: 0.15; }
+    }
+
+    /* Screenshots open like a shutter as they enter the viewport. */
+    .reveal {
+      animation: shutter linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 32%;
+    }
+    @keyframes shutter {
+      from { clip-path: inset(14% 6% 14% 6%); opacity: 0.25; }
+      to { clip-path: inset(0); opacity: 1; }
+    }
+    .reveal img {
+      animation: settle linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 50%;
+    }
+    @keyframes settle {
+      from { transform: scale(1.14); }
+      to { transform: scale(1); }
+    }
+
+    /* Slow parallax for full-bleed bands. */
+    .parallax img {
+      animation: parallax linear both;
+      animation-timeline: view();
+      animation-range: cover;
+      scale: 1.18;
+    }
+    @keyframes parallax {
+      from { transform: translateY(-7%); }
+      to { transform: translateY(7%); }
+    }
+  }
+
+  /* Pinned horizontal tour — desktop only; touch keeps native swipe. */
+  @supports (animation-timeline: view()) {
+    @media (min-width: 1024px) {
+      .tour {
+        height: calc(var(--tour-count, 8) * 48svh + 100svh);
+        view-timeline-name: --tour;
+        view-timeline-axis: block;
+      }
+      .tour-pin {
+        position: sticky;
+        top: 0;
+        height: 100svh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .tour .strip {
+        overflow: visible;
+        scroll-snap-type: none;
+        width: max-content;
+        animation: tour-slide linear both;
+        animation-timeline: --tour;
+        animation-range: contain 4% contain 96%;
+      }
+      @keyframes tour-slide {
+        to { transform: translateX(calc(-100% + 100vw)); }
+      }
+      .tour-progress {
+        transform-origin: 0 50%;
+        animation: tour-progress linear both;
+        animation-timeline: --tour;
+        animation-range: contain 4% contain 96%;
+      }
+      @keyframes tour-progress {
+        from { transform: scaleX(0); }
+        to { transform: scaleX(1); }
+      }
+    }
+  }
+}
+
 /* ---------- Reduced motion: kill every non-essential effect ---------- */
 
 @media (prefers-reduced-motion: reduce) {

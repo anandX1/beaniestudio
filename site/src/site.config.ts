@@ -12,8 +12,10 @@ export const SITE = {
   locale: 'en_US',
   /** Public beta launch (date only; drives the day countdown + copy). */
   launchDate: '2026-10-10',
-  /** Public press/contact address. Forwarded by Cloudflare Email Routing. */
-  contact: 'press@beaniestudio.site',
+  /** General contact (players, partners). Forwarded by Cloudflare Email Routing. */
+  contact: 'hello@beaniestudio.site',
+  /** Press, creators and media requests. */
+  press: 'press@beaniestudio.site',
 } as const;
 
 export const LINKS = {

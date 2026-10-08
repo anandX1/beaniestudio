@@ -1,7 +1,8 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
+import ShotFigure from '../../components/ShotFigure.astro';
 import {
-  GAME, MOVEMENT, JINGLES, POD, SCRAPPER, CRUSHERS, MINIGAMES, EXTRACTION, CONTROLS, SCRAP, ROOMS,
+  GAME, MOVEMENT, JINGLES, POD, SCRAPPER, CRUSHERS, MINIGAMES, EXTRACTION, CONTROLS, SCRAP, ROOMS, RESULTS, PROGRESSION, MOBILE_BUTTONS,
 } from '../../data/game';
 ---
 
@@ -30,6 +31,7 @@ import {
       <li><a href="#health">Health, getting downed and revives</a></li>
       <li><a href="#tools">Your tools: flashlight, bell, shove, lockers</a></li>
       <li><a href="#map">The map</a></li>
+      <li><a href="#results">After the round</a></li>
       <li><a href="#tips">Ten beginner tips</a></li>
     </ol>
   </nav>
@@ -95,6 +97,8 @@ import {
     </li>
   </ol>
 
+  <ShotFigure ids={['lobby', 'hunter-reveal']} caption="Before every round: the lobby, then the Hunter reveal." gallery="guide" aspect="16 / 9" />
+
   <h2 id="controls">Controls</h2>
   <p>PC key binds. On mobile, the same actions are on-screen buttons.</p>
   <div class="overflow-x-auto">
@@ -107,6 +111,7 @@ import {
       </tbody>
     </table>
   </div>
+  <ShotFigure ids={['hud-mobile']} caption={`The mobile HUD: ${MOBILE_BUTTONS.join(', ')} buttons, your two backpack slots and the round timer.`} gallery="guide" />
   <p>
     Sprint has no stamina bar: you can run for as long as you like. You walk at
     {MOVEMENT.scrapperWalk} and sprint at {MOVEMENT.scrapperSprint} studs per second. There is no
@@ -159,6 +164,14 @@ import {
     {ROOMS.slice(0, -1).join(', ')} and {ROOMS[ROOMS.length - 1]}, with the
     {EXTRACTION.room} as the way out. Scrap, crushers and pods are spread across the map, and
     crusher positions change every round, so no two rounds play the same.
+    See <a href="/guide/map/">every room with screenshots</a>.
+  </p>
+  <ShotFigure ids={['cargo-dock-shuttle']} caption="The Cargo Dock, one of the bunker's largest rooms." gallery="guide" />
+
+  <h2 id="results">After the round</h2>
+  <p>
+    Every round ends on one of four screens: {RESULTS.map((r) => `${r.title} (“${r.line.replace(/\.$/, '')}”)`).join(', ')}.
+    Win or lose, you earn {PROGRESSION.currency} and XP toward your next level.
   </p>
 
   <h2 id="tips">Ten beginner tips</h2>

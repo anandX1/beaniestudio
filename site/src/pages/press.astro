@@ -3,6 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, LINKS } from '../site.config';
 import { GAME, CRUSHERS, MINIGAMES, SCRAP, JINGLES, POD, TEAM, COMMUNITY, EXTRACTION } from '../data/game';
 import { VIDEOS, watchUrl } from '../data/videos';
+import Shot from '../components/Shot.astro';
+import Lightbox from '../components/Lightbox.astro';
+import { SHOTS, pressJpg } from '../data/media';
+
+const pressShots = SHOTS.filter((s) => s.press);
 
 const facts: [string, string][] = [
   ['Title', `${GAME.name} (also: ${GAME.fullName})`],
@@ -26,10 +31,10 @@ const longDesc = [
 ];
 
 const assets = [
-  { file: '/press/jingles-render.png', preview: '/img/jingles-480.webp', label: 'Jingles render', meta: 'PNG, transparent, 853×1469' },
-  { file: '/press/static-key-art.png', preview: '/img/press-key-art.webp', label: 'STATIC key art card', meta: 'PNG, 1200×630' },
-  { file: '/press/beanie-studios-logo.png', preview: '/img/beanie-studios-logo.webp', label: 'Beanie Studios logo', meta: 'PNG, 1496×1051' },
-  { file: '/press/beanie-studios-icon.png', preview: '/img/press-icon.webp', label: 'Beanie Studios icon', meta: 'PNG, 703×703' },
+  { file: '/press/jingles-render.png', preview: '/img/jingles-480.webp', w: 279, h: 480, label: 'Jingles render', meta: 'PNG, transparent, 853×1469' },
+  { file: '/press/static-key-art.png', preview: '/img/press-key-art.webp', w: 480, h: 252, label: 'STATIC key art card', meta: 'PNG, 1200×630' },
+  { file: '/press/beanie-studios-logo.png', preview: '/img/beanie-studios-logo.webp', w: 600, h: 422, label: 'Beanie Studios logo', meta: 'PNG, 1496×1051' },
+  { file: '/press/beanie-studios-icon.png', preview: '/img/press-icon.webp', w: 320, h: 320, label: 'Beanie Studios icon', meta: 'PNG, 703×703' },
 ];
 
 const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
@@ -53,7 +58,7 @@ const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
     </p>
     <div class="mt-8 flex flex-wrap gap-4">
       <a href="/press/static-press-kit.zip" download class="btn-primary">Download everything (.zip) <span aria-hidden="true">↓</span></a>
-      <a href={`mailto:${SITE.contact}`} class="btn-secondary">{SITE.contact}</a>
+      <a href={`mailto:${SITE.press}`} class="btn-secondary">{SITE.press}</a>
     </div>
 
     <div class="mt-16 grid gap-10 lg:grid-cols-[1.6fr_1fr]">
@@ -88,20 +93,32 @@ const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
       </aside>
     </div>
 
-    <h2 class="mt-20 font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">Art and logos</h2>
+    <h2 class="mt-20 font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">Screenshots</h2>
     <p class="mt-3 max-w-2xl text-facility-300">
-      Gameplay screenshots are being captured for the launch build and will be added here. Need
-      something specific now? Email us and we'll send it.
+      {pressShots.length} picks from the beta, as full-size JPGs (all are in the zip). More on the
+      <a href="/screenshots/" class="text-signal underline decoration-signal-dim underline-offset-4 hover:text-signal-dim">screenshots page</a>.
     </p>
+    <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {pressShots.map((s) => (
+        <li>
+          <div class="shot-frame aspect-[16/10]">
+            <Shot id={s.id} lightbox="press" sizes="(min-width: 1024px) 280px, (min-width: 640px) 50vw, 100vw" imgClass="h-full w-full object-cover" />
+          </div>
+          <a href={pressJpg(s.id)} download class="mt-1 flex min-h-11 items-center font-mono text-xs text-signal hover:text-signal-dim">static-{s.id}.jpg ↓</a>
+        </li>
+      ))}
+    </ul>
+
+    <h2 class="mt-20 font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">Art and logos</h2>
     <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {assets.map((a) => (
         <li class="panel flex flex-col p-5">
           <div class="grid aspect-square place-items-center overflow-hidden bg-facility-950">
-            <img src={a.preview} alt={a.label} loading="lazy" decoding="async" class="max-h-full max-w-full object-contain p-3" />
+            <img src={a.preview} width={a.w} height={a.h} alt={a.label} loading="lazy" decoding="async" class="h-auto max-h-full w-auto max-w-full object-contain p-3" />
           </div>
           <p class="mt-4 font-display text-sm font-bold uppercase tracking-wide">{a.label}</p>
           <p class="mt-1 font-mono text-xs text-facility-500">{a.meta}</p>
-          <a href={a.file} download class="mt-3 font-mono text-sm text-signal hover:text-signal-dim">Download <span aria-hidden="true">↓</span></a>
+          <a href={a.file} download class="mt-2 flex min-h-11 items-center font-mono text-sm text-signal hover:text-signal-dim">Download <span aria-hidden="true">↓</span></a>
         </li>
       ))}
     </ul>
@@ -124,7 +141,9 @@ const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
             <li class="panel p-5">
               <p class="font-display text-lg font-bold uppercase tracking-wide">{m.name}</p>
               <p class="mt-1 text-sm text-facility-300">{m.role}</p>
-              <p class="mt-2 font-mono text-xs text-facility-500">ROBLOX {m.roblox} · DISCORD {m.discord}</p>
+              <p class="mt-1 font-mono text-xs uppercase tracking-widest text-signal-dim">{m.title}</p>
+              <a href={`mailto:${m.email}`} class="mt-2 inline-block font-mono text-sm text-facility-100 hover:text-signal">{m.email}</a>
+              <p class="mt-1 font-mono text-xs text-facility-500">ROBLOX {m.roblox} · DISCORD {m.discord}</p>
             </li>
           ))}
         </ul>
@@ -142,8 +161,10 @@ const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
         <p class="mt-4 text-facility-300">
           Interviews, extra footage, beta access for your channel, or questions about the game:
         </p>
-        <a href={`mailto:${SITE.contact}`} class="mt-3 inline-block font-mono text-lg text-signal hover:text-signal-dim">{SITE.contact}</a>
+        <a href={`mailto:${SITE.press}`} class="mt-3 inline-block font-mono text-lg text-signal hover:text-signal-dim">{SITE.press}</a>
+        <p class="mt-3 text-sm text-facility-300">Everything else: <a href={`mailto:${SITE.contact}`} class="font-mono text-signal hover:text-signal-dim">{SITE.contact}</a></p>
       </div>
     </div>
   </section>
+  <Lightbox />
 </BaseLayout>

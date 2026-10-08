@@ -56,6 +56,7 @@ export const JINGLES = {
 } as const;
 
 export const POD = {
+  name: 'Bio-Siphon Pod',
   timerSec: 90,
   /** Timer runs twice as fast once no free teammate is left. */
   doubleSpeedWhenAlone: true,
@@ -79,7 +80,7 @@ export const SCRAPPER = {
   bellCooldownSec: 7,
 } as const;
 
-/** PC key binds. Mobile uses on-screen buttons for the same actions. */
+/** PC key binds. Mobile uses on-screen buttons (see MOBILE_BUTTONS). */
 export const CONTROLS = [
   { key: 'E (hold)', action: 'Interact — feed a crusher, rescue a teammate from a pod' },
   { key: 'F or 3', action: 'Flashlight (off while carrying heavy scrap)' },
@@ -153,6 +154,24 @@ export const EXTRACTION = {
   windowSec: 60,
 } as const;
 
+/** End-of-round screens (text copied from the in-game UI). */
+export const RESULTS = [
+  { id: 'result-escaped', title: 'Escaped', line: 'You made it out of the bunker.', side: 'Scrapper', win: true },
+  { id: 'result-consumed', title: 'Consumed', line: 'Jingles got you.', side: 'Scrapper', win: false },
+  { id: 'result-prey-slain', title: 'Prey slain', line: 'Nobody made it out.', side: 'Hunter', win: true },
+  { id: 'result-defeated', title: 'Defeated', line: 'The prey escaped.', side: 'Hunter', win: false },
+] as const;
+
+/** Progression shown on the results screen. */
+export const PROGRESSION = {
+  currency: 'Fragments',
+  /** Stats a Scrapper's results card tracks. */
+  scrapperStats: ['kg fed', 'feeds', 'revives', 'time alive'],
+} as const;
+
+/** Mobile on-screen buttons (labels as shown in the HUD). */
+export const MOBILE_BUTTONS = ['Light', 'Bell', 'Objective', 'Run', 'Drop', 'Slam'] as const;
+
 /** Rooms of the bunker map as built in Studio (names from the map builder). */
 export const ROOMS = [
   'Nuclear Reactor', 'Security', 'Control Room', 'Medbay', 'Interrogation Room',
@@ -164,14 +183,14 @@ export const ROADMAP = [
   { t: 'New game modes', b: 'Rotating-Hunter modes where the Hunter role passes between players, and infection-style rounds where caught Scrappers switch sides.' },
   { t: 'A second map', b: 'A new facility with its own rooms, scrap spawns and crusher points.' },
   { t: 'A second Hunter', b: 'A new monster with its own abilities alongside Jingles.' },
-  { t: 'Cosmetics and events', b: 'Skins, emotes and limited-time events, earned with Frags you collect in rounds.' },
+  { t: 'Cosmetics and events', b: 'Skins, emotes and limited-time events, bought with the Fragments you earn every round.' },
   { t: 'Streamer integration', b: 'Chat and live-stream events that trigger things inside the round while a creator plays.' },
 ] as const;
 
 export const TEAM = [
-  { name: 'Anand Kumar', role: 'Scripting, systems, animation and lighting', roblox: 'anandxdev', discord: '._.anand._.' },
-  { name: 'Pawan Dahe', role: 'Map building, props, concept and community', roblox: 'SosukeAizen2404', discord: 'pawanxdev' },
-  { name: 'Jai Mishra', role: 'Content, editing, social media and sound effects', roblox: 'souljai12e43', discord: 'devil_jai2626' },
+  { name: 'Anand Kumar', role: 'Scripting, systems, animation and lighting', title: 'Lead developer', email: 'anand@beaniestudio.site', roblox: 'anandxdev', discord: '._.anand._.' },
+  { name: 'Pawan Dahe', role: 'Map building, props, concept and community', title: 'Level designer & community lead', email: 'pawan@beaniestudio.site', roblox: 'SosukeAizen2404', discord: 'pawanxdev' },
+  { name: 'Jai Mishra', role: 'Content, editing, social media and sound effects', title: 'Content & audio lead', email: 'jai@beaniestudio.site', roblox: 'souljai12e43', discord: 'devil_jai2626' },
 ] as const;
 
 /** Real, verifiable community numbers (8 Oct 2026). Update before quoting. */

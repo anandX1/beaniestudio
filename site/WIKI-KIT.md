@@ -1,3 +1,5 @@
+> **OUTDATED (2026-10-08):** this doc describes the pre-beta design (wrecked shuttle, fuel, sound-only Hunter, 5v1, console, Q4 2026). Do not copy facts from it. Current facts: `src/data/game.ts`. Current copy: `LAUNCH-PACK.md`.
+
 # WIKI-KIT.md — the STATIC Fandom wiki, ready to paste
 
 > Why a wiki: Fandom is a top-100k domain where game wikis rank for `<game> wiki`

@@ -21,7 +21,9 @@ This file is the law for anyone (human or AI) editing `site/`. Read it before ge
 
 ## Page structure (2026-10-08 rebuild)
 
-- **Home** follows the industry order: hero (Jingles key art, one-line pitch, Play on Roblox) → gameplay videos → how a round works → Jingles stats → Worm + Pod → comparison table → roadmap (labelled PLANNED) → team → community → final CTA.
+- **Home** follows the industry order: cinematic hero (real screenshot backdrop + Jingles key art, one-line pitch, Play on Roblox) → how a round works (screenshot rows) → pinned "Tour the bunker" → Jingles → Worm + Pod → four end screens → videos → comparison → roadmap (PLANNED) → team → community → final CTA.
+- **Screenshots** come from `game-assets/` (raw, never deployed — see repo `.assetsignore`) through `scripts/media.mjs` → `public/media/*.webp`. Register shots in `src/data/media.json`, render with `Shot.astro` / `ShotFigure.astro`, never hand-write `/media/` paths. `/screenshots/` and `/guide/map/` are the image-SEO pages; `/sitemap-images.xml` lists them.
+- **Scroll motion is CSS-only**: `animation-timeline: scroll()/view()` (hero drift, `.reveal` shutter, `.parallax`, pinned `.tour` on ≥1024px). It lives in `@supports` + `prefers-reduced-motion: no-preference`, so unsupported browsers and reduced-motion users get a complete static page.
 - **Official guide** (`/guide/*`, `src/layouts/GuideLayout.astro`) is the SEO engine: one page per game-specific search term (Jingles, Worm, scrap list, crushers, pods, codes). Real numbers only.
 - **Blog content is hand-written.** The Groq autopilot (`tools/autopilot.mjs`) is paused via `tools/autopilot-config.json` → `paused: true`. Mass-generated posts contradicted the game and match Google's scaled-content pattern. Don't unpause it.
 
@@ -42,7 +44,7 @@ The current set: **decode scramble** (`data-decode`, BaseLayout, any page can op
 - Astro 5 static + Tailwind v4 (CSS-first config — the `@theme` block in `global.css` IS the Tailwind config).
 - OG images: `node scripts/og-cards.mjs` renders `public/og/*.png` and `public/press/static-key-art.png` in headless Chromium with the real fonts + Jingles art. Rerun after changing card copy.
 - `npm run check` = astro check (TS). `npm run build` must pass both before deploy.
-- Contact email lives ONLY in `src/site.config.ts` (`SITE.contact`): `press@beaniestudio.site` (Cloudflare Email Routing). Never put a personal or other-company address on the site — it made "picfomo.com" the site's top Google query.
+- Emails live in `src/site.config.ts` (`SITE.contact` = hello@, `SITE.press` = press@) and per-person in `TEAM` (`game.ts`): anand@, pawan@, jai@ — all @beaniestudio.site via Cloudflare Email Routing. Never put a personal or other-company address on the site — it made "picfomo.com" the site's top Google query.
 - `/llms.txt` is generated from `game.ts` by `src/pages/llms.txt.ts`.
 - Deploy target: Cloudflare Pages, build command `npm run build`, output `dist`, Node 20+.
 

@@ -21,7 +21,16 @@ import { stdin as input, stdout as output } from 'node:process';
 const SITE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 import { fileURLToPath } from 'node:url';
 
-const UA = 'BeanieStudioWikiPublisher/1.0 (beaniestudio.site; contact: anand@picfomo.com)';
+// LOCKED 2026-10-08: the page definitions below still describe the pre-beta
+// design (wrecked shuttle, fuel, sound-only Hunter, 5v1). Publishing them would
+// put false facts on a public wiki. Rewrite them from src/data/game.ts and the
+// /guide pages first, then delete this guard.
+if (!process.env.WIKI_KIT_REVIEWED) {
+  console.error('wiki-publish: locked — WIKI-KIT content is outdated. See the note in tools/wiki-publish.mjs.');
+  process.exit(1);
+}
+
+const UA = 'BeanieStudioWikiPublisher/1.0 (beaniestudio.site; contact: hello@beaniestudio.site)';
 
 // ---------------------------------------------------------------------------
 // Page definitions — WIKI-KIT.md content, ready for the API. Order = publish order.

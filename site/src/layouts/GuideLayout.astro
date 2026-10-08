@@ -5,6 +5,7 @@
  * a guide page must come from src/data/game.ts.
  */
 import BaseLayout from './BaseLayout.astro';
+import Lightbox from '../components/Lightbox.astro';
 import { SITE, LINKS } from '../site.config';
 
 interface Props {
@@ -25,6 +26,7 @@ const { title, description, path, h1, kicker, updated, crumb, ogImage = '/og/gui
 
 const GUIDE_PAGES = [
   { href: '/guide/', label: 'Beginner guide' },
+  { href: '/guide/map/', label: 'The map, room by room' },
   { href: '/guide/jingles/', label: 'Jingles, the Hunter' },
   { href: '/guide/worm/', label: 'The Worm' },
   { href: '/guide/scrap/', label: 'Scrap items & weights' },
@@ -116,7 +118,9 @@ const breadcrumb = isHub
         <p class="mt-8 text-xs leading-relaxed text-facility-500">
           Spotted something out of date? Tell us in the <a href={LINKS.discord} rel="noopener" target="_blank" class="text-signal hover:text-signal-dim">Discord</a>.
         </p>
+        <a href="/screenshots/" class="mt-3 block text-xs text-facility-500 hover:text-signal">All screenshots →</a>
       </aside>
     </div>
   </div>
+  <Lightbox />
 </BaseLayout>

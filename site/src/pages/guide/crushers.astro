@@ -1,5 +1,6 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
+import ShotFigure from '../../components/ShotFigure.astro';
 import { CRUSHERS, MINIGAMES, TRANSITION_TASKS, EXTRACTION } from '../../data/game';
 ---
 
@@ -17,6 +18,8 @@ import { CRUSHERS, MINIGAMES, TRANSITION_TASKS, EXTRACTION } from '../../data/ga
     Each one takes two jobs: fill it with scrap, then calibrate its console through a run of
     quick minigames. When all three are done, the exit opens.
   </p>
+
+  <ShotFigure ids={['crusher-console']} caption="A crusher (left) and its console (right), with the Feed crusher prompt." gallery="crushers" />
 
   <h2 id="crushers">The crushers</h2>
   <ul>
@@ -60,6 +63,8 @@ import { CRUSHERS, MINIGAMES, TRANSITION_TASKS, EXTRACTION } from '../../data/ga
     <li>Jingles can't follow you in. The safe zone pushes the Hunter back out.</li>
     <li>Winning is personal. Each Scrapper who escapes wins, whoever else made it.</li>
   </ul>
+
+  <ShotFigure ids={['result-escaped']} caption="Make it out and you get the Escaped screen: kg fed, feeds, revives, time alive, Fragments and XP." gallery="crushers" />
 
   <h2 id="tips">Tips</h2>
   <ul>

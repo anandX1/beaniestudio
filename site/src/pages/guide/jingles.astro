@@ -1,5 +1,6 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
+import ShotFigure from '../../components/ShotFigure.astro';
 import { JINGLES, MOVEMENT, POD, SCRAPPER, EXTRACTION } from '../../data/game';
 
 const stats = [
@@ -24,14 +25,6 @@ const stats = [
   ogImage="/og/jingles.png"
   ogImageAlt="Jingles, the clockwork jester Hunter from STATIC"
 >
-  <img
-    src="/img/jingles-720.webp"
-    width="418"
-    height="720"
-    alt="Jingles, a clockwork jester with a skull mask, a belled cap and metal claws"
-    class="float-right ml-6 mb-4 hidden h-auto w-48 sm:block"
-    loading="eager"
-  />
   <p class="text-lg">
     <strong>Jingles</strong> is the Hunter in STATIC: a clockwork jester with a grinning skull
     mask, a belled cap, brass-jointed limbs and hooked metal claws. It's not a bot. Every round,
@@ -41,6 +34,8 @@ const stats = [
   <p>
     Jingles is the only Hunter in the beta. More Hunters are planned.
   </p>
+
+  <ShotFigure ids={['jingles-closeup']} caption="Jingles in-game." gallery="jingles" />
 
   <h2 id="stats">Stats</h2>
   <p>Values from the beta build. Speeds are in studs per second.</p>
@@ -83,6 +78,8 @@ const stats = [
     disabled until the drop. Read <a href="/guide/capture-and-rescue/">pods and rescue</a> for
     what happens next.
   </p>
+
+  <ShotFigure ids={['jingles-red', 'jingles-medbay', 'jingles-player']} caption="Jingles under the bunker's red lights, walking the Medbay, and closing in on a Scrapper." gallery="jingles" aspect="4 / 3" />
 
   <h2 id="senses">How Jingles finds you</h2>
   <p>

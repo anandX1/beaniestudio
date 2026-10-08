@@ -1,0 +1,61 @@
+---
+/**
+ * Screenshot viewer: one native <dialog> per page, opened by any
+ * a[data-lb] (see Shot.astro). Arrow keys / buttons move through the same
+ * gallery, Esc or a backdrop click closes. ~1 KB of JS, no dependencies.
+ * Without JS the links open the full image directly.
+ */
+---
+
+<dialog id="lightbox" class="lightbox" aria-label="Screenshot viewer">
+  <figure class="m-0 flex h-full w-full flex-col items-center justify-center gap-4 p-4 sm:p-10">
+    <img id="lbImg" alt="" class="max-h-[78svh] max-w-full object-contain" />
+    <figcaption id="lbCap" class="max-w-3xl text-center font-mono text-xs leading-relaxed tracking-[0.12em] text-facility-300"></figcaption>
+  </figure>
+  <button type="button" class="lb-btn lb-close" data-lb-close aria-label="Close viewer">✕</button>
+  <button type="button" class="lb-btn lb-prev" data-lb-step="-1" aria-label="Previous screenshot">←</button>
+  <button type="button" class="lb-btn lb-next" data-lb-step="1" aria-label="Next screenshot">→</button>
+</dialog>
+
+<script>
+  (function () {
+    const dlg = document.getElementById('lightbox') as HTMLDialogElement | null;
+    const img = document.getElementById('lbImg') as HTMLImageElement | null;
+    const cap = document.getElementById('lbCap');
+    if (!dlg || !img || !cap || typeof dlg.showModal !== 'function') return;
+    let list: HTMLAnchorElement[] = [];
+    let i = 0;
+    const show = function () {
+      const a = list[i];
+      if (!a) return;
+      img.src = a.href;
+      img.alt = a.querySelector('img')?.alt || '';
+      cap.textContent = (a.dataset.caption || img.alt) + (list.length > 1 ? '  ·  ' + (i + 1) + ' / ' + list.length : '');
+    };
+    const step = function (d: number) {
+      if (!list.length) return;
+      i = (i + d + list.length) % list.length;
+      show();
+    };
+    document.addEventListener('click', function (e) {
+      const a = (e.target as Element).closest('a[data-lb]') as HTMLAnchorElement | null;
+      if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      e.preventDefault();
+      list = Array.from(document.querySelectorAll('a[data-lb="' + a.dataset.lb + '"]')) as HTMLAnchorElement[];
+      i = Math.max(0, list.indexOf(a));
+      show();
+      dlg.showModal();
+    });
+    dlg.addEventListener('click', function (e) {
+      const t = e.target as HTMLElement;
+      if (t.closest('[data-lb-close]') || t === dlg || t.tagName === 'FIGURE') { dlg.close(); return; }
+      const s = t.closest('[data-lb-step]') as HTMLElement | null;
+      if (s) step(Number(s.dataset.lbStep));
+    });
+    dlg.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') step(1);
+      else if (e.key === 'ArrowLeft') step(-1);
+    });
+    dlg.addEventListener('close', function () { img.removeAttribute('src'); });
+  })();
+</script>

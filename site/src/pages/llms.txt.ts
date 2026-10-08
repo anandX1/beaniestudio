@@ -31,7 +31,7 @@ Facts below are taken from the game's scripts (beta build, ${GAME.launchLabel}).
 - Scrap: ${SCRAP.length} items, ${SCRAP[0].kg}–${SCRAP[SCRAP.length - 1].kg} kg; rarities ${RARITY.map((r) => `${r.name} ×${r.mult} (${r.pct}%)`).join(', ')}; ${SCRAPPER.backpackSlots} backpack slots plus one heavy item in hand.
 - Codes: none live yet (planned). Official list: ${u('/codes/')}
 - Developer: ${SITE.name} — ${TEAM.map((t) => `${t.name} (${t.role.toLowerCase()})`).join('; ')}
-- Contact: ${SITE.contact}
+- Contact: ${SITE.contact} (general), ${SITE.press} (press & creators)
 
 ## Links
 
@@ -44,6 +44,8 @@ Facts below are taken from the game's scripts (beta build, ${GAME.launchLabel}).
 
 - [Home](${u('/')}): what STATIC is, gameplay videos, how a round works, Jingles, roadmap, team.
 - [Beginner guide](${u('/guide/')}): roles, round flow, controls, health, tools, tips.
+- [Map](${u('/guide/map/')}): every room of the bunker with screenshots.
+- [Screenshots](${u('/screenshots/')}): official screenshot gallery.
 - [Jingles](${u('/guide/jingles/')}): Hunter stats, abilities and counterplay.
 - [The Worm](${u('/guide/worm/')}): triggers and how to survive it.
 - [Scrap list](${u('/guide/scrap/')}): every item with weight, rarity values and spawn chance.

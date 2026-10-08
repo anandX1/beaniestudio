@@ -1,0 +1,166 @@
+{
+ "cargo-dock-shuttle": {
+  "w": 1910,
+  "h": 835
+ },
+ "cargo-dock-floor": {
+  "w": 1919,
+  "h": 818
+ },
+ "storage-bay": {
+  "w": 1761,
+  "h": 817
+ },
+ "storage-bay-forklift": {
+  "w": 1912,
+  "h": 824
+ },
+ "control-room-hologram": {
+  "w": 1759,
+  "h": 817
+ },
+ "control-room": {
+  "w": 1913,
+  "h": 826
+ },
+ "reactor-coils": {
+  "w": 1918,
+  "h": 828
+ },
+ "reactor-tanks": {
+  "w": 1913,
+  "h": 826
+ },
+ "reactor-door": {
+  "w": 1500,
+  "h": 832
+ },
+ "medbay": {
+  "w": 1913,
+  "h": 826
+ },
+ "medbay-red": {
+  "w": 1758,
+  "h": 813
+ },
+ "security": {
+  "w": 1836,
+  "h": 824
+ },
+ "security-desk": {
+  "w": 1913,
+  "h": 826
+ },
+ "interrogation": {
+  "w": 1739,
+  "h": 832
+ },
+ "interrogation-red": {
+  "w": 1765,
+  "h": 833
+ },
+ "central-room-globe": {
+  "w": 1913,
+  "h": 826
+ },
+ "central-room": {
+  "w": 1913,
+  "h": 826
+ },
+ "crusher-console": {
+  "w": 1573,
+  "h": 856
+ },
+ "hunter-reveal": {
+  "w": 1139,
+  "h": 830
+ },
+ "lobby": {
+  "w": 1919,
+  "h": 833
+ },
+ "lobby-shop": {
+  "w": 1913,
+  "h": 826
+ },
+ "hallway-storage": {
+  "w": 1728,
+  "h": 824
+ },
+ "hallway-medbay": {
+  "w": 1552,
+  "h": 809
+ },
+ "hallway-security": {
+  "w": 1707,
+  "h": 863
+ },
+ "map-topdown": {
+  "w": 1913,
+  "h": 826
+ },
+ "jingles-closeup": {
+  "w": 732,
+  "h": 590
+ },
+ "jingles-red": {
+  "w": 777,
+  "h": 617
+ },
+ "jingles-red-2": {
+  "w": 836,
+  "h": 551
+ },
+ "jingles-shadow": {
+  "w": 577,
+  "h": 517
+ },
+ "jingles-player": {
+  "w": 415,
+  "h": 290
+ },
+ "jingles-medbay": {
+  "w": 1162,
+  "h": 572
+ },
+ "worm-render": {
+  "w": 1027,
+  "h": 628
+ },
+ "worm-ingame": {
+  "w": 1913,
+  "h": 826
+ },
+ "pod-active": {
+  "w": 823,
+  "h": 498
+ },
+ "pod-idle": {
+  "w": 527,
+  "h": 548
+ },
+ "result-escaped": {
+  "w": 1082,
+  "h": 554
+ },
+ "result-prey-slain": {
+  "w": 1168,
+  "h": 635
+ },
+ "result-consumed": {
+  "w": 1212,
+  "h": 703
+ },
+ "result-defeated": {
+  "w": 1311,
+  "h": 747
+ },
+ "hud-mobile": {
+  "w": 1407,
+  "h": 729
+ },
+ "first-person-hub": {
+  "w": 1918,
+  "h": 824
+ }
+}

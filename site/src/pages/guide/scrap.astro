@@ -1,5 +1,6 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
+import ShotFigure from '../../components/ShotFigure.astro';
 import { SCRAP, RARITY, CRUSHERS, SCRAPPER, kg } from '../../data/game';
 
 const backpack = SCRAP.filter((s) => s.slot === 'Backpack');
@@ -37,6 +38,8 @@ const itemLd = {
     are <strong>{SCRAP.length} scrap items</strong>. This table lists every one, straight from the
     game's config.
   </p>
+
+  <ShotFigure ids={['storage-bay']} caption="The Storage Bay: one of the bunker's rooms to search." gallery="scrap" />
 
   <h2 id="table">All scrap items</h2>
   <p>

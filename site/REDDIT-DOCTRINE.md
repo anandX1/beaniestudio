@@ -1,3 +1,5 @@
+> **OUTDATED (2026-10-08):** this doc describes the pre-beta design (wrecked shuttle, fuel, sound-only Hunter, 5v1, console, Q4 2026). Do not copy facts from it. Current facts: `src/data/game.ts`. Current copy: `LAUNCH-PACK.md`.
+
 # REDDIT-DOCTRINE.md — Step 3: Reddit as an organic-traffic channel
 
 > Why Reddit is on the ladder at all: Perplexity draws roughly **1 in 5 of its citations

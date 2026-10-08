@@ -1,3 +1,5 @@
+> **OUTDATED (2026-10-08):** this doc describes the pre-beta design (wrecked shuttle, fuel, sound-only Hunter, 5v1, console, Q4 2026). Do not copy facts from it. Current facts: `src/data/game.ts`. Current copy: `LAUNCH-PACK.md`.
+
 # DISBOARD-GUIDE.md — Free Discord growth, step by step
 
 > Disboard.org is the biggest public Discord server directory. Research case:

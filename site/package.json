@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "astro dev",
     "dev:host": "astro dev --host ::",
-    "build": "node scripts/copy-fonts.mjs && astro build && pagefind --site dist",
+    "build": "node scripts/copy-fonts.mjs && astro build",
     "preview": "astro preview",
     "check": "astro check",
     "check:links": "node scripts/check-links.mjs",
@@ -29,6 +29,9 @@
     "deploy:dry": "node scripts/deploy-site.mjs --dry-run",
     "studio": "node scripts/studio.mjs",
     "seo": "npm run check:links && npm run ping:indexnow:dry",
+    "media": "node scripts/media.mjs",
+    "sync-root": "node scripts/sync-root.mjs",
+    "og": "node scripts/og-cards.mjs",
     "rank": "node tools/rank-track.mjs",
     "rank:setup": "node tools/setup-openserp.mjs"
   },

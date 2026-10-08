@@ -13,7 +13,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const [base = 'http://127.0.0.1:4173', form = 'mobile', ...pages] = process.argv.slice(2);
 const routes = pages.length
   ? pages
-  : ['/', '/play/', '/faq/', '/press/', '/blog/', '/blog/why-we-removed-the-radar/'];
+  : ['/', '/guide/', '/guide/map/', '/screenshots/', '/faq/', '/press/', '/blog/why-static-is-not-a-generator-game/'];
 
 mkdirSync(join(root, 'reports'), { recursive: true });
 const cli = join(root, 'node_modules', 'lighthouse', 'cli', 'index.js');

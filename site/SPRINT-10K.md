@@ -1,3 +1,5 @@
+> **OUTDATED (2026-10-08):** this doc describes the pre-beta design (wrecked shuttle, fuel, sound-only Hunter, 5v1, console, Q4 2026). Do not copy facts from it. Current facts: `src/data/game.ts`. Current copy: `LAUNCH-PACK.md`.
+
 # SPRINT-10K.md — The 10-Day War Plan
 
 > Mission: convert the existing audience + 10 days of relentless execution into

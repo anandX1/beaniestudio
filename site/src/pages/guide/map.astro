@@ -1,0 +1,99 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import ShotFigure from '../../components/ShotFigure.astro';
+import { ROOM_INFO } from '../../data/rooms';
+import { ROOMS, CRUSHERS, EXTRACTION, GAME } from '../../data/game';
+import { SITE } from '../../site.config';
+import { shot } from '../../data/media';
+
+const pictured = new Set(ROOM_INFO.map((r) => r.name));
+const unpictured = ROOMS.filter((r) => !pictured.has(r));
+
+const galleryLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ImageGallery',
+  name: 'STATIC bunker map — room screenshots',
+  about: { '@id': `${SITE.url}/#game` },
+  image: ROOM_INFO.flatMap((r) =>
+    r.shots.map((id) => ({
+      '@type': 'ImageObject',
+      contentUrl: new URL(shot(id).full, SITE.url).href,
+      name: `${r.name} — STATIC`,
+      description: shot(id).alt,
+      creator: { '@id': `${SITE.url}/#org` },
+      copyrightHolder: { '@id': `${SITE.url}/#org` },
+    }))
+  ),
+};
+---
+
+<GuideLayout
+  title="STATIC Map Guide — Every Room in the Bunker (Roblox)"
+  description="The full STATIC map on Roblox: a top-down view of the bunker and screenshots of every room, from the Cargo Dock and Storage Bay to the Nuclear Reactor."
+  path="/guide/map/"
+  h1="The STATIC map: every room in the bunker"
+  kicker="Official guide · Map"
+  crumb="Map"
+  updated="2026-10-08"
+  ogImage={shot('map-topdown').full}
+  ogImageAlt="Top-down view of the STATIC bunker map"
+  jsonLd={[galleryLd]}
+>
+  <p class="text-lg">
+    The {GAME.status.toLowerCase()} of STATIC has one map: an abandoned underground bunker. This
+    page shows every room we've captured so far, straight from the game. Use it to learn the
+    layout before your first round.
+  </p>
+
+  <div class="callout">
+    <strong>Things that move every round:</strong> the {CRUSHERS.count} crushers spawn at different
+    points each round, and Jingles starts from a random spawn. Room layouts stay the same, so
+    learning them pays off.
+  </div>
+
+  <ShotFigure ids={['map-topdown']} caption="The whole bunker from above, roof removed (Studio capture)." gallery="map" />
+
+  <nav aria-label="Rooms" class="callout">
+    <p class="font-mono text-xs tracking-[0.16em] text-facility-500">ROOMS ON THIS PAGE</p>
+    <ol class="mt-2 grid gap-x-8 sm:grid-cols-2">
+      {ROOM_INFO.map((r) => <li><a href={`#${r.slug}`}>{r.name}</a></li>)}
+      <li><a href="#round">Lobby and Hunter reveal</a></li>
+    </ol>
+  </nav>
+
+  {ROOM_INFO.map((r) => (
+    <section id={r.slug} class="scroll-mt-24">
+      <h2>{r.name}</h2>
+      <p>{r.blurb}</p>
+      <ShotFigure ids={r.shots.slice(0, 1)} gallery="map" />
+      {r.shots.length > 1 && <ShotFigure ids={r.shots.slice(1, 3)} gallery="map" aspect="16 / 10" />}
+    </section>
+  ))}
+
+  <h2 id="hallways">Hallways</h2>
+  <p>
+    Corridors link every room. Most are narrow and dark, lit by a single strip light, so keep your
+    flashlight ready.
+  </p>
+  <ShotFigure ids={['hallway-storage', 'hallway-medbay', 'hallway-security']} gallery="map" aspect="4 / 3" />
+
+  <h2 id="round">Before the round: lobby and Hunter reveal</h2>
+  <p>
+    Every round starts in the lobby, then cuts to the Hunter reveal, a campfire in a dark forest,
+    before everyone drops into the bunker.
+  </p>
+  <ShotFigure ids={['lobby', 'hunter-reveal']} gallery="map" aspect="16 / 9" />
+
+  <h2 id="exit">The way out</h2>
+  <p>
+    The exit is the <strong>{EXTRACTION.room}</strong>. It opens only after all {CRUSHERS.count}
+    crushers are complete, and then only for {EXTRACTION.windowSec} seconds. Details in
+    <a href="/guide/crushers/#extraction">crushers and extraction</a>.
+  </p>
+
+  {unpictured.length > 0 && (
+    <p class="text-sm text-facility-500">
+      Not pictured yet: {unpictured.join(', ')}. Screenshots are coming with the next update.
+    </p>
+  )}
+</GuideLayout>

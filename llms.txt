@@ -20,7 +20,7 @@ Facts below are taken from the game's scripts (beta build, 10 October 2026).
 - Scrap: 14 items, 3–140 kg; rarities Common ×1 (78%), Rare ×1.5 (17%), Charged ×3 (5%); 2 backpack slots plus one heavy item in hand.
 - Codes: none live yet (planned). Official list: https://beaniestudio.site/codes/
 - Developer: Beanie Studios — Anand Kumar (scripting, systems, animation and lighting); Pawan Dahe (map building, props, concept and community); Jai Mishra (content, editing, social media and sound effects)
-- Contact: press@beaniestudio.site
+- Contact: hello@beaniestudio.site (general), press@beaniestudio.site (press & creators)
 
 ## Links
 
@@ -33,6 +33,8 @@ Facts below are taken from the game's scripts (beta build, 10 October 2026).
 
 - [Home](https://beaniestudio.site/): what STATIC is, gameplay videos, how a round works, Jingles, roadmap, team.
 - [Beginner guide](https://beaniestudio.site/guide/): roles, round flow, controls, health, tools, tips.
+- [Map](https://beaniestudio.site/guide/map/): every room of the bunker with screenshots.
+- [Screenshots](https://beaniestudio.site/screenshots/): official screenshot gallery.
 - [Jingles](https://beaniestudio.site/guide/jingles/): Hunter stats, abilities and counterplay.
 - [The Worm](https://beaniestudio.site/guide/worm/): triggers and how to survive it.
 - [Scrap list](https://beaniestudio.site/guide/scrap/): every item with weight, rarity values and spawn chance.

@@ -3,7 +3,9 @@ import { SITE, LINKS } from '../site.config';
 
 const nav = [
   { href: '/guide', label: 'GUIDE' },
+  { href: '/guide/map', label: 'MAP' },
   { href: '/guide/jingles', label: 'JINGLES' },
+  { href: '/screenshots', label: 'MEDIA' },
   { href: '/blog', label: 'DEVLOG' },
   { href: '/faq', label: 'FAQ' },
   { href: '/press', label: 'PRESS' },
@@ -13,7 +15,7 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 function isActive(href: string): boolean {
   if (href === '/') return current === '/';
-  if (href === '/guide') return current === '/guide' || (current.startsWith('/guide/') && !current.startsWith('/guide/jingles'));
+  if (href === '/guide') return current === '/guide' || (current.startsWith('/guide/') && !/^\/guide\/(jingles|map)/.test(current));
   return current === href || current.startsWith(href + '/');
 }
 ---
@@ -36,7 +38,7 @@ function isActive(href: string): boolean {
       </span>
     </a>
 
-    <nav class="hidden items-center gap-7 font-mono text-xs tracking-[0.22em] md:flex" aria-label="Primary">
+    <nav class="hidden items-center gap-6 font-mono text-xs tracking-[0.2em] lg:flex" aria-label="Primary">
       {nav.map((item) => (
         <a
           href={item.href}
@@ -51,10 +53,10 @@ function isActive(href: string): boolean {
       ))}
     </nav>
 
-    <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary hidden !px-4 !py-2 text-xs md:inline-flex">Play free</a>
+    <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary hidden !px-4 !py-2 text-xs lg:inline-flex">Play free</a>
 
     <!-- Mobile menu: checkbox hack, zero JS -->
-    <details class="relative md:hidden">
+    <details class="relative lg:hidden">
       <summary
         class="grid h-9 w-9 cursor-pointer list-none place-items-center border border-facility-600 text-facility-100"
         aria-label="Toggle menu"

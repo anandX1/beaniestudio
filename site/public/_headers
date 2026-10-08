@@ -16,8 +16,6 @@
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
-/pagefind/*
-  Cache-Control: public, max-age=31536000, immutable
 
 # ---- static asset directories that contain no HTML (verified: images only) ----
 /og/*
@@ -25,6 +23,16 @@
 
 /yt/*
   Cache-Control: public, max-age=2592000
+
+# Screenshots + key art: stable names, regenerated rarely (scripts/media.mjs).
+/media/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/img/*
+  Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
+
+/press/*
+  Cache-Control: public, max-age=604800
 
 # ---- site chrome icons ----
 /favicon.png

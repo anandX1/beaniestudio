@@ -1,5 +1,6 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
+import ShotFigure from '../../components/ShotFigure.astro';
 import { WORM, SCRAPPER } from '../../data/game';
 ---
 
@@ -22,6 +23,8 @@ import { WORM, SCRAPPER } from '../../data/game';
     <strong>Short version:</strong> don't ring your bell, don't miss your throws, and when a Worm
     rears up, point your flashlight at it and hold it there.
   </div>
+
+  <ShotFigure ids={['worm-render', 'worm-ingame']} caption="The Worm: a Studio render (left) and in the bunker (right)." gallery="worm" aspect="16 / 10" />
 
   <h2 id="triggers">What makes a Worm spawn</h2>
   <h3>The bell (guaranteed)</h3>

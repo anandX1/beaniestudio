@@ -1,3 +1,5 @@
+> **OUTDATED (2026-10-08):** this doc describes the pre-beta design (wrecked shuttle, fuel, sound-only Hunter, 5v1, console, Q4 2026). Do not copy facts from it. Current facts: `src/data/game.ts`. Current copy: `LAUNCH-PACK.md`.
+
 # GROWTH.md — The Organic Audience Engine
 
 > Chief-marketing-officer runbook for STATIC: Salvage vs Hunter. Objective: arrive at

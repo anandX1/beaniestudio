@@ -2,14 +2,19 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import VideoCard from '../components/VideoCard.astro';
 import FollowSection from '../components/FollowSection.astro';
+import Shot from '../components/Shot.astro';
+import Lightbox from '../components/Lightbox.astro';
 import { SITE, LINKS } from '../site.config';
 import { FEATURED_VIDEO, VIDEOS, watchUrl } from '../data/videos';
+import { shot } from '../data/media';
+import { ROOM_INFO } from '../data/rooms';
 import {
-  GAME, MOVEMENT, JINGLES, POD, SCRAP, CRUSHERS, MINIGAMES, EXTRACTION, WORM, ROADMAP, TEAM, COMMUNITY, SCRAPPER,
+  GAME, MOVEMENT, JINGLES, POD, SCRAP, CRUSHERS, MINIGAMES, EXTRACTION, WORM, ROADMAP, TEAM, COMMUNITY, SCRAPPER, RESULTS, PROGRESSION,
 } from '../data/game';
 
 const lightest = SCRAP[0];
 const heaviest = SCRAP[SCRAP.length - 1];
+const heroShot = shot('central-room-globe');
 
 const tickerItems = [
   `CRUSHER QUOTA: ${CRUSHERS.totalKg} KG`,
@@ -24,22 +29,34 @@ const loop = [
   {
     n: '01',
     t: 'Scavenge',
+    shot: 'storage-bay',
+    pos: '50% 50%',
     b: `Search the bunker for scrap: ${SCRAP.length} kinds, from a ${lightest.kg} kg ${lightest.name.toLowerCase()} to a ${heaviest.kg} kg ${heaviest.name.toLowerCase()}. Small parts go in your ${SCRAPPER.backpackSlots} backpack slots. The heavy ones go in your hands, and you'll feel it.`,
+    link: { href: '/guide/scrap/', label: 'Every scrap item and its weight' },
   },
   {
     n: '02',
     t: 'Crush',
+    shot: 'crusher-console',
+    pos: '25% 50%',
     b: `${CRUSHERS.count} crushers spawn in different places every round. Feed them ${CRUSHERS.quotasKg.join(', ').replace(/, (\d+)$/, ' and $1')} kg: ${CRUSHERS.totalKg} kg in total. Crushing scrap is not quiet.`,
+    link: { href: '/guide/crushers/', label: 'How crushers work' },
   },
   {
     n: '03',
     t: 'Calibrate',
-    b: `A full crusher unlocks its console: ${CRUSHERS.minigamesPerConsole} quick minigames drawn from ${MINIGAMES.length}, like ${MINIGAMES.slice(0, 4).join(', ').toLowerCase()} and ${MINIGAMES[9].toLowerCase()}. Two players can work one console side by side. Mess one up and the console faults, loudly.`,
+    shot: 'crusher-console',
+    pos: '80% 50%',
+    b: `A full crusher unlocks its console: ${CRUSHERS.minigamesPerConsole} quick minigames drawn from ${MINIGAMES.length}, like ${MINIGAMES.slice(0, 3).join(', ').toLowerCase()} and ${MINIGAMES[9].toLowerCase()}. Two players can work one console side by side. Mess one up and it faults, loudly.`,
+    link: { href: '/guide/crushers/#minigames', label: `All ${MINIGAMES.length} minigames` },
   },
   {
     n: '04',
     t: 'Extract',
+    shot: 'result-escaped',
+    pos: '50% 30%',
     b: `Finish all ${CRUSHERS.count} crushers and the ${EXTRACTION.room} opens for ${EXTRACTION.windowSec} seconds. Reach it and a UFO beams you out. Escaping is personal: you make it, or you don't.`,
+    link: { href: '/guide/', label: 'Beginner guide' },
   },
 ];
 
@@ -59,8 +76,6 @@ const compare = [
   ['The escape', 'Open the gate', `A ${EXTRACTION.windowSec}-second window and a personal UFO beam-out`],
 ];
 
-const pageImage = new URL('/press/jingles-render.png', SITE.url).href;
-
 const videoGameLd = {
   '@context': 'https://schema.org',
   '@type': 'VideoGame',
@@ -69,7 +84,11 @@ const videoGameLd = {
   alternateName: GAME.fullName,
   description: SITE.description,
   url: SITE.url,
-  image: pageImage,
+  image: [
+    new URL('/press/jingles-render.png', SITE.url).href,
+    ...['central-room-globe', 'cargo-dock-shuttle', 'jingles-closeup', 'crusher-console'].map((id) => new URL(shot(id).full, SITE.url).href),
+  ],
+  screenshot: ROOM_INFO.map((r) => new URL(shot(r.shots[0]).full, SITE.url).href),
   genre: [...GAME.genres],
   gamePlatform: ['Roblox', ...GAME.platforms],
   operatingSystem: 'Roblox',
@@ -96,8 +115,12 @@ const videoGameLd = {
 ---
 
 <BaseLayout title={SITE.title} path="/" ogImageAlt="Jingles, the clockwork jester Hunter from STATIC, next to the STATIC logo" jsonLd={[videoGameLd]}>
-  <!-- Arm the beat reveals INLINE (not in the deferred bundle) so above-fold
-       beats paint on first frame. Fail-safe: no observer → nothing hidden. -->
+  <Fragment slot="head">
+    <link rel="preload" as="image" type="image/webp" imagesrcset={heroShot.srcset} imagesizes="(min-width: 768px) 100vw, 50vw" fetchpriority="high" />
+  </Fragment>
+
+  <!-- Beat reveals: armed inline so above-fold copy paints on first frame.
+       Fail-safe: no observer → nothing is hidden. -->
   <script is:inline>
     (function () {
       if (!('IntersectionObserver' in window)) return;
@@ -139,39 +162,45 @@ const videoGameLd = {
   <div class="progress-rail" aria-hidden="true"><div class="progress-rail-fill" id="progressFill"></div></div>
 
   <!-- ================= HERO ================= -->
-  <section class="hero relative overflow-hidden" aria-label="STATIC">
+  <section class="hero-cine" aria-label="STATIC">
+    <div class="hero-cine-bg" aria-hidden="true">
+      <!-- Phones see this backdrop under a heavy shade: 50vw picks the 640 file. -->
+      <Shot id="central-room-globe" sizes="(min-width: 768px) 100vw, 50vw" eager alt="" />
+    </div>
+    <div class="hero-cine-shade" aria-hidden="true"></div>
     <canvas id="staticNoise" class="static-noise" aria-hidden="true"></canvas>
-    <div class="relative mx-auto grid w-full max-w-6xl items-center gap-6 px-4 pt-14 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:pt-10">
-      <div class="py-6 lg:py-20">
+
+    <div class="relative mx-auto grid w-full max-w-6xl items-end gap-4 px-4 pt-24 pb-10 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:pt-16 lg:pb-0">
+      <div class="hero-cine-copy">
         <p id="launchStatus" data-launch={SITE.launchDate} class="kicker flex items-center gap-3">
           <span class="dot" aria-hidden="true"></span>
           <span data-launch-label>Free on Roblox · Beta out {GAME.launchLabel}</span>
         </p>
 
-        <h1 class="beat mt-6 font-display text-7xl font-bold uppercase leading-none tracking-tight sm:text-9xl">
+        <h1 class="mt-6 font-display text-7xl font-bold uppercase leading-none tracking-tight sm:text-9xl">
           <span class="flicker text-signal" data-decode>Static</span>
         </h1>
-        <p class="beat mt-2 font-display text-2xl font-semibold uppercase tracking-[0.14em] text-facility-100 sm:text-3xl" style="--beat-delay: 90ms">
+        <p class="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.14em] text-facility-100 sm:text-3xl">
           {GAME.tagline}
         </p>
 
-        <p class="beat mt-7 max-w-xl text-lg leading-relaxed text-facility-300" style="--beat-delay: 160ms">
+        <p class="mt-7 max-w-xl text-lg leading-relaxed text-facility-100/85">
           A free co-op horror game on Roblox. Up to {GAME.scrappers.max} players search an abandoned
           bunker for scrap and haul {CRUSHERS.totalKg} kg of it to the crushers. One more player is
           <strong class="text-facility-100">Jingles</strong>, the Hunter, and Jingles is a little
           faster than you.
         </p>
 
-        <div class="beat mt-9 flex flex-wrap items-center gap-4" style="--beat-delay: 230ms">
+        <div class="mt-9 flex flex-wrap items-center gap-4">
           <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary">
             Play free on Roblox <span aria-hidden="true">→</span>
           </a>
-          <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-secondary">
-            Join the Discord <span aria-hidden="true">→</span>
+          <a href="#tour" class="btn-secondary bg-facility-950/40">
+            Tour the bunker <span aria-hidden="true">↓</span>
           </a>
         </div>
 
-        <ul class="beat mt-10 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs tracking-[0.16em] text-facility-500" style="--beat-delay: 300ms">
+        <ul class="mt-10 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs tracking-[0.16em] text-facility-300">
           <li>{GAME.scrappers.min}–{GAME.scrappers.max} SCRAPPERS VS {GAME.hunters} HUNTER</li>
           <li>ROUNDS UP TO {GAME.roundLimitMin} MIN</li>
           <li>PC + MOBILE</li>
@@ -179,23 +208,23 @@ const videoGameLd = {
         </ul>
       </div>
 
-      <div class="hero-art relative mx-auto w-full max-w-sm self-end lg:max-w-none">
+      <div class="hero-art hero-cine-fg relative mx-auto w-full max-w-[16rem] self-end sm:max-w-xs lg:max-w-none">
         <img
           src="/img/jingles-720.webp"
-          srcset="/img/jingles-480.webp 279w, /img/jingles-720.webp 418w, /img/jingles.webp 697w"
-          sizes="(min-width: 1024px) 420px, 280px"
+          srcset="/img/jingles-360.webp 360w, /img/jingles-720.webp 418w, /img/jingles.webp 697w"
+          sizes="(min-width: 1024px) 420px, 200px"
           width="418"
           height="720"
+          fetchpriority="low"
           alt="Jingles, the Hunter in STATIC: a clockwork jester with a grinning skull mask, a belled jester cap and long metal claws"
-          fetchpriority="high"
-          class="relative mx-auto h-auto max-h-[78svh] w-auto"
+          class="relative mx-auto h-auto max-h-[80svh] w-auto"
         />
       </div>
     </div>
   </section>
 
   <!-- Facts band (true numbers only — every item comes from data/game.ts) -->
-  <div class="ticker border-t border-facility-700 bg-facility-900/60" aria-hidden="true">
+  <div class="ticker border-y border-facility-700 bg-facility-900/80" aria-hidden="true">
     <div class="ticker-track font-mono text-[0.7rem] tracking-[0.3em] text-signal-dim">
       {[0, 1].map(() =>
         tickerItems.map((item) => (
@@ -208,12 +237,203 @@ const videoGameLd = {
     </div>
   </div>
 
+  <!-- ================= HOW A ROUND WORKS ================= -->
+  <section aria-labelledby="loop-h" id="how-to-play">
+    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
+      <p class="kicker">How a round works</p>
+      <h2 id="loop-h" class="beat mt-4 max-w-3xl font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
+        Find it. Haul it. Crush it. Get out.
+      </h2>
+      <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
+        Scrappers spawn together in the Central Room. Jingles is released shortly after, from one
+        of {GAME.hunterSpawnPoints} random spots. A round lasts up to {GAME.roundLimitMin} minutes;
+        if time runs out, the Hunter wins.
+      </p>
+
+      <ol class="mt-16 space-y-20 sm:space-y-28">
+        {loop.map((s, i) => (
+          <li class:list={['grid items-center gap-8 lg:grid-cols-2 lg:gap-14', i % 2 === 1 && 'lg:[&>*:first-child]:order-2']}>
+            <div class="reveal shot-frame aspect-[16/10]">
+              <Shot id={s.shot} sizes="(min-width: 1024px) 560px, 100vw" imgClass="h-full w-full object-cover" alt={shot(s.shot).alt} />
+            </div>
+            <div>
+              <div class="flex items-baseline gap-4">
+                <span class="font-mono text-sm text-signal-dim" aria-hidden="true">{s.n}</span>
+                <h3 class="font-display text-3xl font-bold uppercase tracking-wide sm:text-4xl">{s.t}</h3>
+              </div>
+              <p class="mt-5 text-lg leading-relaxed text-facility-300">{s.b}</p>
+              <a href={s.link.href} class="mt-6 inline-block font-mono text-sm text-signal hover:text-signal-dim">{s.link.label} <span aria-hidden="true">→</span></a>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= TOUR THE BUNKER (pinned horizontal on desktop) ================= -->
+  <section class="tour border-t border-facility-800" id="tour" aria-labelledby="tour-h" style={`--tour-count: ${ROOM_INFO.length}`}>
+    <div class="tour-pin py-20 lg:py-0">
+      <div class="mx-auto mb-8 flex w-full max-w-6xl flex-wrap items-end justify-between gap-6 px-4 sm:px-6">
+        <div>
+          <p class="kicker">The map</p>
+          <h2 id="tour-h" class="mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">Tour the bunker</h2>
+          <p class="mt-4 max-w-xl text-facility-300">
+            One map in the beta, {ROOM_INFO.length}+ rooms. Every screenshot is from the game.
+            <span class="lg:hidden">Swipe to look around.</span>
+          </p>
+        </div>
+        <a href="/guide/map/" class="btn-secondary">Full map guide <span aria-hidden="true">→</span></a>
+      </div>
+
+      <ol class="strip" aria-label="Rooms of the bunker">
+        {ROOM_INFO.map((r, i) => (
+          <li class="tour-card">
+            <a href={`/guide/map/#${r.slug}`} class="group block">
+              <div class="shot-frame">
+                <Shot id={r.shots[0]} sizes="(min-width: 1024px) 704px, 82vw" imgClass="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+                <div class="shot-caption">
+                  <p class="font-mono text-[0.68rem] tracking-[0.2em] text-signal">{String(i + 1).padStart(2, '0')} / {String(ROOM_INFO.length).padStart(2, '0')}</p>
+                  <p class="mt-1 font-display text-2xl font-bold uppercase tracking-wide text-facility-100 sm:text-3xl">{r.name}</p>
+                </div>
+              </div>
+              <p class="mt-3 max-w-xl text-sm leading-relaxed text-facility-300">{r.blurb}</p>
+            </a>
+          </li>
+        ))}
+      </ol>
+
+      <div class="mx-auto mt-8 hidden w-full max-w-6xl px-6 lg:block" aria-hidden="true">
+        <div class="h-px w-full bg-facility-700"><div class="tour-progress h-px w-full bg-signal"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= JINGLES ================= -->
+  <section class="relative overflow-hidden border-t border-facility-800" aria-labelledby="jingles-h" id="jingles">
+    <div class="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 py-24 sm:px-6 sm:py-32 lg:grid-cols-[0.95fr_1.05fr]">
+      <div class="order-2 grid gap-4 lg:order-1">
+        <div class="reveal shot-frame aspect-[4/3]">
+          <Shot id="jingles-closeup" sizes="(min-width: 1024px) 520px, 100vw" lightbox="jingles" imgClass="h-full w-full object-cover object-[50%_30%]" />
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="reveal shot-frame aspect-[4/3]">
+            <Shot id="jingles-red" sizes="(min-width: 1024px) 260px, 50vw" lightbox="jingles" imgClass="h-full w-full object-cover object-[50%_35%]" />
+          </div>
+          <div class="reveal shot-frame aspect-[4/3]">
+            <Shot id="jingles-medbay" sizes="(min-width: 1024px) 260px, 50vw" lightbox="jingles" imgClass="h-full w-full object-cover object-[60%_50%]" />
+          </div>
+        </div>
+      </div>
+
+      <div class="order-1 lg:order-2">
+        <p class="noise-label text-status-red">The Hunter — 1 per round</p>
+        <h2 id="jingles-h" class="beat mt-4 font-display text-4xl font-bold uppercase tracking-wide sm:text-6xl" data-decode>
+          Meet Jingles
+        </h2>
+        <p class="beat mt-6 max-w-xl text-lg leading-relaxed text-facility-300">
+          Jingles is not an AI. It's one of the players in your server, picked each round, playing
+          a clockwork jester with a grinning skull mask and claws for hands. The rest of the
+          server is trying to get away from it.
+        </p>
+
+        <dl class="beat mt-10 divide-y divide-facility-700 border-y border-facility-700">
+          {jinglesStats.map((s) => (
+            <div class="grid grid-cols-[6.5rem_5.5rem_1fr] items-baseline gap-3 py-4 sm:grid-cols-[9rem_7rem_1fr] sm:gap-4">
+              <dt class="font-mono text-xs uppercase tracking-widest text-facility-500">{s.k}</dt>
+              <dd class="whitespace-nowrap font-display text-xl font-bold text-signal sm:text-2xl">{s.v}</dd>
+              <dd class="text-sm leading-relaxed text-facility-300">{s.note}</dd>
+            </div>
+          ))}
+        </dl>
+        <p class="mt-3 font-mono text-[0.68rem] tracking-[0.14em] text-facility-500">SPEEDS IN STUDS PER SECOND. VALUES FROM THE BETA BUILD.</p>
+
+        <p class="beat mt-8">
+          <a href="/guide/jingles/" class="btn-secondary">Jingles: abilities and counterplay <span aria-hidden="true">→</span></a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= THE OTHER THREATS ================= -->
+  <section class="border-t border-facility-800" aria-labelledby="threats-h">
+    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
+      <p class="kicker">It's not only Jingles</p>
+      <h2 id="threats-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
+        Two more ways to lose
+      </h2>
+
+      <div class="mt-12 grid gap-6 lg:grid-cols-2">
+        <article class="panel flex flex-col">
+          <div class="reveal shot-frame aspect-[16/9] border-0 border-b">
+            <Shot id="worm-render" sizes="(min-width: 1024px) 560px, 100vw" lightbox="threats" imgClass="h-full w-full object-cover" />
+          </div>
+          <div class="flex flex-1 flex-col p-7">
+            <p class="noise-label text-signal">Under the floor</p>
+            <h3 class="mt-3 font-display text-3xl font-bold uppercase leading-tight tracking-wide">The Worm</h3>
+            <p class="mt-5 leading-relaxed text-facility-300">
+              Every Scrapper carries a bell they can't drop. Ring it and a Worm surfaces
+              {WORM.bellSpawnDelaySec} seconds later. Missed throws, heavy scrap and screaming mimic
+              items can draw one too. It grabs you, drains {WORM.grabDamagePct}% of your health and
+              leaves.
+            </p>
+            <p class="mt-4 leading-relaxed text-facility-100">Hold your flashlight on it while it rears up and it backs off.</p>
+            <a href="/guide/worm/" class="mt-auto pt-6 font-mono text-sm text-signal hover:text-signal-dim">How to survive the Worm <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+        <article class="panel flex flex-col">
+          <div class="reveal shot-frame aspect-[16/9] border-0 border-b">
+            <Shot id="pod-active" sizes="(min-width: 1024px) 560px, 100vw" lightbox="threats" imgClass="h-full w-full object-cover" />
+          </div>
+          <div class="flex flex-1 flex-col p-7">
+            <p class="noise-label text-status-red">After the second hit</p>
+            <h3 class="mt-3 font-display text-3xl font-bold uppercase leading-tight tracking-wide">The {POD.name}</h3>
+            <p class="mt-5 leading-relaxed text-facility-300">
+              Go down and Jingles can carry you to a pod. You get {POD.timerSec} seconds. A teammate
+              holds E for {POD.rescueHoldSec} seconds to break you out. If nobody's left free to save
+              you, the timer runs twice as fast.
+            </p>
+            <p class="mt-4 leading-relaxed text-facility-100">Camping a pod overloads it, stuns Jingles and sets you free.</p>
+            <a href="/guide/capture-and-rescue/" class="mt-auto pt-6 font-mono text-sm text-signal hover:text-signal-dim">Capture and rescue, explained <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOUR ENDINGS ================= -->
+  <section class="border-t border-facility-800" aria-labelledby="endings-h">
+    <div class="mx-auto w-full max-w-6xl px-4 pt-24 sm:px-6 sm:pt-32">
+      <p class="kicker">Every round ends on one of four screens</p>
+      <h2 id="endings-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
+        Escaped or consumed
+      </h2>
+      <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
+        Every round pays out {PROGRESSION.currency} and XP, win or lose. Your results card tracks
+        {PROGRESSION.scrapperStats.slice(0, -1).join(', ')} and {PROGRESSION.scrapperStats.at(-1)}.
+      </p>
+    </div>
+    <ul class="strip mt-12 pb-24 sm:pb-32" aria-label="End-of-round screens">
+      {RESULTS.map((r) => (
+        <li class="w-[min(86vw,36rem)]">
+          <div class="shot-frame aspect-[16/9]">
+            <Shot id={r.id} sizes="(min-width: 640px) 576px, 86vw" lightbox="endings" caption={`${r.title}: ${r.line}`} imgClass="h-full w-full object-cover" />
+          </div>
+          <p class="mt-3 flex items-baseline justify-between gap-4">
+            <span class:list={['font-display text-xl font-bold uppercase tracking-wide', r.win ? 'text-facility-100' : 'text-facility-300']}>{r.title}</span>
+            <span class="font-mono text-xs tracking-[0.14em] text-facility-500">{r.side.toUpperCase()} {r.win ? 'WIN' : 'LOSS'}</span>
+          </p>
+          <p class="mt-1 text-sm text-facility-300">“{r.line}”</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
   <!-- ================= FOOTAGE ================= -->
-  <section class="border-t border-facility-800" aria-label="Gameplay videos" id="videos">
-    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6">
+  <section class="border-t border-facility-800" aria-labelledby="videos-h" id="videos">
+    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
       <p class="kicker">Gameplay</p>
-      <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
-        Footage from the bunker
+      <h2 id="videos-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
+        Watch it in motion
       </h2>
 
       <div class="mt-12 grid gap-6 lg:grid-cols-5">
@@ -247,144 +467,25 @@ const videoGameLd = {
     </div>
   </section>
 
-  <!-- ================= HOW A ROUND WORKS ================= -->
-  <section class="border-t border-facility-800" aria-label="How a round works" id="how-to-play">
-    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6">
-      <p class="kicker">How a round works</p>
-      <h2 class="beat mt-4 max-w-3xl font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
-        Find it. Haul it. Crush it. Get out.
-      </h2>
-      <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
-        Scrappers spawn together in the central hub. Jingles is released shortly after, from one
-        of {GAME.hunterSpawnPoints} random spots. A round lasts up to
-        {GAME.roundLimitMin} minutes; if time runs out, the Hunter wins.
-      </p>
-
-      <ol class="mt-14 grid gap-px border border-facility-700 bg-facility-700 md:grid-cols-2">
-        {loop.map((s, i) => (
-          <li class="beat bg-facility-900 p-8" style={`--beat-delay: ${(i % 2) * 110}ms`}>
-            <div class="flex items-baseline gap-4">
-              <span class="font-mono text-sm text-signal-dim" aria-hidden="true">{s.n}</span>
-              <h3 class="font-display text-2xl font-bold uppercase tracking-wide">{s.t}</h3>
-            </div>
-            <p class="mt-4 leading-relaxed text-facility-300">{s.b}</p>
-          </li>
-        ))}
-      </ol>
-
-      <p class="beat mt-10 flex flex-wrap gap-x-8 gap-y-3 font-mono text-sm">
-        <a href="/guide/" class="text-signal hover:text-signal-dim">Full beginner's guide <span aria-hidden="true">→</span></a>
-        <a href="/guide/scrap/" class="text-signal hover:text-signal-dim">Every scrap item and its weight <span aria-hidden="true">→</span></a>
-        <a href="/guide/crushers/" class="text-signal hover:text-signal-dim">Crushers and minigames <span aria-hidden="true">→</span></a>
-      </p>
-    </div>
-  </section>
-
-  <!-- ================= JINGLES ================= -->
-  <section class="border-t border-facility-800" aria-label="Meet Jingles, the Hunter" id="jingles">
-    <div class="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[0.8fr_1.2fr]">
-      <div class="beat hunter-portrait panel relative order-2 overflow-hidden lg:order-1">
-        <img
-          src="/img/jingles-closeup.webp"
-          width="640"
-          height="664"
-          loading="lazy"
-          decoding="async"
-          alt="Close-up of Jingles: a grinning skull mask under a red, navy and brown jester cap with brass bells"
-          class="relative mx-auto block h-auto w-full max-w-md pt-10"
-        />
-        <div class="hunter-fade" aria-hidden="true"></div>
-        <p class="absolute bottom-4 left-5 font-mono text-[0.68rem] tracking-[0.2em] text-facility-300">SUBJECT: JINGLES · CLASS: HUNTER</p>
-      </div>
-
-      <div class="order-1 lg:order-2">
-        <p class="noise-label text-status-red">The Hunter — 1 per round</p>
-        <h2 class="beat mt-4 font-display text-4xl font-bold uppercase tracking-wide sm:text-6xl" data-decode>
-          Meet Jingles
-        </h2>
-        <p class="beat mt-6 max-w-xl text-lg leading-relaxed text-facility-300">
-          Jingles is not an AI. It's one of the players in your server, picked each round, playing
-          a clockwork jester with a grinning skull mask and claws for hands. The rest of the
-          server is trying to get away from it.
-        </p>
-
-        <dl class="beat mt-10 divide-y divide-facility-700 border-y border-facility-700">
-          {jinglesStats.map((s) => (
-            <div class="grid grid-cols-[6.5rem_5.5rem_1fr] items-baseline gap-3 py-4 sm:grid-cols-[9rem_7rem_1fr] sm:gap-4">
-              <dt class="font-mono text-xs uppercase tracking-widest text-facility-500">{s.k}</dt>
-              <dd class="whitespace-nowrap font-display text-xl font-bold text-signal sm:text-2xl">{s.v}</dd>
-              <dd class="text-sm leading-relaxed text-facility-300">{s.note}</dd>
-            </div>
-          ))}
-        </dl>
-        <p class="mt-3 font-mono text-[0.68rem] tracking-[0.14em] text-facility-500">SPEEDS IN STUDS PER SECOND. VALUES FROM THE BETA BUILD.</p>
-
-        <p class="beat mt-8">
-          <a href="/guide/jingles/" class="btn-secondary">Jingles: abilities and counterplay <span aria-hidden="true">→</span></a>
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= THE OTHER THREATS ================= -->
-  <section class="border-t border-facility-800" aria-label="The Worm and the pods">
-    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6">
-      <p class="kicker">It's not only Jingles</p>
-      <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
-        Two more ways to lose
-      </h2>
-
-      <div class="split mt-12">
-        <div class="beat">
-          <p class="noise-label text-signal">Under the floor</p>
-          <h3 class="mt-3 font-display text-3xl font-bold uppercase leading-tight tracking-wide">The Worm</h3>
-          <p class="mt-5 leading-relaxed text-facility-300">
-            Every Scrapper carries a bell they can't drop. Ring it and a Worm surfaces
-            {WORM.bellSpawnDelaySec} seconds later. Missed throws, heavy scrap and screaming mimic
-            items can draw one too. It grabs you, drains {WORM.grabDamagePct}% of your health and
-            leaves.
-          </p>
-          <p class="mt-4 leading-relaxed text-facility-100">
-            Hold your flashlight on it while it rears up and it backs off.
-          </p>
-          <a href="/guide/worm/" class="mt-6 inline-block font-mono text-sm text-signal hover:text-signal-dim">How to survive the Worm <span aria-hidden="true">→</span></a>
-        </div>
-        <div class="beat" style="--beat-delay: 140ms">
-          <p class="noise-label text-status-red">After the second hit</p>
-          <h3 class="mt-3 font-display text-3xl font-bold uppercase leading-tight tracking-wide">The Pod</h3>
-          <p class="mt-5 leading-relaxed text-facility-300">
-            Go down and Jingles can carry you to a pod. You get {POD.timerSec} seconds. A teammate
-            holds E for {POD.rescueHoldSec} seconds to break you out. If nobody's left free to save
-            you, the timer runs twice as fast.
-          </p>
-          <p class="mt-4 leading-relaxed text-facility-100">
-            Jingles can't just stand guard: camping a pod overloads it, stuns the Hunter and sets
-            you free.
-          </p>
-          <a href="/guide/capture-and-rescue/" class="mt-6 inline-block font-mono text-sm text-signal hover:text-signal-dim">Capture and rescue, explained <span aria-hidden="true">→</span></a>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ================= WHAT'S DIFFERENT ================= -->
-  <section class="border-t border-facility-800" aria-label="How STATIC is different">
-    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6">
+  <section class="border-t border-facility-800" aria-labelledby="diff-h">
+    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
       <p class="kicker">Why we built it</p>
-      <h2 class="beat mt-4 max-w-3xl font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
+      <h2 id="diff-h" class="beat mt-4 max-w-3xl font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
         Not another generator game
       </h2>
       <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
         Most asymmetrical horror games compete on graphics and keep the same loop: fix the
         machines, open the gate. We wanted the survivors' side to be its own game, where you
         explore, decide what's worth carrying and work as a team.
+        <a href="/blog/why-static-is-not-a-generator-game/" class="text-signal underline decoration-signal-dim underline-offset-4 hover:text-signal-dim">Read why</a>.
       </p>
 
       <div class="beat mt-12 overflow-x-auto border border-facility-700">
         <table class="w-full min-w-[40rem] text-left text-sm">
           <thead class="bg-facility-900 font-mono text-xs uppercase tracking-widest text-facility-500">
             <tr>
-              <th scope="col" class="w-36 px-5 py-4 font-normal"></th>
+              <th scope="col" class="w-36 px-5 py-4 font-normal"><span class="sr-only">Aspect</span></th>
               <th scope="col" class="px-5 py-4 font-normal">Most asymmetrical horror</th>
               <th scope="col" class="px-5 py-4 font-normal text-signal">STATIC</th>
             </tr>
@@ -403,12 +504,18 @@ const videoGameLd = {
     </div>
   </section>
 
+  <!-- Full-bleed parallax band -->
+  <div class="parallax relative h-[42svh] overflow-hidden border-y border-facility-800 sm:h-[60svh]" aria-hidden="true">
+    <Shot id="cargo-dock-shuttle" sizes="100vw" alt="" imgClass="absolute inset-0 h-full w-full object-cover" />
+    <div class="absolute inset-0 bg-gradient-to-b from-facility-950/70 via-transparent to-facility-950/80"></div>
+  </div>
+
   <!-- ================= ROADMAP ================= -->
-  <section class="border-t border-facility-800" aria-label="Roadmap">
-    <div class="mx-auto grid w-full max-w-6xl gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[0.9fr_1.1fr]">
+  <section aria-labelledby="roadmap-h">
+    <div class="mx-auto grid w-full max-w-6xl gap-12 px-4 py-24 sm:px-6 sm:py-32 lg:grid-cols-[0.9fr_1.1fr]">
       <div>
         <p class="kicker">Planned — not in the beta yet</p>
-        <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
+        <h2 id="roadmap-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
           What's next
         </h2>
         <p class="beat mt-6 text-lg leading-relaxed text-facility-300">
@@ -429,10 +536,10 @@ const videoGameLd = {
   </section>
 
   <!-- ================= TEAM ================= -->
-  <section class="border-t border-facility-800" aria-label="The team">
-    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6">
+  <section class="border-t border-facility-800" aria-labelledby="team-h">
+    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
       <p class="kicker">Who makes it</p>
-      <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
+      <h2 id="team-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
         Built by three people
       </h2>
       <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
@@ -442,9 +549,10 @@ const videoGameLd = {
       <ul class="mt-12 grid gap-5 md:grid-cols-3">
         {TEAM.map((m, i) => (
           <li class="beat panel p-7" style={`--beat-delay: ${i * 100}ms`}>
-            <p class="font-display text-xl font-bold uppercase tracking-wide">{m.name}</p>
+            <p class="font-mono text-xs uppercase tracking-widest text-signal-dim">{m.title}</p>
+            <p class="mt-2 font-display text-xl font-bold uppercase tracking-wide">{m.name}</p>
             <p class="mt-2 text-sm leading-relaxed text-facility-300">{m.role}</p>
-            <p class="mt-4 font-mono text-xs text-facility-500">ROBLOX: {m.roblox}</p>
+            <a href={`mailto:${m.email}`} class="mt-4 inline-block font-mono text-xs text-facility-300 hover:text-signal">{m.email}</a>
           </li>
         ))}
       </ul>
@@ -454,10 +562,12 @@ const videoGameLd = {
   <FollowSection />
 
   <!-- ================= FINAL CTA ================= -->
-  <section class="border-t border-facility-800" aria-label="Play STATIC">
-    <div class="mx-auto w-full max-w-6xl px-4 py-24 text-center sm:px-6">
+  <section class="parallax relative overflow-hidden border-t border-facility-800" aria-labelledby="cta-h">
+    <Shot id="control-room-hologram" sizes="100vw" alt="" imgClass="absolute inset-0 h-full w-full object-cover opacity-40" />
+    <div class="absolute inset-0 bg-gradient-to-b from-facility-950 via-facility-950/60 to-facility-950" aria-hidden="true"></div>
+    <div class="relative mx-auto w-full max-w-6xl px-4 py-28 text-center sm:px-6 sm:py-40">
       <p class="kicker">Free · {GAME.platforms.join(' + ')} · Roblox</p>
-      <h2 class="beat mt-4 font-display text-4xl font-bold uppercase tracking-wide sm:text-6xl" data-decode>
+      <h2 id="cta-h" class="beat mt-4 font-display text-4xl font-bold uppercase tracking-wide sm:text-6xl" data-decode>
         The bunker is open
       </h2>
       <p class="beat mx-auto mt-5 max-w-xl text-facility-300" style="--beat-delay: 100ms">
@@ -465,10 +575,12 @@ const videoGameLd = {
       </p>
       <div class="beat mt-9 flex flex-wrap items-center justify-center gap-4" style="--beat-delay: 200ms">
         <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary">Play free on Roblox <span aria-hidden="true">→</span></a>
-        <a href="/guide/" class="btn-secondary">Read the guide first <span aria-hidden="true">→</span></a>
+        <a href="/guide/" class="btn-secondary bg-facility-950/50">Read the guide first <span aria-hidden="true">→</span></a>
       </div>
     </div>
   </section>
+
+  <Lightbox />
 
   <!-- Launch status: day-precision, so no fake launch hour is implied. -->
   <script>
@@ -529,10 +641,11 @@ const videoGameLd = {
       sizeCanvas();
       window.addEventListener('resize', sizeCanvas);
       let rafId = 0;
-      let parity = 0;
+      let frame = 0;
       const draw = function () {
-        parity ^= 1;
-        if (parity && running) {
+        // ~20fps: static is noise — more frames add nothing but main-thread cost.
+        frame = (frame + 1) % 3;
+        if (frame === 0 && running) {
           const d = img.data;
           for (let i = 0; i < d.length; i += 4) {
             const v = (Math.random() * 255) | 0;
@@ -547,8 +660,8 @@ const videoGameLd = {
       const start = function () {
         if (rafId) return;
         const kick = function () { if (!rafId) rafId = requestAnimationFrame(draw); };
-        if ('requestIdleCallback' in window) requestIdleCallback(kick, { timeout: 600 });
-        else (window as any).setTimeout(kick, 120);
+        if ('requestIdleCallback' in window) requestIdleCallback(kick, { timeout: 1500 });
+        else (window as any).setTimeout(kick, 400);
       };
       const stop = function () { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } };
       if ('IntersectionObserver' in window) {

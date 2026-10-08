@@ -1,0 +1,46 @@
+---
+/**
+ * A game screenshot from the registry: responsive WebP srcset, intrinsic
+ * width/height (zero CLS), lazy by default. `lightbox` wraps it in a link
+ * to the full-size file that Lightbox.astro opens in a <dialog>; without JS
+ * the link simply opens the image.
+ */
+import { shot } from '../data/media';
+
+interface Props {
+  id: string;
+  sizes?: string;
+  class?: string;
+  imgClass?: string;
+  eager?: boolean;
+  /** Gallery name for prev/next in the lightbox. Omit for a plain image. */
+  lightbox?: string;
+  caption?: string;
+  /** Override the registry alt text (rare — prefer editing media.json). */
+  alt?: string;
+}
+
+const { id, sizes = '(min-width: 1280px) 1200px, 100vw', class: cls, imgClass, eager = false, lightbox, caption, alt } = Astro.props;
+const s = shot(id);
+const img = {
+  src: s.w > 1280 ? `/media/${s.id}-1280.webp` : s.full,
+  srcset: s.srcset,
+  sizes,
+  width: s.w,
+  height: s.h,
+  alt: alt ?? s.alt,
+  loading: eager ? ('eager' as const) : ('lazy' as const),
+  decoding: 'async' as const,
+  fetchpriority: eager ? ('high' as const) : undefined,
+  class: imgClass,
+};
+---
+
+{lightbox ? (
+  <a href={s.full} class:list={['shot-link', cls]} data-lb={lightbox} data-caption={caption ?? s.alt}>
+    <img {...img} />
+    <span class="shot-zoom" aria-hidden="true">⤢</span>
+  </a>
+) : (
+  <img {...img} class:list={[cls, imgClass]} />
+)}
