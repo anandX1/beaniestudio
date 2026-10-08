@@ -18,7 +18,7 @@ const multi = ids.length > 1;
 ---
 
 <figure class="my-8">
-  <div class:list={['grid gap-3', multi && (ids.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-3')]}>
+  <div class:list={['grid gap-3', multi && (ids.length === 2 || ids.length === 4 ? 'sm:grid-cols-2' : 'sm:grid-cols-3')]}>
     {ids.map((id) => (
       <div class="reveal shot-frame" style={`aspect-ratio: ${multi ? aspect : 'auto'}`}>
         <Shot id={id} lightbox={gallery} sizes={multi ? '(min-width: 1024px) 360px, 100vw' : '(min-width: 1024px) 736px, 100vw'} imgClass={multi ? 'h-full w-full object-cover' : 'h-auto w-full'} />

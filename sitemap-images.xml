@@ -64,6 +64,45 @@
     <image:image><image:loc>https://beaniestudio.site/media/result-defeated-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/hud-mobile-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/first-person-hub-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/jingles-studio-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/jingles-shadow-2-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hallway-cargo-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hallway-control-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hallway-control-2-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hallway-green-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hallway-strip-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/lobby-arena-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-orb-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/cargo-dock-catwalk-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/cargo-dock-bay-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/cargo-dock-sign-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/cargo-dock-low-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/control-room-wide-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/control-room-desks-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/control-room-floor-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/control-room-detail-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/interrogation-office-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/interrogation-blue-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/interrogation-dark-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/medbay-beds-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/medbay-wide-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-entrance-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-coils-2-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-pipes-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-window-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-lab-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-office-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-tanks-wide-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/security-corridor-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/security-shelves-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/storage-bay-aisle-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/storage-bay-dark-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/storage-bay-sign-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/crusher-detail-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hunter-hud-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hunter-reveal-forest-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/office-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/worm-wide-1920.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://beaniestudio.site/guide/map/</loc>
@@ -71,25 +110,56 @@
     <image:image><image:loc>https://beaniestudio.site/media/central-room-globe-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/central-room-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/first-person-hub-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-orb-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/cargo-dock-shuttle-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/cargo-dock-floor-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/cargo-dock-catwalk-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/cargo-dock-bay-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/cargo-dock-sign-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/cargo-dock-low-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/storage-bay-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/storage-bay-forklift-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/storage-bay-aisle-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/storage-bay-dark-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/storage-bay-sign-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/control-room-hologram-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/control-room-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/control-room-wide-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/control-room-desks-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/control-room-floor-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/control-room-detail-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/reactor-coils-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/reactor-tanks-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/reactor-door-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-entrance-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-coils-2-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-pipes-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-window-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-lab-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-office-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/reactor-tanks-wide-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/medbay-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/medbay-red-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/jingles-medbay-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/medbay-beds-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/medbay-wide-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/security-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/security-desk-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/security-corridor-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/security-shelves-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/interrogation-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/interrogation-red-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/interrogation-office-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/interrogation-blue-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/interrogation-dark-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/hallway-storage-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/hallway-medbay-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/hallway-security-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hallway-cargo-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hallway-control-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hallway-control-2-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hallway-green-1920.webp</image:loc></image:image>
+    <image:image><image:loc>https://beaniestudio.site/media/hallway-strip-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/lobby-1920.webp</image:loc></image:image>
     <image:image><image:loc>https://beaniestudio.site/media/hunter-reveal-1920.webp</image:loc></image:image>
   </url>

@@ -12,7 +12,7 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const PAGES: { path: string; ids: string[] }[] = [
   { path: '/', ids: ['central-room-globe', 'storage-bay', 'crusher-console', 'result-escaped', ...ROOM_INFO.map((r) => r.shots[0]), 'jingles-closeup', 'jingles-red', 'jingles-medbay', 'worm-render', 'pod-active', 'result-consumed', 'result-prey-slain', 'result-defeated', 'cargo-dock-shuttle', 'control-room-hologram'] },
   { path: '/screenshots/', ids: SHOTS.map((s) => s.id) },
-  { path: '/guide/map/', ids: ['map-topdown', ...ROOM_INFO.flatMap((r) => r.shots), 'hallway-storage', 'hallway-medbay', 'hallway-security', 'lobby', 'hunter-reveal'] },
+  { path: '/guide/map/', ids: ['map-topdown', ...ROOM_INFO.flatMap((r) => [...r.shots, ...SHOTS.filter((s) => s.room === r.name).map((s) => s.id)]), ...SHOTS.filter((s) => s.group === 'hallway').map((s) => s.id), 'lobby', 'hunter-reveal'] },
   { path: '/guide/', ids: ['lobby', 'hunter-reveal', 'hud-mobile', 'cargo-dock-shuttle'] },
   { path: '/guide/jingles/', ids: ['jingles-closeup', 'jingles-red', 'jingles-medbay', 'jingles-player'] },
   { path: '/guide/worm/', ids: ['worm-render', 'worm-ingame'] },

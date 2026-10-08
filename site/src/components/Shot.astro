@@ -18,9 +18,11 @@ interface Props {
   caption?: string;
   /** Override the registry alt text (rare — prefer editing media.json). */
   alt?: string;
+  /** Inline style for the <img> (e.g. object-position for a crop). */
+  imgStyle?: string;
 }
 
-const { id, sizes = '(min-width: 1280px) 1200px, 100vw', class: cls, imgClass, eager = false, lightbox, caption, alt } = Astro.props;
+const { id, sizes = '(min-width: 1280px) 1200px, 100vw', class: cls, imgClass, eager = false, lightbox, caption, alt, imgStyle } = Astro.props;
 const s = shot(id);
 const img = {
   src: s.w > 1280 ? `/media/${s.id}-1280.webp` : s.full,
@@ -33,6 +35,7 @@ const img = {
   decoding: 'async' as const,
   fetchpriority: eager ? ('high' as const) : undefined,
   class: imgClass,
+  style: imgStyle,
 };
 ---
 

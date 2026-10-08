@@ -162,5 +162,161 @@
  "first-person-hub": {
   "w": 1918,
   "h": 824
+ },
+ "jingles-studio": {
+  "w": 1913,
+  "h": 826
+ },
+ "jingles-shadow-2": {
+  "w": 903,
+  "h": 729
+ },
+ "hallway-cargo": {
+  "w": 1769,
+  "h": 839
+ },
+ "hallway-control": {
+  "w": 1754,
+  "h": 834
+ },
+ "hallway-control-2": {
+  "w": 1710,
+  "h": 807
+ },
+ "hallway-green": {
+  "w": 1741,
+  "h": 834
+ },
+ "hallway-strip": {
+  "w": 1760,
+  "h": 814
+ },
+ "lobby-arena": {
+  "w": 1174,
+  "h": 608
+ },
+ "reactor-orb": {
+  "w": 1752,
+  "h": 818
+ },
+ "cargo-dock-catwalk": {
+  "w": 1919,
+  "h": 802
+ },
+ "cargo-dock-bay": {
+  "w": 1919,
+  "h": 753
+ },
+ "cargo-dock-sign": {
+  "w": 1919,
+  "h": 820
+ },
+ "cargo-dock-low": {
+  "w": 1919,
+  "h": 835
+ },
+ "control-room-wide": {
+  "w": 1764,
+  "h": 821
+ },
+ "control-room-desks": {
+  "w": 1794,
+  "h": 805
+ },
+ "control-room-floor": {
+  "w": 1748,
+  "h": 807
+ },
+ "control-room-detail": {
+  "w": 1913,
+  "h": 826
+ },
+ "interrogation-office": {
+  "w": 1745,
+  "h": 821
+ },
+ "interrogation-blue": {
+  "w": 1545,
+  "h": 840
+ },
+ "interrogation-dark": {
+  "w": 1773,
+  "h": 809
+ },
+ "medbay-beds": {
+  "w": 1764,
+  "h": 822
+ },
+ "medbay-wide": {
+  "w": 1913,
+  "h": 826
+ },
+ "reactor-entrance": {
+  "w": 1295,
+  "h": 831
+ },
+ "reactor-coils-2": {
+  "w": 1783,
+  "h": 801
+ },
+ "reactor-pipes": {
+  "w": 1773,
+  "h": 838
+ },
+ "reactor-window": {
+  "w": 1919,
+  "h": 830
+ },
+ "reactor-lab": {
+  "w": 1759,
+  "h": 836
+ },
+ "reactor-office": {
+  "w": 1906,
+  "h": 810
+ },
+ "reactor-tanks-wide": {
+  "w": 1913,
+  "h": 826
+ },
+ "security-corridor": {
+  "w": 1766,
+  "h": 876
+ },
+ "security-shelves": {
+  "w": 1754,
+  "h": 815
+ },
+ "storage-bay-aisle": {
+  "w": 1768,
+  "h": 821
+ },
+ "storage-bay-dark": {
+  "w": 1915,
+  "h": 819
+ },
+ "storage-bay-sign": {
+  "w": 1919,
+  "h": 843
+ },
+ "crusher-detail": {
+  "w": 1913,
+  "h": 826
+ },
+ "hunter-hud": {
+  "w": 1069,
+  "h": 617
+ },
+ "hunter-reveal-forest": {
+  "w": 1913,
+  "h": 826
+ },
+ "office": {
+  "w": 1913,
+  "h": 826
+ },
+ "worm-wide": {
+  "w": 1913,
+  "h": 826
  }
 }

@@ -1,87 +1,545 @@
 {
-  "_doc": "Screenshot registry. `src` is relative to the repo's game-assets/ folder. Run `node scripts/media.mjs` after editing to (re)generate /public/media. `press: true` also exports a full-size JPG into the press kit. Alt text describes what is visible — never invent mechanics in it.",
-  "shots": [
-    { "id": "cargo-dock-shuttle", "src": "owner-shots/rooms/cargo-dock-4.png", "group": "room", "room": "Cargo Dock", "press": true,
-      "alt": "A battered cargo shuttle parked in STATIC's Cargo Dock under red warning lights and floodlamps" },
-    { "id": "cargo-dock-floor", "src": "owner-shots/rooms/cargo-dock-1.png", "group": "room", "room": "Cargo Dock",
-      "alt": "Cargo Dock floor with a forklift, stacked crates and catwalks in red and white light" },
-    { "id": "storage-bay", "src": "owner-shots/rooms/storage-bay-4.png", "group": "room", "room": "Storage Bay", "press": true,
-      "alt": "Tall shelves of crates under the STORAGE BAY sign, washed in red light" },
-    { "id": "storage-bay-forklift", "src": "owner-shots/rooms/storage-bay-2.png", "group": "room", "room": "Storage Bay",
-      "alt": "A yellow forklift parked between the Storage Bay shelves" },
-    { "id": "control-room-hologram", "src": "owner-shots/rooms/control-panel-4.png", "group": "room", "room": "Control Room", "press": true,
-      "alt": "A glowing holographic world map and control consoles in the Control Room" },
-    { "id": "control-room", "src": "rooms/room-control-01.png", "group": "room", "room": "Control Room",
-      "alt": "The Control Room: a wall of blue monitors above a grid floor" },
-    { "id": "reactor-coils", "src": "owner-shots/rooms/nuclear-reactor-3.png", "group": "room", "room": "Nuclear Reactor", "press": true,
-      "alt": "Red-glowing coils in the dark Nuclear Reactor room" },
-    { "id": "reactor-tanks", "src": "rooms/room-reactor-02-detail.png", "group": "room", "room": "Nuclear Reactor",
-      "alt": "Green-lit reactor tanks inside the Nuclear Reactor room" },
-    { "id": "reactor-door", "src": "owner-shots/rooms/nuclear-reactor-1.png", "group": "room", "room": "Nuclear Reactor",
-      "alt": "The reactor entrance: an Authorized Personnel Only sign and danger notices beside a sealed door" },
-    { "id": "medbay", "src": "rooms/room-medbay-02-detail.png", "group": "room", "room": "Medbay", "press": true,
-      "alt": "Medbay stretchers with red straps and blue privacy curtains" },
-    { "id": "medbay-red", "src": "owner-shots/rooms/medbay-2.png", "group": "room", "room": "Medbay",
-      "alt": "The Medbay floor with stretchers and supply crates under red light" },
-    { "id": "security", "src": "owner-shots/rooms/security-2.png", "group": "room", "room": "Security",
-      "alt": "Security room desks and monitors under cold blue light" },
-    { "id": "security-desk", "src": "rooms/room-security-01.png", "group": "room", "room": "Security",
-      "alt": "Security desks facing a wall screen and a server rack labelled STATIC" },
-    { "id": "interrogation", "src": "owner-shots/rooms/interrogation-room-5.png", "group": "room", "room": "Interrogation Room",
-      "alt": "The Interrogation Room: metal shelving and desks under a harsh blue light" },
-    { "id": "interrogation-red", "src": "owner-shots/rooms/interrogation-room-4.png", "group": "room", "room": "Interrogation Room",
-      "alt": "A red-lit observation window looking into the Interrogation Room" },
-    { "id": "central-room-globe", "src": "rooms/room-central-hub-02-detail.png", "group": "room", "room": "Central Room", "press": true,
-      "alt": "A giant amber globe over a red-lit platform in the Central Room" },
-    { "id": "central-room", "src": "rooms/room-central-hub-01.png", "group": "room", "room": "Central Room",
-      "alt": "The Central Room hub with walkways around the glowing globe" },
-    { "id": "crusher-console", "src": "owner-shots/rooms/crusher-and-console-1.png", "group": "objective", "press": true,
-      "alt": "A scrap crusher with its weight gauge reading 150, next to its wired console and the Feed crusher prompt" },
-    { "id": "hunter-reveal", "src": "owner-shots/rooms/hunter-reveal-1.png", "group": "round", "press": true,
-      "alt": "The Hunter reveal scene: a campfire in a dark forest clearing" },
-    { "id": "lobby", "src": "owner-shots/lobby/lobby-2.png", "group": "round",
-      "alt": "The STATIC lobby: a desert canyon arena with a Top Backers board" },
-    { "id": "lobby-shop", "src": "rooms/lobby-wide-01.png", "group": "round",
-      "alt": "The lobby at night with the shop and the STATIC sign" },
-    { "id": "hallway-storage", "src": "owner-shots/hallways/storage-bay-hallway-1.png", "group": "hallway",
-      "alt": "A dark bunker corridor opening into a red-lit room" },
-    { "id": "hallway-medbay", "src": "owner-shots/hallways/medic-hallway-1.png", "group": "hallway",
-      "alt": "A corridor with a green checkered wall leading into the Medbay" },
-    { "id": "hallway-security", "src": "owner-shots/hallways/security-hallway-1.png", "group": "hallway",
-      "alt": "A corridor outside Security with a DANGER electrical cabinet" },
-    { "id": "map-topdown", "src": "map/map-topdown-01.png", "group": "map", "press": true,
-      "alt": "Top-down view of the whole STATIC bunker map with the roof removed" },
-    { "id": "jingles-closeup", "src": "owner-shots/jingles/jingles-2.png", "group": "jingles", "press": true,
-      "alt": "In-game close-up of Jingles, the Hunter: a grinning skull mask under a jester cap" },
-    { "id": "jingles-red", "src": "owner-shots/jingles/jingles-4.png", "group": "jingles", "press": true,
-      "alt": "Jingles lit in red light inside the bunker" },
-    { "id": "jingles-red-2", "src": "owner-shots/jingles/jingles-3.png", "group": "jingles",
-      "alt": "Jingles under red light against a dark wall" },
-    { "id": "jingles-shadow", "src": "owner-shots/jingles/jingles-5.png", "group": "jingles",
-      "alt": "Jingles half in shadow beside yellow machinery" },
-    { "id": "jingles-player", "src": "owner-shots/jingles/jingles-with-player-closeup-1.png", "group": "jingles",
-      "alt": "A Scrapper in the foreground with Jingles looming behind them" },
-    { "id": "jingles-medbay", "src": "owner-shots/rooms/medbay-1.png", "group": "jingles", "press": true,
-      "alt": "Jingles walking down the Medbay aisle between supply shelves" },
-    { "id": "worm-render", "src": "owner-shots/worm/worm-1.png", "group": "worm", "press": true,
-      "alt": "Studio render of the Worm: a segmented, spined creature with a round mouth full of teeth" },
-    { "id": "worm-ingame", "src": "worm/worm-fullbody-01.png", "group": "worm",
-      "alt": "The Worm in the dark bunker, lit by a red glow" },
-    { "id": "pod-active", "src": "owner-shots/pods/pod-working-1.png", "group": "pod", "press": true,
-      "alt": "A Bio-Siphon Pod holding a captured Scrapper, with the Destroy Field / Override prompt" },
-    { "id": "pod-idle", "src": "owner-shots/pods/pod-1.png", "group": "pod",
-      "alt": "An empty Bio-Siphon Pod on its platform" },
-    { "id": "result-escaped", "src": "owner-shots/ui/gui-4.png", "group": "ui", "press": true,
-      "alt": "End-of-round screen reading Escaped: you made it out of the bunker, with kg fed, feeds, revives, Fragments and level" },
-    { "id": "result-prey-slain", "src": "owner-shots/ui/gui-5.png", "group": "ui",
-      "alt": "The Hunter's end-of-round screen reading Prey slain" },
-    { "id": "result-consumed", "src": "owner-shots/ui/gui-6.png", "group": "ui",
-      "alt": "End-of-round screen reading Consumed" },
-    { "id": "result-defeated", "src": "owner-shots/ui/gui-7.png", "group": "ui",
-      "alt": "End-of-round screen reading Defeated" },
-    { "id": "hud-mobile", "src": "owner-shots/ui/gui-1.png", "group": "ui", "press": true,
-      "alt": "STATIC's mobile HUD with Light, Bell, Objective, Run, Drop and Slam buttons and the round timer" },
-    { "id": "first-person-hub", "src": "owner-shots/misc/screenshot-2026-10-08-131544.png", "group": "round",
-      "alt": "First-person view with the flashlight out, walking toward the glowing globe" }
-  ]
+ "_doc": "Screenshot registry. `src` is relative to the repo's game-assets/ folder. Run `node scripts/media.mjs` after editing to (re)generate /public/media. `press: true` also exports a full-size JPG into the press kit. Alt text describes what is visible — never invent mechanics in it.",
+ "shots": [
+  {
+   "id": "cargo-dock-shuttle",
+   "src": "owner-shots/rooms/cargo-dock-4.png",
+   "group": "room",
+   "room": "Cargo Dock",
+   "press": true,
+   "alt": "A battered cargo shuttle parked in STATIC's Cargo Dock under red warning lights and floodlamps"
+  },
+  {
+   "id": "cargo-dock-floor",
+   "src": "owner-shots/rooms/cargo-dock-1.png",
+   "group": "room",
+   "room": "Cargo Dock",
+   "alt": "Cargo Dock floor with a forklift, stacked crates and catwalks in red and white light"
+  },
+  {
+   "id": "storage-bay",
+   "src": "owner-shots/rooms/storage-bay-4.png",
+   "group": "room",
+   "room": "Storage Bay",
+   "press": true,
+   "alt": "Tall shelves of crates under the STORAGE BAY sign, washed in red light"
+  },
+  {
+   "id": "storage-bay-forklift",
+   "src": "owner-shots/rooms/storage-bay-2.png",
+   "group": "room",
+   "room": "Storage Bay",
+   "alt": "A yellow forklift parked between the Storage Bay shelves"
+  },
+  {
+   "id": "control-room-hologram",
+   "src": "owner-shots/rooms/control-panel-4.png",
+   "group": "room",
+   "room": "Control Room",
+   "press": true,
+   "alt": "A glowing holographic world map and control consoles in the Control Room"
+  },
+  {
+   "id": "control-room",
+   "src": "rooms/room-control-01.png",
+   "group": "room",
+   "room": "Control Room",
+   "alt": "The Control Room: a wall of blue monitors above a grid floor"
+  },
+  {
+   "id": "reactor-coils",
+   "src": "owner-shots/rooms/nuclear-reactor-3.png",
+   "group": "room",
+   "room": "Nuclear Reactor",
+   "press": true,
+   "alt": "Red-glowing coils in the dark Nuclear Reactor room"
+  },
+  {
+   "id": "reactor-tanks",
+   "src": "rooms/room-reactor-02-detail.png",
+   "group": "room",
+   "room": "Nuclear Reactor",
+   "alt": "Green-lit reactor tanks inside the Nuclear Reactor room"
+  },
+  {
+   "id": "reactor-door",
+   "src": "owner-shots/rooms/nuclear-reactor-1.png",
+   "group": "room",
+   "room": "Nuclear Reactor",
+   "alt": "The reactor entrance: an Authorized Personnel Only sign and danger notices beside a sealed door"
+  },
+  {
+   "id": "medbay",
+   "src": "rooms/room-medbay-02-detail.png",
+   "group": "room",
+   "room": "Medbay",
+   "press": true,
+   "alt": "Medbay stretchers with red straps and blue privacy curtains"
+  },
+  {
+   "id": "medbay-red",
+   "src": "owner-shots/rooms/medbay-2.png",
+   "group": "room",
+   "room": "Medbay",
+   "alt": "The Medbay floor with stretchers and supply crates under red light"
+  },
+  {
+   "id": "security",
+   "src": "owner-shots/rooms/security-2.png",
+   "group": "room",
+   "room": "Security",
+   "alt": "Security room desks and monitors under cold blue light"
+  },
+  {
+   "id": "security-desk",
+   "src": "rooms/room-security-01.png",
+   "group": "room",
+   "room": "Security",
+   "alt": "Security desks facing a wall screen and a server rack labelled STATIC"
+  },
+  {
+   "id": "interrogation",
+   "src": "owner-shots/rooms/interrogation-room-5.png",
+   "group": "room",
+   "room": "Interrogation Room",
+   "alt": "The Interrogation Room: metal shelving and desks under a harsh blue light"
+  },
+  {
+   "id": "interrogation-red",
+   "src": "owner-shots/rooms/interrogation-room-4.png",
+   "group": "room",
+   "room": "Interrogation Room",
+   "alt": "A red-lit observation window looking into the Interrogation Room"
+  },
+  {
+   "id": "central-room-globe",
+   "src": "rooms/room-central-hub-02-detail.png",
+   "group": "room",
+   "room": "Central Room",
+   "press": true,
+   "alt": "A giant amber globe over a red-lit platform in the Central Room"
+  },
+  {
+   "id": "central-room",
+   "src": "rooms/room-central-hub-01.png",
+   "group": "room",
+   "room": "Central Room",
+   "alt": "The Central Room hub with walkways around the glowing globe"
+  },
+  {
+   "id": "crusher-console",
+   "src": "owner-shots/rooms/crusher-and-console-1.png",
+   "group": "objective",
+   "press": true,
+   "alt": "A scrap crusher with its weight gauge reading 150, next to its wired console and the Feed crusher prompt"
+  },
+  {
+   "id": "hunter-reveal",
+   "src": "owner-shots/rooms/hunter-reveal-1.png",
+   "group": "round",
+   "press": true,
+   "alt": "The Hunter reveal scene: a campfire in a dark forest clearing"
+  },
+  {
+   "id": "lobby",
+   "src": "owner-shots/lobby/lobby-2.png",
+   "group": "round",
+   "alt": "The STATIC lobby: a desert canyon arena with a Top Backers board"
+  },
+  {
+   "id": "lobby-shop",
+   "src": "rooms/lobby-wide-01.png",
+   "group": "round",
+   "alt": "The lobby at night with the shop and the STATIC sign"
+  },
+  {
+   "id": "hallway-storage",
+   "src": "owner-shots/hallways/storage-bay-hallway-1.png",
+   "group": "hallway",
+   "alt": "A dark bunker corridor opening into a red-lit room"
+  },
+  {
+   "id": "hallway-medbay",
+   "src": "owner-shots/hallways/medic-hallway-1.png",
+   "group": "hallway",
+   "alt": "A corridor with a green checkered wall leading into the Medbay"
+  },
+  {
+   "id": "hallway-security",
+   "src": "owner-shots/hallways/security-hallway-1.png",
+   "group": "hallway",
+   "alt": "A corridor outside Security with a DANGER electrical cabinet"
+  },
+  {
+   "id": "map-topdown",
+   "src": "map/map-topdown-01.png",
+   "group": "map",
+   "press": true,
+   "alt": "Top-down view of the whole STATIC bunker map with the roof removed"
+  },
+  {
+   "id": "jingles-closeup",
+   "src": "owner-shots/jingles/jingles-2.png",
+   "group": "jingles",
+   "press": true,
+   "alt": "In-game close-up of Jingles, the Hunter: a grinning skull mask under a jester cap"
+  },
+  {
+   "id": "jingles-red",
+   "src": "owner-shots/jingles/jingles-4.png",
+   "group": "jingles",
+   "press": true,
+   "alt": "Jingles lit in red light inside the bunker"
+  },
+  {
+   "id": "jingles-red-2",
+   "src": "owner-shots/jingles/jingles-3.png",
+   "group": "jingles",
+   "alt": "Jingles under red light against a dark wall"
+  },
+  {
+   "id": "jingles-shadow",
+   "src": "owner-shots/jingles/jingles-5.png",
+   "group": "jingles",
+   "alt": "Jingles half in shadow beside yellow machinery"
+  },
+  {
+   "id": "jingles-player",
+   "src": "owner-shots/jingles/jingles-with-player-closeup-1.png",
+   "group": "jingles",
+   "alt": "A Scrapper in the foreground with Jingles looming behind them"
+  },
+  {
+   "id": "jingles-medbay",
+   "src": "owner-shots/rooms/medbay-1.png",
+   "group": "jingles",
+   "press": true,
+   "alt": "Jingles walking down the Medbay aisle between supply shelves"
+  },
+  {
+   "id": "worm-render",
+   "src": "owner-shots/worm/worm-1.png",
+   "group": "worm",
+   "press": true,
+   "alt": "Studio render of the Worm: a segmented, spined creature with a round mouth full of teeth"
+  },
+  {
+   "id": "worm-ingame",
+   "src": "worm/worm-fullbody-01.png",
+   "group": "worm",
+   "alt": "The Worm in the dark bunker, lit by a red glow"
+  },
+  {
+   "id": "pod-active",
+   "src": "owner-shots/pods/pod-working-1.png",
+   "group": "pod",
+   "press": true,
+   "alt": "A Bio-Siphon Pod holding a captured Scrapper, with the Destroy Field / Override prompt"
+  },
+  {
+   "id": "pod-idle",
+   "src": "owner-shots/pods/pod-1.png",
+   "group": "pod",
+   "alt": "An empty Bio-Siphon Pod on its platform"
+  },
+  {
+   "id": "result-escaped",
+   "src": "owner-shots/ui/gui-4.png",
+   "group": "ui",
+   "press": true,
+   "alt": "End-of-round screen reading Escaped: you made it out of the bunker, with kg fed, feeds, revives, Fragments and level"
+  },
+  {
+   "id": "result-prey-slain",
+   "src": "owner-shots/ui/gui-5.png",
+   "group": "ui",
+   "alt": "The Hunter's end-of-round screen reading Prey slain"
+  },
+  {
+   "id": "result-consumed",
+   "src": "owner-shots/ui/gui-6.png",
+   "group": "ui",
+   "alt": "End-of-round screen reading Consumed"
+  },
+  {
+   "id": "result-defeated",
+   "src": "owner-shots/ui/gui-7.png",
+   "group": "ui",
+   "alt": "End-of-round screen reading Defeated"
+  },
+  {
+   "id": "hud-mobile",
+   "src": "owner-shots/ui/gui-1.png",
+   "group": "ui",
+   "press": true,
+   "alt": "STATIC's mobile HUD with Light, Bell, Objective, Run, Drop and Slam buttons and the round timer"
+  },
+  {
+   "id": "first-person-hub",
+   "src": "owner-shots/misc/screenshot-2026-10-08-131544.png",
+   "group": "round",
+   "alt": "First-person view with the flashlight out, walking toward the glowing globe"
+  },
+  {
+   "id": "jingles-studio",
+   "src": "jingles/jingles-fullbody-front-01.png",
+   "group": "jingles",
+   "alt": "Jingles standing between red and blue stage lights, full body"
+  },
+  {
+   "id": "jingles-shadow-2",
+   "src": "owner-shots/jingles/jingles-1.png",
+   "group": "jingles",
+   "alt": "Jingles barely visible in the dark, skull grin catching the light"
+  },
+  {
+   "id": "hallway-cargo",
+   "src": "owner-shots/hallways/cargo-dock-hallway-1.png",
+   "group": "hallway",
+   "alt": "A dark red-lit corridor opening onto the lit Cargo Dock"
+  },
+  {
+   "id": "hallway-control",
+   "src": "owner-shots/hallways/control-panel-hallway-2.png",
+   "group": "hallway",
+   "alt": "A corridor with a steel cabinet leading to the blue-lit Control Room"
+  },
+  {
+   "id": "hallway-control-2",
+   "src": "owner-shots/hallways/control-panel-hallway-3.png",
+   "group": "hallway",
+   "alt": "View from a dark corridor into the Control Room's red and blue screens"
+  },
+  {
+   "id": "hallway-green",
+   "src": "owner-shots/hallways/control-panel-hallway-1.png",
+   "group": "hallway",
+   "alt": "A pitch-black corridor lit by a single green light"
+  },
+  {
+   "id": "hallway-strip",
+   "src": "owner-shots/hallways/hallway-1.png",
+   "group": "hallway",
+   "alt": "A long grid-floored corridor lit by one strip light"
+  },
+  {
+   "id": "lobby-arena",
+   "src": "owner-shots/lobby/lobby-1.png",
+   "group": "round",
+   "alt": "Players in the STATIC lobby arena under a dusty orange sky"
+  },
+  {
+   "id": "reactor-orb",
+   "src": "owner-shots/misc/screenshot-2026-10-08-201523.png",
+   "group": "room",
+   "alt": "The amber globe glowing over a red-lit platform",
+   "room": "Central Room"
+  },
+  {
+   "id": "cargo-dock-catwalk",
+   "src": "owner-shots/rooms/cargo-dock-2.png",
+   "group": "room",
+   "alt": "Crates and machinery under catwalks in the Cargo Dock",
+   "room": "Cargo Dock"
+  },
+  {
+   "id": "cargo-dock-bay",
+   "src": "owner-shots/rooms/cargo-dock-3.png",
+   "group": "room",
+   "alt": "A shuttle on the Cargo Dock floor beside yellow hazard stripes",
+   "room": "Cargo Dock"
+  },
+  {
+   "id": "cargo-dock-sign",
+   "src": "owner-shots/rooms/cargo-dock-5.png",
+   "group": "room",
+   "alt": "The CARGO DOCK BAY sign over crates in the dark",
+   "room": "Cargo Dock"
+  },
+  {
+   "id": "cargo-dock-low",
+   "src": "owner-shots/rooms/cargo-dock-low-angle-1.png",
+   "group": "room",
+   "alt": "Low-angle view across the polished Cargo Dock floor",
+   "room": "Cargo Dock"
+  },
+  {
+   "id": "control-room-wide",
+   "src": "owner-shots/rooms/control-panel-1.png",
+   "group": "room",
+   "alt": "The Control Room under pink ceiling light with a wall of screens",
+   "room": "Control Room"
+  },
+  {
+   "id": "control-room-desks",
+   "src": "owner-shots/rooms/control-panel-2.png",
+   "group": "room",
+   "alt": "Rows of desks and monitors in the Control Room",
+   "room": "Control Room"
+  },
+  {
+   "id": "control-room-floor",
+   "src": "owner-shots/rooms/control-panel-3.png",
+   "group": "room",
+   "alt": "The Control Room's holographic wall and gridded floor",
+   "room": "Control Room"
+  },
+  {
+   "id": "control-room-detail",
+   "src": "rooms/room-control-02-detail.png",
+   "group": "room",
+   "alt": "Close-up of the Control Room's map screens and consoles",
+   "room": "Control Room"
+  },
+  {
+   "id": "interrogation-office",
+   "src": "owner-shots/rooms/interrogation-room-1.png",
+   "group": "room",
+   "alt": "Whiteboards, a desk and a monitor in the Interrogation Room",
+   "room": "Interrogation Room"
+  },
+  {
+   "id": "interrogation-blue",
+   "src": "owner-shots/rooms/interrogation-room-2.png",
+   "group": "room",
+   "alt": "The Interrogation Room seen through a blue-lit doorway",
+   "room": "Interrogation Room"
+  },
+  {
+   "id": "interrogation-dark",
+   "src": "owner-shots/rooms/interrogation-room-3.png",
+   "group": "room",
+   "alt": "A long table in the dark Interrogation Room behind red light strips",
+   "room": "Interrogation Room"
+  },
+  {
+   "id": "medbay-beds",
+   "src": "owner-shots/rooms/medbay-3.png",
+   "group": "room",
+   "alt": "Medbay stretchers and blue lockers under a single spotlight",
+   "room": "Medbay"
+  },
+  {
+   "id": "medbay-wide",
+   "src": "rooms/room-medbay-01.png",
+   "group": "room",
+   "alt": "The Medbay with stretchers, blue curtains and supply shelves",
+   "room": "Medbay"
+  },
+  {
+   "id": "reactor-entrance",
+   "src": "owner-shots/rooms/nuclear-reactor-2.png",
+   "group": "room",
+   "alt": "The sealed reactor door in the dark with danger signs",
+   "room": "Nuclear Reactor"
+  },
+  {
+   "id": "reactor-coils-2",
+   "src": "owner-shots/rooms/nuclear-reactor-4.png",
+   "group": "room",
+   "alt": "Red reactor coils and a green-lit doorway",
+   "room": "Nuclear Reactor"
+  },
+  {
+   "id": "reactor-pipes",
+   "src": "owner-shots/rooms/nuclear-reactor-5.png",
+   "group": "room",
+   "alt": "Reactor pipes and a lit observation window",
+   "room": "Nuclear Reactor"
+  },
+  {
+   "id": "reactor-window",
+   "src": "owner-shots/rooms/nuclear-reactor-6.png",
+   "group": "room",
+   "alt": "A red and green tiled wall around the reactor's observation window",
+   "room": "Nuclear Reactor"
+  },
+  {
+   "id": "reactor-lab",
+   "src": "owner-shots/rooms/nuclear-reactor-7.png",
+   "group": "room",
+   "alt": "A pale reactor-side lab with an open doorway",
+   "room": "Nuclear Reactor"
+  },
+  {
+   "id": "reactor-office",
+   "src": "owner-shots/rooms/nuclear-reactor-8.png",
+   "group": "room",
+   "alt": "A bright office beside the reactor with schematic screens",
+   "room": "Nuclear Reactor"
+  },
+  {
+   "id": "reactor-tanks-wide",
+   "src": "rooms/room-reactor-01.png",
+   "group": "room",
+   "alt": "Green-lit reactor tanks behind a railing",
+   "room": "Nuclear Reactor"
+  },
+  {
+   "id": "security-corridor",
+   "src": "owner-shots/rooms/security-1.png",
+   "group": "room",
+   "alt": "A dark corridor lit by ceiling lamps on the way to Security",
+   "room": "Security"
+  },
+  {
+   "id": "security-shelves",
+   "src": "owner-shots/rooms/security-3.png",
+   "group": "room",
+   "alt": "Shelving and wall screens in the Security room",
+   "room": "Security"
+  },
+  {
+   "id": "storage-bay-aisle",
+   "src": "owner-shots/rooms/storage-bay-1.png",
+   "group": "room",
+   "alt": "A Storage Bay aisle lined with stocked shelves",
+   "room": "Storage Bay"
+  },
+  {
+   "id": "storage-bay-dark",
+   "src": "owner-shots/rooms/storage-bay-3.png",
+   "group": "room",
+   "alt": "Shelves and a forklift in the dark Storage Bay",
+   "room": "Storage Bay"
+  },
+  {
+   "id": "storage-bay-sign",
+   "src": "owner-shots/rooms/storage-bay-5.png",
+   "group": "room",
+   "alt": "The STORAGE BAY sign over red-lit shelving",
+   "room": "Storage Bay"
+  },
+  {
+   "id": "crusher-detail",
+   "src": "rooms/room-crusher-02-detail.png",
+   "group": "objective",
+   "alt": "A crusher machine lit from below in a dark room"
+  },
+  {
+   "id": "hunter-hud",
+   "src": "owner-shots/ui/gui-2.png",
+   "group": "ui",
+   "alt": "The Hunter's HUD during The Hunt, with Scrapper portraits down the side"
+  },
+  {
+   "id": "hunter-reveal-forest",
+   "src": "rooms/hunter-reveal-area-01.png",
+   "group": "round",
+   "alt": "Tall grass and trees in the Hunter reveal forest at night"
+  },
+  {
+   "id": "office",
+   "src": "rooms/room-office-01.png",
+   "group": "room",
+   "alt": "A bright office with a meeting table and schematic screens",
+   "room": "Office"
+  },
+  {
+   "id": "worm-wide",
+   "src": "worm/worm-fullbody-02-wide.png",
+   "group": "worm",
+   "alt": "The Worm crawling across a dark floor toward a red glow"
+  }
+ ]
 }

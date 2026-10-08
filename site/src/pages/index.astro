@@ -4,9 +4,10 @@ import VideoCard from '../components/VideoCard.astro';
 import FollowSection from '../components/FollowSection.astro';
 import Shot from '../components/Shot.astro';
 import Lightbox from '../components/Lightbox.astro';
+import Icon from '../components/Icon.astro';
 import { SITE, LINKS } from '../site.config';
 import { FEATURED_VIDEO, VIDEOS, watchUrl } from '../data/videos';
-import { shot } from '../data/media';
+import { shot, SHOTS } from '../data/media';
 import { ROOM_INFO } from '../data/rooms';
 import {
   GAME, MOVEMENT, JINGLES, POD, SCRAP, CRUSHERS, MINIGAMES, EXTRACTION, WORM, ROADMAP, TEAM, COMMUNITY, SCRAPPER, RESULTS, PROGRESSION,
@@ -27,38 +28,36 @@ const tickerItems = [
 
 const loop = [
   {
-    n: '01',
-    t: 'Scavenge',
-    shot: 'storage-bay',
-    pos: '50% 50%',
-    b: `Search the bunker for scrap: ${SCRAP.length} kinds, from a ${lightest.kg} kg ${lightest.name.toLowerCase()} to a ${heaviest.kg} kg ${heaviest.name.toLowerCase()}. Small parts go in your ${SCRAPPER.backpackSlots} backpack slots. The heavy ones go in your hands, and you'll feel it.`,
-    link: { href: '/guide/scrap/', label: 'Every scrap item and its weight' },
+    n: '01', t: 'Scavenge', icon: 'scrap' as const, shot: 'storage-bay', pos: '50% 50%',
+    b: `${SCRAP.length} kinds of scrap, ${lightest.kg} kg to ${heaviest.kg} kg. Two backpack slots. Heavy stuff goes in your hands.`,
+    link: { href: '/guide/scrap/', label: 'Every scrap item' },
   },
   {
-    n: '02',
-    t: 'Crush',
-    shot: 'crusher-console',
-    pos: '25% 50%',
-    b: `${CRUSHERS.count} crushers spawn in different places every round. Feed them ${CRUSHERS.quotasKg.join(', ').replace(/, (\d+)$/, ' and $1')} kg: ${CRUSHERS.totalKg} kg in total. Crushing scrap is not quiet.`,
+    n: '02', t: 'Crush', icon: 'crusher' as const, shot: 'crusher-console', pos: '18% 50%',
+    b: `${CRUSHERS.count} crushers, random spots, ${CRUSHERS.totalKg} kg to feed. Crushing is loud.`,
     link: { href: '/guide/crushers/', label: 'How crushers work' },
   },
   {
-    n: '03',
-    t: 'Calibrate',
-    shot: 'crusher-console',
-    pos: '80% 50%',
-    b: `A full crusher unlocks its console: ${CRUSHERS.minigamesPerConsole} quick minigames drawn from ${MINIGAMES.length}, like ${MINIGAMES.slice(0, 3).join(', ').toLowerCase()} and ${MINIGAMES[9].toLowerCase()}. Two players can work one console side by side. Mess one up and it faults, loudly.`,
+    n: '03', t: 'Calibrate', icon: 'console' as const, shot: 'crusher-console', pos: '82% 50%',
+    b: `${CRUSHERS.minigamesPerConsole} minigames per console, from a pool of ${MINIGAMES.length}. Fail one and it faults.`,
     link: { href: '/guide/crushers/#minigames', label: `All ${MINIGAMES.length} minigames` },
   },
   {
-    n: '04',
-    t: 'Extract',
-    shot: 'result-escaped',
-    pos: '50% 30%',
-    b: `Finish all ${CRUSHERS.count} crushers and the ${EXTRACTION.room} opens for ${EXTRACTION.windowSec} seconds. Reach it and a UFO beams you out. Escaping is personal: you make it, or you don't.`,
+    n: '04', t: 'Escape', icon: 'exit' as const, shot: 'result-escaped', pos: '50% 30%',
+    b: `The ${EXTRACTION.room} opens for ${EXTRACTION.windowSec} seconds. Make it and a UFO beams you out.`,
     link: { href: '/guide/', label: 'Beginner guide' },
   },
 ];
+
+const stats = [
+  { to: CRUSHERS.totalKg, unit: 'KG', label: 'of scrap to crush', icon: 'weight' as const, gauge: true },
+  { to: MINIGAMES.length, unit: '', label: 'console minigames', icon: 'console' as const },
+  { to: POD.timerSec, unit: 'SEC', label: 'to save a captured friend', icon: 'pod' as const },
+  { to: GAME.serverSize, unit: '', label: 'players per server', icon: 'users' as const },
+];
+
+const ribbonA = ['cargo-dock-shuttle', 'reactor-coils', 'medbay', 'control-room-hologram', 'storage-bay', 'jingles-red', 'central-room-globe', 'interrogation', 'cargo-dock-floor', 'security'];
+const ribbonB = ['jingles-medbay', 'reactor-tanks', 'storage-bay-forklift', 'control-room', 'worm-render', 'pod-active', 'medbay-red', 'hunter-reveal', 'cargo-dock-bay', 'reactor-door'];
 
 const jinglesStats = [
   { k: 'Speed', v: `${MOVEMENT.hunter}`, note: `You sprint at ${MOVEMENT.scrapperSprint}. It gains on you every second.` },
@@ -221,6 +220,7 @@ const videoGameLd = {
         />
       </div>
     </div>
+    <span class="scroll-cue absolute bottom-6 left-1/2 hidden -translate-x-1/2 lg:inline-flex" aria-hidden="true">SCROLL</span>
   </section>
 
   <!-- Facts band (true numbers only — every item comes from data/game.ts) -->
@@ -237,32 +237,64 @@ const videoGameLd = {
     </div>
   </div>
 
-  <!-- ================= HOW A ROUND WORKS ================= -->
-  <section aria-labelledby="loop-h" id="how-to-play">
-    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
+  <!-- ================= NUMBERS ================= -->
+  <section aria-label="STATIC in numbers" class="atmo-amber">
+    <div class="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map((st) => (
+          <li class="stat rise">
+            <div class="flex items-start justify-between">
+              <Icon name={st.icon} size={28} class="stat-icon" />
+              {st.gauge && (
+                <svg width="56" height="56" viewBox="0 0 40 40" aria-hidden="true">
+                  <circle cx="20" cy="20" r="16" fill="none" stroke-width="3" class="gauge-track" />
+                  <circle cx="20" cy="20" r="16" fill="none" stroke-width="3" class="gauge-fill" pathLength="100" transform="rotate(-90 20 20)" />
+                </svg>
+              )}
+            </div>
+            <p class="mt-6">
+              <span class="stat-num count" style={`--to: ${st.to}`}><span class="count-real">{st.to}</span></span>
+              {st.unit && <span class="stat-unit">{st.unit}</span>}
+            </p>
+            <p class="mt-2 font-mono text-xs uppercase tracking-[0.16em] text-facility-300">{st.label}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= HOW A ROUND WORKS: sticky story ================= -->
+  <section aria-labelledby="loop-h" id="how-to-play" class="border-t border-facility-800">
+    <div class="mx-auto w-full max-w-6xl px-4 pt-24 sm:px-6 sm:pt-32">
       <p class="kicker">How a round works</p>
-      <h2 id="loop-h" class="beat mt-4 max-w-3xl font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
+      <h2 id="loop-h" class="beat mt-4 max-w-3xl font-display text-4xl font-bold uppercase tracking-wide sm:text-6xl" data-decode>
         Find it. Haul it. Crush it. Get out.
       </h2>
-      <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
-        Scrappers spawn together in the Central Room. Jingles is released shortly after, from one
-        of {GAME.hunterSpawnPoints} random spots. A round lasts up to {GAME.roundLimitMin} minutes;
-        if time runs out, the Hunter wins.
-      </p>
-
-      <ol class="mt-16 space-y-20 sm:space-y-28">
-        {loop.map((s, i) => (
-          <li class:list={['grid items-center gap-8 lg:grid-cols-2 lg:gap-14', i % 2 === 1 && 'lg:[&>*:first-child]:order-2']}>
-            <div class="reveal shot-frame aspect-[16/10]">
-              <Shot id={s.shot} sizes="(min-width: 1024px) 560px, 100vw" imgClass="h-full w-full object-cover" alt={shot(s.shot).alt} />
+    </div>
+    <div class="story mx-auto grid w-full max-w-6xl gap-10 px-4 pb-24 sm:px-6 lg:grid-cols-[1.35fr_0.65fr] lg:gap-14">
+      <div class="story-media" aria-hidden="true">
+        {loop.map((st) => (
+          <div class="shot-frame">
+            <Shot id={st.shot} sizes="(min-width: 1024px) 760px, 1px" alt="" imgClass="h-full w-full object-cover" imgStyle={`object-position: ${st.pos}`} />
+            <div class="shot-caption">
+              <p class="font-mono text-[0.68rem] tracking-[0.2em] text-signal">STEP {st.n}</p>
+              <p class="mt-1 font-display text-3xl font-bold uppercase tracking-wide text-facility-100">{st.t}</p>
             </div>
-            <div>
-              <div class="flex items-baseline gap-4">
-                <span class="font-mono text-sm text-signal-dim" aria-hidden="true">{s.n}</span>
-                <h3 class="font-display text-3xl font-bold uppercase tracking-wide sm:text-4xl">{s.t}</h3>
-              </div>
-              <p class="mt-5 text-lg leading-relaxed text-facility-300">{s.b}</p>
-              <a href={s.link.href} class="mt-6 inline-block font-mono text-sm text-signal hover:text-signal-dim">{s.link.label} <span aria-hidden="true">→</span></a>
+          </div>
+        ))}
+      </div>
+      <ol class="pt-12 lg:pt-0">
+        {loop.map((st) => (
+          <li class="story-step py-10">
+            <div class="flex items-end gap-5">
+              <span class="step-num" aria-hidden="true">{st.n}</span>
+              <span class="step-icon"><Icon name={st.icon} size={26} /></span>
+            </div>
+            <h3 class="mt-5 font-display text-4xl font-bold uppercase tracking-wide sm:text-5xl">{st.t}</h3>
+            <p class="mt-4 max-w-md text-lg leading-relaxed text-facility-300">{st.b}</p>
+            <a href={st.link.href} class="mt-5 inline-block font-mono text-sm text-signal hover:text-signal-dim">{st.link.label} <span aria-hidden="true">→</span></a>
+            <div class="step-inline reveal shot-frame aspect-[16/10]">
+              <Shot id={st.shot} sizes="(min-width: 640px) 600px, 100vw" imgClass="h-full w-full object-cover" imgStyle={`object-position: ${st.pos}`} />
             </div>
           </li>
         ))}
@@ -308,8 +340,14 @@ const videoGameLd = {
     </div>
   </section>
 
+  <!-- ================= KINETIC BAND ================= -->
+  <div class="border-y border-facility-800 py-10 sm:py-16" aria-hidden="true">
+    <div class="kinetic"><div class="kinetic-l"><span class="kinetic-line kinetic-outline">Jingles is</span><span class="kinetic-line kinetic-solid">faster</span><span class="kinetic-line kinetic-outline">than you</span><span class="kinetic-line kinetic-signal">13.5</span></div></div>
+    <div class="kinetic mt-2"><div class="kinetic-r"><span class="kinetic-line kinetic-signal">Don't</span><span class="kinetic-line kinetic-outline">ring the</span><span class="kinetic-line kinetic-solid">bell</span><span class="kinetic-line kinetic-outline">Don't ring the bell</span></div></div>
+  </div>
+
   <!-- ================= JINGLES ================= -->
-  <section class="relative overflow-hidden border-t border-facility-800" aria-labelledby="jingles-h" id="jingles">
+  <section class="atmo-red relative overflow-hidden" aria-labelledby="jingles-h" id="jingles">
     <div class="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 py-24 sm:px-6 sm:py-32 lg:grid-cols-[0.95fr_1.05fr]">
       <div class="order-2 grid gap-4 lg:order-1">
         <div class="reveal shot-frame aspect-[4/3]">
@@ -331,9 +369,7 @@ const videoGameLd = {
           Meet Jingles
         </h2>
         <p class="beat mt-6 max-w-xl text-lg leading-relaxed text-facility-300">
-          Jingles is not an AI. It's one of the players in your server, picked each round, playing
-          a clockwork jester with a grinning skull mask and claws for hands. The rest of the
-          server is trying to get away from it.
+          Not an AI. One real player in your server, every round, hunting everyone else.
         </p>
 
         <dl class="beat mt-10 divide-y divide-facility-700 border-y border-facility-700">
@@ -355,8 +391,12 @@ const videoGameLd = {
   </section>
 
   <!-- ================= THE OTHER THREATS ================= -->
-  <section class="border-t border-facility-800" aria-labelledby="threats-h">
-    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
+  <section class="atmo-amber border-t border-facility-800" aria-labelledby="threats-h">
+    <div class="relative mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
+      <svg class="pointer-events-none absolute right-4 top-16 hidden h-32 w-[min(46rem,60%)] sm:block" viewBox="0 0 600 120" aria-hidden="true">
+        <path class="draw-path" pathLength="1" d="M0 90 C 60 90, 70 30, 130 30 S 200 100, 260 95 S 330 20, 400 28 S 470 105, 540 80 S 585 40, 600 42" />
+        <circle cx="600" cy="42" r="5" fill="currentColor" class="text-signal" />
+      </svg>
       <p class="kicker">It's not only Jingles</p>
       <h2 id="threats-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
         Two more ways to lose
@@ -371,10 +411,8 @@ const videoGameLd = {
             <p class="noise-label text-signal">Under the floor</p>
             <h3 class="mt-3 font-display text-3xl font-bold uppercase leading-tight tracking-wide">The Worm</h3>
             <p class="mt-5 leading-relaxed text-facility-300">
-              Every Scrapper carries a bell they can't drop. Ring it and a Worm surfaces
-              {WORM.bellSpawnDelaySec} seconds later. Missed throws, heavy scrap and screaming mimic
-              items can draw one too. It grabs you, drains {WORM.grabDamagePct}% of your health and
-              leaves.
+              Ring your bell and it surfaces {WORM.bellSpawnDelaySec} seconds later. It grabs, drains
+              {WORM.grabDamagePct}% health, and leaves.
             </p>
             <p class="mt-4 leading-relaxed text-facility-100">Hold your flashlight on it while it rears up and it backs off.</p>
             <a href="/guide/worm/" class="mt-auto pt-6 font-mono text-sm text-signal hover:text-signal-dim">How to survive the Worm <span aria-hidden="true">→</span></a>
@@ -388,9 +426,8 @@ const videoGameLd = {
             <p class="noise-label text-status-red">After the second hit</p>
             <h3 class="mt-3 font-display text-3xl font-bold uppercase leading-tight tracking-wide">The {POD.name}</h3>
             <p class="mt-5 leading-relaxed text-facility-300">
-              Go down and Jingles can carry you to a pod. You get {POD.timerSec} seconds. A teammate
-              holds E for {POD.rescueHoldSec} seconds to break you out. If nobody's left free to save
-              you, the timer runs twice as fast.
+              Caught? {POD.timerSec} seconds. A teammate needs {POD.rescueHoldSec} to break you out.
+              Alone, the clock runs twice as fast.
             </p>
             <p class="mt-4 leading-relaxed text-facility-100">Camping a pod overloads it, stuns Jingles and sets you free.</p>
             <a href="/guide/capture-and-rescue/" class="mt-auto pt-6 font-mono text-sm text-signal hover:text-signal-dim">Capture and rescue, explained <span aria-hidden="true">→</span></a>
@@ -408,8 +445,7 @@ const videoGameLd = {
         Escaped or consumed
       </h2>
       <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
-        Every round pays out {PROGRESSION.currency} and XP, win or lose. Your results card tracks
-        {PROGRESSION.scrapperStats.slice(0, -1).join(', ')} and {PROGRESSION.scrapperStats.at(-1)}.
+        Win or lose, every round pays {PROGRESSION.currency} and XP.
       </p>
     </div>
     <ul class="strip mt-12 pb-24 sm:pb-32" aria-label="End-of-round screens">
@@ -426,6 +462,26 @@ const videoGameLd = {
         </li>
       ))}
     </ul>
+  </section>
+
+  <!-- ================= RIBBON ================= -->
+  <section aria-label="Screenshots" class="border-t border-facility-800 py-16 sm:py-20">
+    <div class="mx-auto mb-8 flex w-full max-w-6xl flex-wrap items-end justify-between gap-4 px-4 sm:px-6">
+      <h2 class="font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">{SHOTS.length} screenshots</h2>
+      <a href="/screenshots/" class="btn-secondary">See them all <span aria-hidden="true">→</span></a>
+    </div>
+    <a href="/screenshots/" class="block" tabindex="-1" aria-hidden="true">
+      <div class="ribbon">
+        <div class="ribbon-track">
+          {[...ribbonA, ...ribbonA].map((id) => (<div><Shot id={id} sizes="288px" alt="" /></div>))}
+        </div>
+      </div>
+      <div class="ribbon mt-3">
+        <div class="ribbon-track rev">
+          {[...ribbonB, ...ribbonB].map((id) => (<div><Shot id={id} sizes="288px" alt="" /></div>))}
+        </div>
+      </div>
+    </a>
   </section>
 
   <!-- ================= FOOTAGE ================= -->
@@ -475,9 +531,8 @@ const videoGameLd = {
         Not another generator game
       </h2>
       <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
-        Most asymmetrical horror games compete on graphics and keep the same loop: fix the
-        machines, open the gate. We wanted the survivors' side to be its own game, where you
-        explore, decide what's worth carrying and work as a team.
+        Survivors shouldn't just fix machines. In STATIC they explore, choose what to carry and
+        split the work.
         <a href="/blog/why-static-is-not-a-generator-game/" class="text-signal underline decoration-signal-dim underline-offset-4 hover:text-signal-dim">Read why</a>.
       </p>
 
@@ -543,8 +598,7 @@ const videoGameLd = {
         Built by three people
       </h2>
       <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
-        {SITE.name} started STATIC in {GAME.devStarted} and rebuilt it three times before the
-        first beta. No publisher, no outsourcing: everything in the game was made by the three of us.
+        Started in {GAME.devStarted}. Rebuilt three times. No publisher, no outsourcing.
       </p>
       <ul class="mt-12 grid gap-5 md:grid-cols-3">
         {TEAM.map((m, i) => (

@@ -21,7 +21,7 @@ This file is the law for anyone (human or AI) editing `site/`. Read it before ge
 
 ## Page structure (2026-10-08 rebuild)
 
-- **Home** follows the industry order: cinematic hero (real screenshot backdrop + Jingles key art, one-line pitch, Play on Roblox) → how a round works (screenshot rows) → pinned "Tour the bunker" → Jingles → Worm + Pod → four end screens → videos → comparison → roadmap (PLANNED) → team → community → final CTA.
+- **Home** is visual-first, short copy: cinematic hero → count-up stat band (gauge SVG) → sticky scrollytelling "how a round works" (crossfading shots, `Icon.astro` vector icons) → pinned "Tour the bunker" → kinetic type band → Jingles (red atmosphere) → Worm + Pod (SVG line-draw) → four end screens → screenshot ribbon → videos → comparison → roadmap (PLANNED) → team → community → final CTA. Keep copy to one or two lines per block; details belong in /guide.
 - **Screenshots** come from `game-assets/` (raw, never deployed — see repo `.assetsignore`) through `scripts/media.mjs` → `public/media/*.webp`. Register shots in `src/data/media.json`, render with `Shot.astro` / `ShotFigure.astro`, never hand-write `/media/` paths. `/screenshots/` and `/guide/map/` are the image-SEO pages; `/sitemap-images.xml` lists them.
 - **Scroll motion is CSS-only**: `animation-timeline: scroll()/view()` (hero drift, `.reveal` shutter, `.parallax`, pinned `.tour` on ≥1024px). It lives in `@supports` + `prefers-reduced-motion: no-preference`, so unsupported browsers and reduced-motion users get a complete static page.
 - **Official guide** (`/guide/*`, `src/layouts/GuideLayout.astro`) is the SEO engine: one page per game-specific search term (Jingles, Worm, scrap list, crushers, pods, codes). Real numbers only.
