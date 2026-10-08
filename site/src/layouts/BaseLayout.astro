@@ -74,7 +74,8 @@ const ogImageAbs = new URL(ogImage, SITE.url);
 // title stand alone (better a complete page title than a truncated brand tail).
 const brandSuffix = ' | Beanie Studios';
 const fullTitle =
-  title.includes('Beanie Studio') || title.length + brandSuffix.length > 60
+  // Count "&" as its HTML-escaped length (&amp;) — that's what crawlers and the live audit measure.
+  title.includes('Beanie Studio') || title.replace(/&/g, '&amp;').length + brandSuffix.length > 60
     ? title
     : `${title}${brandSuffix}`;
 
