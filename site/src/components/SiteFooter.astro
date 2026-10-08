@@ -1,5 +1,15 @@
 ---
-import { SITE, CHANNELS } from '../site.config';
+import { SITE, LINKS, CHANNELS } from '../site.config';
+
+const guideLinks = [
+  { href: '/guide/', label: 'Beginner guide' },
+  { href: '/guide/jingles/', label: 'Jingles (Hunter)' },
+  { href: '/guide/worm/', label: 'The Worm' },
+  { href: '/guide/scrap/', label: 'Scrap list' },
+  { href: '/guide/crushers/', label: 'Crushers & minigames' },
+  { href: '/guide/capture-and-rescue/', label: 'Pods & rescue' },
+  { href: '/codes/', label: 'Codes' },
+];
 
 const year = new Date().getFullYear();
 ---
@@ -8,26 +18,31 @@ const year = new Date().getFullYear();
   <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
     <div class="grid gap-10 md:grid-cols-[1.2fr_2fr]">
       <div>
-        <p class="kicker">Comm Channels</p>
-        <p class="mt-4 max-w-sm text-sm leading-relaxed text-facility-300">
-          {SITE.name} is a small team building STATIC: Salvage vs Hunter for Roblox. Wishlists and
-          follows decide whether the doors open on schedule — every channel below is a way to be
-          there when they do.
+        <img src="/img/beanie-studios-logo.webp" width="180" height="127" loading="lazy" decoding="async" alt="Beanie Studios logo" class="h-auto w-40" />
+        <p class="mt-5 max-w-sm text-sm leading-relaxed text-facility-300">
+          {SITE.name} is a three-person team making STATIC, a free co-op horror game on Roblox.
         </p>
-        <a href={`mailto:${SITE.contact}`} class="mt-6 inline-flex items-center gap-2 font-mono text-sm text-facility-100 hover:text-signal">
+        <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary mt-6 !px-4 !py-2 text-xs">Play STATIC on Roblox <span aria-hidden="true">→</span></a>
+        <p class="kicker mt-10">Guide</p>
+        <ul class="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+          {guideLinks.map((l) => (
+            <li><a href={l.href} class="text-facility-300 hover:text-signal">{l.label}</a></li>
+          ))}
+        </ul>
+        <a href={`mailto:${SITE.contact}`} class="mt-8 inline-flex items-center gap-2 font-mono text-sm text-facility-100 hover:text-signal">
           {SITE.contact}
           <span aria-hidden="true">→</span>
         </a>
       </div>
 
-      <ul class="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+      <ul class="grid content-start gap-x-8 gap-y-6 sm:grid-cols-2">
         <li>
           <a href="/creators" class="group block">
             <span class="flex items-center justify-between border-b border-facility-700 pb-2 font-display text-sm font-bold uppercase tracking-wider text-facility-100 transition-colors group-hover:text-signal">
               Creator program
               <span class="text-signal transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
             </span>
-            <span class="mt-1.5 block font-mono text-xs text-facility-500">Stream STATIC? Get the creator kit</span>
+            <span class="mt-1.5 block font-mono text-xs text-facility-500">Make videos of STATIC? Start here</span>
           </a>
         </li>
         {CHANNELS.map((ch) => (
@@ -45,11 +60,8 @@ const year = new Date().getFullYear();
     </div>
 
     <div class="mt-14 flex flex-col gap-2 border-t border-facility-800 pt-6 font-mono text-xs text-facility-500 sm:flex-row sm:items-center sm:justify-between">
-      <span>© {year} {SITE.name}. STATIC and the Beanie Studio name are works of fiction in progress.</span>
-      <span class="flex items-center gap-2">
-        <span class="dot" aria-hidden="true"></span>
-        TRANSMISSION ACTIVE
-      </span>
+      <span>© {year} {SITE.name}. STATIC is a Roblox experience by {SITE.name}; not affiliated with Roblox Corporation.</span>
+      <a href="/press/" class="hover:text-signal">PRESS KIT →</a>
     </div>
   </div>
 </footer>

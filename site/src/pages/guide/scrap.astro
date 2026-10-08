@@ -1,0 +1,132 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { SCRAP, RARITY, CRUSHERS, SCRAPPER, kg } from '../../data/game';
+
+const backpack = SCRAP.filter((s) => s.slot === 'Backpack');
+const heavy = SCRAP.filter((s) => s.slot === 'Heavy');
+const charged = RARITY.find((r) => r.name === 'Charged')!;
+const core = SCRAP[SCRAP.length - 1];
+const bestBackpack = backpack[backpack.length - 1];
+
+const itemLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'STATIC scrap items and weights',
+  numberOfItems: SCRAP.length,
+  itemListElement: SCRAP.map((s, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: `${s.name} — ${s.kg} kg`,
+  })),
+};
+---
+
+<GuideLayout
+  title="STATIC Scrap List — Every Item, Weight & Rarity (Roblox)"
+  description={`All ${SCRAP.length} scrap items in STATIC on Roblox with exact weights, spawn chances and Rare/Charged values, plus how to fill the ${CRUSHERS.totalKg} kg crusher quota fast.`}
+  path="/guide/scrap/"
+  h1="Scrap list: every item, weight and rarity"
+  kicker="Official guide · Items"
+  crumb="Scrap items"
+  updated="2026-10-08"
+  jsonLd={[itemLd]}
+>
+  <p class="text-lg">
+    Scrap is the whole job in STATIC. Scrappers need to feed <strong>{CRUSHERS.totalKg} kg</strong>
+    into {CRUSHERS.count} crushers ({CRUSHERS.quotasKg.join(' + ')} kg) before the exit opens. There
+    are <strong>{SCRAP.length} scrap items</strong>. This table lists every one, straight from the
+    game's config.
+  </p>
+
+  <h2 id="table">All scrap items</h2>
+  <p>
+    Spawn chance is the chance an item is in a round's spawn pool. Every item that spawns also
+    rolls a rarity that multiplies its weight.
+  </p>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Item</th>
+          <th scope="col">Carry</th>
+          <th scope="col" class="num">Common</th>
+          <th scope="col" class="num">Rare ×1.5</th>
+          <th scope="col" class="num">Charged ×3</th>
+          <th scope="col" class="num">Spawn chance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {SCRAP.map((s) => (
+          <tr>
+            <td class="text-facility-100">{s.name}</td>
+            <td>{s.slot === 'Backpack' ? 'Backpack' : 'In hands'}</td>
+            <td class="num text-facility-100">{kg(s.kg)}</td>
+            <td class="num">{kg(s.kg * 1.5)}</td>
+            <td class="num text-signal">{kg(s.kg * 3)}</td>
+            <td class="num">{s.spawnPct}%</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="rarity">Rarity</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Rarity</th><th scope="col" class="num">Weight multiplier</th><th scope="col" class="num">Chance</th></tr></thead>
+      <tbody>
+        {RARITY.map((r) => (
+          <tr><td class="text-facility-100">{r.name}</td><td class="num">×{r.mult}</td><td class="num">{r.pct}%</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p>
+    Charged items are rare ({charged.pct}%) but worth triple. A Charged {core.name.toLowerCase()}
+    weighs {kg(core.kg * charged.mult)}, more than the entire {CRUSHERS.totalKg} kg quota.
+  </p>
+
+  <h2 id="carrying">Backpack vs. carrying in your hands</h2>
+  <h3>Backpack items ({backpack.length})</h3>
+  <p>
+    {backpack.map((b) => b.name).join(', ')}. You have <strong>{SCRAPPER.backpackSlots} backpack
+    slots</strong>, and backpack scrap doesn't slow you down at all.
+  </p>
+  <h3>Heavy items ({heavy.length})</h3>
+  <p>
+    {heavy.map((b) => b.name).join(', ')}. You carry one at a time in your hands. It slows you
+    down, scaling with weight up to <strong>{SCRAPPER.heavyCarrySlowMaxPct}%</strong> for the
+    {core.kg} kg {core.name.toLowerCase()}, and your flashlight switches off while you hold it.
+  </p>
+
+  <h2 id="strategy">How to fill the quota fast</h2>
+  <ul>
+    <li>
+      <strong>Pack small, then lift big.</strong> Two backpack items cost you nothing to carry. Fill
+      both slots before you pick up something heavy, and one trip can deliver a heavy item plus up
+      to {kg(bestBackpack.kg * SCRAPPER.backpackSlots)} of backpack scrap.
+    </li>
+    <li>
+      <strong>Know the quotas.</strong> The crushers need {CRUSHERS.quotasKg.join(', ')} kg. A
+      Common {heavy.find((h) => h.kg === 50)?.name.toLowerCase()} plus a few backpack items gets
+      a crusher a long way.
+    </li>
+    <li>
+      <strong>Grab Charged items first.</strong> One Charged item can be worth as much as a whole
+      trip of Common scrap.
+    </li>
+    <li>
+      <strong>Don't throw what you can walk.</strong> A missed throw makes noise that draws Worms.
+    </li>
+    <li>
+      <strong>Pick up what gets dropped.</strong> Dropped scrap stays in the world as a pickup, but
+      it vanishes after 90 seconds if nobody grabs it. Scrap doesn't respawn mid-round.
+    </li>
+    <li>
+      <strong>Careful with heavy scrap.</strong> Holding or standing near it raises your chance of
+      drawing a <a href="/guide/worm/">Worm</a>, right when your flashlight is off.
+    </li>
+  </ul>
+
+  <p>Next: <a href="/guide/crushers/">how crushers, consoles and extraction work</a>.</p>
+</GuideLayout>

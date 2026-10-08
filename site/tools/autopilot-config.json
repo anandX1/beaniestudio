@@ -1,4 +1,6 @@
 {
+  "paused": true,
+  "pausedNote": "Paused 2026-10-08: auto-generated posts were contradicting the real game. Write posts by hand from real facts (src/data/game.ts) instead.",
   "targetCount": 100,
   "publishTime": "22:00",
   "nextPublishDate": "2026-09-21",

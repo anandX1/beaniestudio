@@ -34,7 +34,7 @@ const {
   description = SITE.description,
   path,
   ogImage = '/og/home.png',
-  ogImageAlt = `${SITE.name} — key art card`,
+  ogImageAlt = 'STATIC — free Roblox horror game by Beanie Studios',
   jsonLd = [],
   breadcrumb,
   noindex = false,
@@ -71,7 +71,7 @@ const ogImageAbs = new URL(ogImage, SITE.url);
 // Title budget: SERP snippets truncate ~60 chars. Append the brand only when the
 // total stays within budget; when the page title alone fills it, let the page
 // title stand alone (better a complete page title than a truncated brand tail).
-const brandSuffix = ' — Beanie Studio';
+const brandSuffix = ' | Beanie Studios';
 const fullTitle =
   title.includes('Beanie Studio') || title.length + brandSuffix.length > 60
     ? title
@@ -81,7 +81,9 @@ const fullTitle =
 const organizationLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
+  '@id': `${SITE.url}/#org`,
   name: SITE.name,
+  alternateName: 'Beanie Studio',
   url: SITE.url,
   email: SITE.contact,
   logo: new URL('/logo.png', SITE.url).href,
@@ -91,16 +93,18 @@ const organizationLd = {
     LINKS.youtube,
     LINKS.instagram,
     LINKS.x,
-    // Wikidata entity — the knowledge-graph anchor AI engines resolve (2026-09-21)
-    'https://www.wikidata.org/wiki/Q141511863',
+    // Wikidata entity — the knowledge-graph anchor AI engines resolve
+    LINKS.wikidataStudio,
   ],
 };
 
 const websiteLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: SITE.name,
+  '@id': `${SITE.url}/#website`,
+  name: 'STATIC by Beanie Studios',
   url: SITE.url,
+  publisher: { '@id': `${SITE.url}/#org` },
 };
 
 /** BreadcrumbList — wins sitelink breadcrumbs in SERPs. */

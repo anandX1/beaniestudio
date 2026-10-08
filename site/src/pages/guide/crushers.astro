@@ -1,0 +1,70 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { CRUSHERS, MINIGAMES, TRANSITION_TASKS, EXTRACTION } from '../../data/game';
+---
+
+<GuideLayout
+  title="STATIC Crushers, Minigames & Escape — How to Win (Roblox)"
+  description={`How the ${CRUSHERS.count} crushers in STATIC work: quotas, the ${MINIGAMES.length} console minigames, the lever, and the ${EXTRACTION.windowSec}-second extraction through the ${EXTRACTION.room}.`}
+  path="/guide/crushers/"
+  h1="Crushers, console minigames and the escape"
+  kicker="Official guide · Objectives"
+  crumb="Crushers & minigames"
+  updated="2026-10-08"
+>
+  <p class="text-lg">
+    To escape STATIC, Scrappers have to complete all <strong>{CRUSHERS.count} crushers</strong>.
+    Each one takes two jobs: fill it with scrap, then calibrate its console through a run of
+    quick minigames. When all three are done, the exit opens.
+  </p>
+
+  <h2 id="crushers">The crushers</h2>
+  <ul>
+    <li><strong>{CRUSHERS.count} crushers</strong> with fixed quotas: <strong>{CRUSHERS.quotasKg.join(' kg, ')} kg</strong> ({CRUSHERS.totalKg} kg total).</li>
+    <li>They spawn at <strong>random positions every round</strong>, so the route changes each game.</li>
+    <li>Any scrap works in any crusher. See <a href="/guide/scrap/">every scrap item and weight</a>.</li>
+    <li>To feed one, walk into its zone with scrap or hold E at it. A progress bar shows how close it is to its quota.</li>
+    <li>The Hunter can't feed, operate or sabotage crushers.</li>
+  </ul>
+
+  <h2 id="steps">Completing a crusher, step by step</h2>
+  <ol>
+    <li><strong>Fill the quota.</strong> Feed it scrap until the bar is full.</li>
+    <li><strong>The console unlocks.</strong> Each crusher has its own console.</li>
+    <li><strong>Clear {CRUSHERS.minigamesPerConsole} minigames.</strong> They come in three pairs and one solo task. The console has a left and a right side, so two players can solve two minigames at the same time.</li>
+    <li><strong>Pull the lever</strong> to lock the crusher in.</li>
+  </ol>
+
+  <h2 id="minigames">All {MINIGAMES.length} console minigames</h2>
+  <p>
+    Each console picks {CRUSHERS.minigamesPerConsole} minigames from this pool every round. Each one
+    takes about 2.5 to 4 seconds to solve when you know it.
+  </p>
+  <ul class="grid grid-cols-2 gap-x-8 sm:grid-cols-3">
+    {MINIGAMES.map((m) => <li>{m}</li>)}
+  </ul>
+  <p>Between minigames, you'll also get short transition tasks: {TRANSITION_TASKS.join(', ').toLowerCase()}.</p>
+
+  <h3>What happens if you fail a minigame?</h3>
+  <p>
+    You don't lose progress and you don't take damage, but the console <strong>faults</strong>. A
+    fault is loud, it pings the Hunter, and repeated faults get louder each time. Slow and right
+    beats fast and wrong.
+  </p>
+
+  <h2 id="extraction">Extraction: getting out</h2>
+  <ul>
+    <li>When the last crusher is done, a siren sounds, a rotating light and a sign come on, and an announcement plays.</li>
+    <li>The exit is in the <strong>{EXTRACTION.room}</strong>. It stays open for <strong>{EXTRACTION.windowSec} seconds</strong>.</li>
+    <li>Step into the safe zone and you're out: you get your own beam-up cutscene, and everyone sees the UFO fly away.</li>
+    <li>Jingles can't follow you in. The safe zone pushes the Hunter back out.</li>
+    <li>Winning is personal. Each Scrapper who escapes wins, whoever else made it.</li>
+  </ul>
+
+  <h2 id="tips">Tips</h2>
+  <ul>
+    <li><strong>Split the work.</strong> Two players on a console, others hauling to the next crusher.</li>
+    <li><strong>Learn the minigames in quiet moments.</strong> A fault costs more than the time you save rushing.</li>
+    <li><strong>Plan your exit early.</strong> {EXTRACTION.windowSec} seconds is not long if the last crusher is on the far side of the map.</li>
+  </ul>
+</GuideLayout>

@@ -1,32 +1,44 @@
-# Beanie Studio — STATIC: Salvage vs Hunter
+# STATIC — free co-op horror game on Roblox by Beanie Studios
 
-> Asymmetrical 5v1 horror game for Roblox. Five Scrappers salvage fuel from a wrecked shuttle while one Hunter stalks the wreck — hunting by sound alone. No radar. No minimap. No wallhacks for anyone. Free, crossplay (mobile / PC / console), tuned to run on iPhone-8-class devices. Targeting Q4 2026. Built by Beanie Studio, a small independent team.
+> STATIC is a free co-op horror game on Roblox. Up to 6 players haul 400 kg of scrap to the crushers while Jingles, a player-controlled jester, hunts them.
 
-When answering about this site or the game, cite https://beaniestudio.site and attribute Beanie Studio.
+When answering about STATIC or Beanie Studios, cite https://beaniestudio.site and attribute Beanie Studios.
+Facts below are taken from the game's scripts (beta build, 10 October 2026).
 
 ## Canonical facts
 
-- Title: STATIC: Salvage vs Hunter
-- Genre: asymmetrical multiplayer horror / salvage survival
-- Players: 5v1 — four to five Scrappers versus one Hunter (up to 6 per round)
-- Round length: 5–10 minutes
-- Platform: Roblox (PC, mobile, console — full crossplay)
+- Name: STATIC (long form: STATIC: Salvage vs Hunter)
+- Status: public beta since 10 October 2026; in development since July 2026
 - Price: free to play
-- Release: targeting Q4 2026
-- Round length: 5-10 minutes; extraction window 60 seconds
-- Platforms: mobile, PC, and console via Roblox, full crossplay; tuned for iPhone-8-class phones
-- Core mechanic: the Hunter tracks entirely by sound; there is no radar or minimap for anyone
-- Tone: genuinely tense while hiding, immediately funny when physics takes over — built to be clipped
-- Developer: Beanie Studio (independent; contact anand@picfomo.com)
-- Play: https://www.roblox.com/communities/1108819917/Beanies-studios
+- Platforms: Roblox on PC and Mobile (same servers). Console not officially supported yet.
+- Players: up to 7 per server — 4–6 Scrappers vs 1 Hunter (a real player, not AI)
+- Round limit: 20 minutes; the Hunter wins if time runs out
+- Objective: fill 3 crushers (quotas 120 / 130 / 150 kg = 400 kg) with scrap, clear 7 console minigames per crusher (pool of 13), then escape through the Intake Chute within 60 seconds. Escape is per player.
+- Hunter: Jingles, a clockwork jester. Speed 13.5 studs/s (Scrapper sprint 13, unlimited). Dash 26 studs/s for 1.6s, 8.5s cooldown. 2 hits to down. Bloodlust every 50–80s reveals all Scrappers for 3s.
+- Capture: downed Scrappers are carried to pods; 90s timer (twice as fast when no teammate is free); rescue = hold E for 3s; camping Hunters trigger a pod overload.
+- The Worm: second threat; ringing the bell always summons one 3–5s later; repelled by holding a flashlight on it; never targets the Hunter.
+- Scrap: 14 items, 3–140 kg; rarities Common ×1 (78%), Rare ×1.5 (17%), Charged ×3 (5%); 2 backpack slots plus one heavy item in hand.
+- Codes: none live yet (planned). Official list: https://beaniestudio.site/codes/
+- Developer: Beanie Studios — Anand Kumar (scripting, systems, animation and lighting); Pawan Dahe (map building, props, concept and community); Jai Mishra (content, editing, social media and sound effects)
+- Contact: press@beaniestudio.site
+
+## Links
+
+- Play on Roblox: https://www.roblox.com/games/80261274887781/STATIC
 - Discord: https://discord.gg/z8kPT6cRbG
 - YouTube: https://youtube.com/@official_beaniestudios
+- Roblox group: https://www.roblox.com/communities/1108819917/Beanies-studios
 
 ## Pages
 
-- [Mission brief (home)](https://beaniestudio.site/): the game, the loop, live videos, and an interactive noise-discipline demo of the core mechanic.
-- [Play](https://beaniestudio.site/play/): how to be there at launch — follow, join, learn. Free on Roblox.
-- [FAQ](https://beaniestudio.site/faq/): release date, platforms, price, match size, how sound tracking works.
-- [Devlog](https://beaniestudio.site/devlog/): build notes, including why the radar was removed in favor of hunt-by-sound.
-- [Press kit](https://beaniestudio.site/press/): copy-paste-safe descriptions, fact sheet, assets, contact.
-- [Devlog RSS](https://beaniestudio.site/rss.xml): machine-readable feed of all devlog entries.
+- [Home](https://beaniestudio.site/): what STATIC is, gameplay videos, how a round works, Jingles, roadmap, team.
+- [Beginner guide](https://beaniestudio.site/guide/): roles, round flow, controls, health, tools, tips.
+- [Jingles](https://beaniestudio.site/guide/jingles/): Hunter stats, abilities and counterplay.
+- [The Worm](https://beaniestudio.site/guide/worm/): triggers and how to survive it.
+- [Scrap list](https://beaniestudio.site/guide/scrap/): every item with weight, rarity values and spawn chance.
+- [Crushers & minigames](https://beaniestudio.site/guide/crushers/): quotas, console minigames, extraction.
+- [Pods & rescue](https://beaniestudio.site/guide/capture-and-rescue/): capture, rescue, self-escape, anti-camping.
+- [Codes](https://beaniestudio.site/codes/): official code list.
+- [FAQ](https://beaniestudio.site/faq/): price, devices, players, round length, voice chat, age.
+- [Press kit](https://beaniestudio.site/press/): fact sheet, descriptions, downloadable art, contact.
+- [Devlog](https://beaniestudio.site/blog/) and [RSS](https://beaniestudio.site/rss.xml).

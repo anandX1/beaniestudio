@@ -1,98 +1,148 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, LINKS } from '../site.config';
+import { GAME, CRUSHERS, MINIGAMES, SCRAP, JINGLES, POD, TEAM, COMMUNITY, EXTRACTION } from '../data/game';
+import { VIDEOS, watchUrl } from '../data/videos';
 
-const facts = [
-  ['Title', 'STATIC: Salvage vs Hunter'],
-  ['Developer', 'Beanie Studio'],
-  ['Platform', 'Roblox (PC, mobile, console — crossplay)'],
-  ['Players', '5v1 — four to five Scrappers vs one Hunter'],
-  ['Session length', '5–10 minute rounds'],
-  ['Price', 'Free to play'],
-  ['Release', 'Targeting Q4 2026'],
-  ['Genre', 'Asymmetrical horror / salvage survival'],
+const facts: [string, string][] = [
+  ['Title', `${GAME.name} (also: ${GAME.fullName})`],
+  ['Developer', `${SITE.name} — independent, ${TEAM.length} people`],
+  ['Platform', `Roblox — ${GAME.platforms.join(' and ')}`],
+  ['Release', `Public beta, ${GAME.launchLabel}`],
+  ['In development since', GAME.devStarted],
+  ['Price', GAME.price],
+  ['Players', `Up to ${GAME.serverSize}: ${GAME.scrappers.min}–${GAME.scrappers.max} Scrappers vs ${GAME.hunters} Hunter`],
+  ['Round length', `Up to ${GAME.roundLimitMin} minutes`],
+  ['Genre', 'Co-op asymmetrical horror'],
+  ['Audience', `${GAME.ageTarget}`],
 ];
 
-const paragraphs = [
-  'STATIC is an asymmetrical 5v1 horror game for Roblox. Four to five Scrappers salvage heavy fuel scrap from a wrecked shuttle while one player — the Hunter — stalks the wreck to stop them.',
-  'The twist is the tracker: there is none. No radar, no minimap, no wallhacks for anyone. The Hunter hunts by sound alone, and everything the Scrappers do makes noise — sprinting, dragging heavy salvage, panicking. Crouch-walk is life.',
-  'The tone is deliberately double-edged: genuinely tense when you are hiding three feet from a Hunter you cannot see, and immediately funny when a shove turns a stealth standoff into a ragdoll pile. Rounds run five to ten minutes and are built for "one more game."',
-  'STATIC targets a Q4 2026 launch and is developed by Beanie Studio, a small independent team. Performance is tuned for iPhone-8-class devices so full crossplay never means second-class players.',
+const shortDesc = `STATIC is a free co-op horror game on Roblox by ${SITE.name}. Up to ${GAME.scrappers.max} players search an abandoned bunker for scrap and feed ${CRUSHERS.totalKg} kg of it into ${CRUSHERS.count} crushers to open the way out, while one player hunts them as Jingles, a clockwork jester. Free on PC and mobile; public beta from ${GAME.launchLabel}.`;
+
+const longDesc = [
+  `STATIC is a co-op asymmetrical horror game for Roblox. A server of up to ${GAME.serverSize} players splits into Scrappers and one Hunter. The Scrappers explore an abandoned bunker, collecting ${SCRAP.length} kinds of scrap that weigh anywhere from ${SCRAP[0].kg} kg to ${SCRAP[SCRAP.length - 1].kg} kg, and haul it to ${CRUSHERS.count} crushers with a combined ${CRUSHERS.totalKg} kg quota. Each full crusher unlocks a console of ${CRUSHERS.minigamesPerConsole} minigames, drawn from a pool of ${MINIGAMES.length}. Finish all three and the ${EXTRACTION.room} opens for ${EXTRACTION.windowSec} seconds.`,
+  `The Hunter is Jingles, a clockwork jester played by one of the players. Jingles is only slightly faster than a sprinting Scrapper, but it has a Dash, and every ${JINGLES.bloodlust.everySec} seconds its Bloodlust briefly reveals every Scrapper on the map. Downed Scrappers are carried to pods, where teammates have ${POD.timerSec} seconds to rescue them. Under the floor lives a second threat, the Worm, which answers noise and can only be driven off with a flashlight.`,
+  `Most asymmetrical horror games ask survivors to repair the same machines every round. STATIC was built to make the survivors' side a game of its own: exploring, deciding what's worth carrying, and splitting work between crushers and consoles while the Hunter closes in. STATIC is made by a team of three. Development started in ${GAME.devStarted}, and the game was rebuilt three times before its first public beta.`,
 ];
 
-const shortDesc = 'STATIC: Salvage vs Hunter is an asymmetrical 5v1 horror game for Roblox by Beanie Studio. Scrappers salvage fuel from a wrecked shuttle while one Hunter hunts them by sound alone. No radar. No minimap. Only ears. Free, crossplay, targeting Q4 2026.';
+const assets = [
+  { file: '/press/jingles-render.png', preview: '/img/jingles-480.webp', label: 'Jingles render', meta: 'PNG, transparent, 853×1469' },
+  { file: '/press/static-key-art.png', preview: '/img/press-key-art.webp', label: 'STATIC key art card', meta: 'PNG, 1200×630' },
+  { file: '/press/beanie-studios-logo.png', preview: '/img/beanie-studios-logo.webp', label: 'Beanie Studios logo', meta: 'PNG, 1496×1051' },
+  { file: '/press/beanie-studios-icon.png', preview: '/img/press-icon.webp', label: 'Beanie Studios icon', meta: 'PNG, 703×703' },
+];
+
+const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
 ---
 
 <BaseLayout
-  title="Press kit — STATIC: Salvage vs Hunter"
-  description="Copy-paste-safe facts, descriptions, and contact for press and creators covering STATIC: Salvage vs Hunter, the asymmetrical 5v1 horror game for Roblox."
+  title="STATIC Press Kit — Facts, Assets & Contact"
+  description="Press kit for STATIC, the free co-op horror game on Roblox by Beanie Studios: fact sheet, descriptions, downloadable art, videos, team and press contact."
   path="/press"
   ogImage="/og/press.png"
   breadcrumb={[{ name: 'Home', path: '/' }, { name: 'Press kit', path: '/press' }]}
 >
-  <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+  <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
     <p class="kicker">Press kit</p>
     <h1 class="mt-6 font-display text-4xl font-bold uppercase leading-tight tracking-tight sm:text-6xl">
-      Cover STATIC
+      STATIC press kit
     </h1>
     <p class="mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
-      Everything on this page is copy-paste safe for articles, videos, and posts. Need anything
-      else — interviews, early access, custom clips — email us and ask.
+      Everything you need to write about or make videos of STATIC. All text on this page is free
+      to quote and all assets are free to use for coverage. No need to ask.
     </p>
+    <div class="mt-8 flex flex-wrap gap-4">
+      <a href="/press/static-press-kit.zip" download class="btn-primary">Download everything (.zip) <span aria-hidden="true">↓</span></a>
+      <a href={`mailto:${SITE.contact}`} class="btn-secondary">{SITE.contact}</a>
+    </div>
 
     <div class="mt-16 grid gap-10 lg:grid-cols-[1.6fr_1fr]">
-      <!-- Description blocks -->
       <div>
-        <p class="kicker">The one-liner</p>
-        <blockquote class="panel mt-4 p-6 font-mono text-sm leading-relaxed text-facility-100">
-          {shortDesc}
-        </blockquote>
+        <h2 class="kicker">Short description</h2>
+        <blockquote class="panel mt-4 p-6 text-sm leading-relaxed text-facility-100">{shortDesc}</blockquote>
 
-        <p class="kicker mt-10">The story</p>
+        <h2 class="kicker mt-12">Long description</h2>
         <div class="mt-4 space-y-4 leading-relaxed text-facility-300">
-          {paragraphs.map((p) => <p>{p}</p>)}
+          {longDesc.map((p) => <p>{p}</p>)}
         </div>
       </div>
 
-      <!-- Fact sheet -->
       <aside class="panel h-fit p-7">
-        <p class="kicker">Fact sheet</p>
+        <h2 class="kicker">Fact sheet</h2>
         <dl class="mt-5 divide-y divide-facility-700">
           {facts.map(([k, v]) => (
-            <div class="flex items-baseline justify-between gap-4 py-3">
+            <div class="grid gap-1 py-3">
               <dt class="font-mono text-xs uppercase tracking-widest text-facility-500">{k}</dt>
-              <dd class="text-right text-sm font-semibold text-facility-100">{v}</dd>
+              <dd class="text-sm font-semibold text-facility-100">{v}</dd>
             </div>
           ))}
+          <div class="grid gap-1 py-3">
+            <dt class="font-mono text-xs uppercase tracking-widest text-facility-500">Links</dt>
+            <dd class="flex flex-col gap-1 text-sm">
+              <a href={LINKS.game} rel="noopener" target="_blank" class="text-signal hover:text-signal-dim">Roblox game page</a>
+              <a href={LINKS.youtube} rel="noopener" target="_blank" class="text-signal hover:text-signal-dim">YouTube</a>
+              <a href={LINKS.discord} rel="noopener" target="_blank" class="text-signal hover:text-signal-dim">Discord</a>
+            </dd>
+          </div>
         </dl>
       </aside>
     </div>
 
-    <!-- Assets + contact -->
-    <div class="mt-14 grid gap-6 md:grid-cols-2">
-      <div class="panel p-7">
-        <p class="kicker">Assets</p>
-        <ul class="mt-5 space-y-2.5 text-sm text-facility-300">
-          <li>• Logo (PNG, 703×703) + favicon — <span class="font-mono text-facility-100"><a href="/logo.png" class="underline decoration-facility-600 underline-offset-4 hover:decoration-signal" download>download /logo.png</a></span></li>
-          <li>• OG card (1200×630) — <span class="font-mono text-facility-100">/og/home.png</span></li>
-          <li>• Screenshots & key art — <span class="font-mono text-facility-100">on request via email</span></li>
-          <li>• Gameplay clips — <span class="font-mono text-facility-100">YouTube channel</span></li>
+    <h2 class="mt-20 font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">Art and logos</h2>
+    <p class="mt-3 max-w-2xl text-facility-300">
+      Gameplay screenshots are being captured for the launch build and will be added here. Need
+      something specific now? Email us and we'll send it.
+    </p>
+    <ul class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      {assets.map((a) => (
+        <li class="panel flex flex-col p-5">
+          <div class="grid aspect-square place-items-center overflow-hidden bg-facility-950">
+            <img src={a.preview} alt={a.label} loading="lazy" decoding="async" class="max-h-full max-w-full object-contain p-3" />
+          </div>
+          <p class="mt-4 font-display text-sm font-bold uppercase tracking-wide">{a.label}</p>
+          <p class="mt-1 font-mono text-xs text-facility-500">{a.meta}</p>
+          <a href={a.file} download class="mt-3 font-mono text-sm text-signal hover:text-signal-dim">Download <span aria-hidden="true">↓</span></a>
+        </li>
+      ))}
+    </ul>
+
+    <h2 class="mt-20 font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">Videos</h2>
+    <ul class="mt-6 divide-y divide-facility-700 border-y border-facility-700">
+      {pressVideos.map((v) => (
+        <li class="flex flex-wrap items-baseline justify-between gap-3 py-3">
+          <a href={watchUrl(v.id)} rel="noopener" target="_blank" class="text-facility-100 hover:text-signal">{v.title}</a>
+          <span class="font-mono text-xs text-facility-500">{v.tag} · {v.date}</span>
+        </li>
+      ))}
+    </ul>
+
+    <div class="mt-20 grid gap-10 lg:grid-cols-2">
+      <div>
+        <h2 class="font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">The team</h2>
+        <ul class="mt-6 space-y-4">
+          {TEAM.map((m) => (
+            <li class="panel p-5">
+              <p class="font-display text-lg font-bold uppercase tracking-wide">{m.name}</p>
+              <p class="mt-1 text-sm text-facility-300">{m.role}</p>
+              <p class="mt-2 font-mono text-xs text-facility-500">ROBLOX {m.roblox} · DISCORD {m.discord}</p>
+            </li>
+          ))}
         </ul>
-        <a href={LINKS.youtube} rel="noopener" target="_blank" class="btn-secondary mt-7 !px-4 !py-2 text-xs">
-          YouTube channel <span aria-hidden="true">→</span>
-        </a>
       </div>
-      <div class="panel flex flex-col p-7">
-        <p class="kicker">Direct line</p>
-        <p class="mt-5 text-sm leading-relaxed text-facility-300">
-          Interviews, creator keys, early playtests, or anything at all — we answer fast.
+      <div>
+        <h2 class="font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">Numbers</h2>
+        <dl class="mt-6 divide-y divide-facility-700 border-y border-facility-700">
+          <div class="flex justify-between gap-4 py-3"><dt class="text-facility-300">YouTube views</dt><dd class="font-mono text-facility-100">{COMMUNITY.youtubeViews}</dd></div>
+          <div class="flex justify-between gap-4 py-3"><dt class="text-facility-300">YouTube subscribers</dt><dd class="font-mono text-facility-100">{COMMUNITY.youtubeSubs}</dd></div>
+          <div class="flex justify-between gap-4 py-3"><dt class="text-facility-300">Discord members</dt><dd class="font-mono text-facility-100">{COMMUNITY.discordMembers}</dd></div>
+        </dl>
+        <p class="mt-2 font-mono text-xs text-facility-500">AS OF {COMMUNITY.asOf.toUpperCase()}</p>
+
+        <h2 class="mt-12 font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">Contact</h2>
+        <p class="mt-4 text-facility-300">
+          Interviews, extra footage, beta access for your channel, or questions about the game:
         </p>
-        <a href={`mailto:${SITE.contact}`} class="mt-6 font-mono text-lg text-signal hover:text-signal-dim">
-          {SITE.contact}
-        </a>
-        <p class="mt-auto pt-8 font-mono text-xs text-facility-500">
-          RESPONSE TIME: USUALLY UNDER 48H
-        </p>
+        <a href={`mailto:${SITE.contact}`} class="mt-3 inline-block font-mono text-lg text-signal hover:text-signal-dim">{SITE.contact}</a>
       </div>
     </div>
   </section>

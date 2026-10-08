@@ -5,8 +5,8 @@ import { SITE } from '../site.config';
 export async function GET(context) {
   const posts = await getCollection('devlog', ({ data }) => !data.draft);
   return rss({
-    title: `${SITE.name} — Blog`,
-    description: 'News, development updates and playtest info for STATIC: Salvage vs Hunter.',
+    title: `STATIC devlog — ${SITE.name}`,
+    description: 'Update notes and design posts on STATIC, the free co-op horror game on Roblox.',
     site: context.site,
     items: posts.map((post) => ({
       title: post.data.title,

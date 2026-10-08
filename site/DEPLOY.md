@@ -27,7 +27,7 @@ The site is a fully static Astro build — no server, no database, free at any t
 - Every `git push` to the production branch auto-deploys. PRs get preview URLs.
 - Submit `https://beaniestudio.site/sitemap-index.xml` in **Google Search Console** (add the property, verify via DNS TXT record — takes 5 min) and in **Bing Webmaster Tools** (it imports from Google).
 - Replace the countdown target in `src/site.config.ts` (`launchDate`) when the launch window firms up — it propagates everywhere including the fallback text.
-- OG images: if you change card copy in `scripts/generate-og.mjs`, run `node scripts/generate-og.mjs` and commit the new PNGs.
+- OG images: if you change card copy in `scripts/og-cards.mjs`, run `node scripts/og-cards.mjs` and commit the new PNGs.
 
 ## SEO ops runbook
 
@@ -51,7 +51,7 @@ The site ships with a full SEO stack. Every deploy, in order:
 - Canonical URLs (trailing-slash normalized), robots directives (`max-image-preview:large` etc.) on every page via `BaseLayout`
 - BreadcrumbList schema from a `breadcrumb` prop; `noindex` prop for utility pages (404)
 - Sitemap excludes noindex pages; RSS + llms.txt + robots.txt ship from `public/`
-- OG cards regenerate with the real studio logo: `node scripts/generate-og.mjs`
+- OG cards regenerate with the real studio logo: `node scripts/og-cards.mjs`
 - Internal link checker: `npm run check:links` (fails the build on dead links)
 - Hover prefetch + inlined CSS for Core Web Vitals (LCP/CINP headroom)
 

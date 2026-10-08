@@ -1,0 +1,124 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { JINGLES, MOVEMENT, POD, SCRAPPER, EXTRACTION } from '../../data/game';
+
+const stats = [
+  ['Movement speed', `${MOVEMENT.hunter} studs/s`, `Scrapper sprint is ${MOVEMENT.scrapperSprint}, walk is ${MOVEMENT.scrapperWalk}`],
+  ['Speed while carrying', `${MOVEMENT.hunterCarrying} studs/s`, 'Slower than a sprinting Scrapper'],
+  ['Dash', `${JINGLES.dash.speed} studs/s for ${JINGLES.dash.durationSec} s`, `${JINGLES.dash.cooldownSec} s cooldown, no wind-up`],
+  ['Attack range', `${JINGLES.attack.rangeStuds} studs`, `${JINGLES.attack.windupSec} s red telegraph, ${JINGLES.attack.cooldownSec} s cooldown`],
+  ['Hits to down', `${JINGLES.attack.hitsToDown}`, 'Hit 1 halves health, hit 2 downs'],
+  ['Finish a downed Scrapper', `${JINGLES.executeSec} s`, 'Or carry them to a pod instead'],
+  ['Bloodlust', `every ${JINGLES.bloodlust.everySec} s`, `Reveals all Scrappers + ${JINGLES.bloodlust.speedMult}× speed for ${JINGLES.bloodlust.revealSec} s`],
+];
+---
+
+<GuideLayout
+  title="Jingles (STATIC Hunter) — Abilities, Stats & Counters"
+  description="Everything about Jingles, the Hunter in STATIC on Roblox: speed, Dash, Bloodlust, two-hit attack, carrying and pods, plus how to survive it and how to play it."
+  path="/guide/jingles/"
+  h1="Jingles: the Hunter in STATIC"
+  kicker="Official guide · The Hunter"
+  crumb="Jingles"
+  updated="2026-10-08"
+  ogImage="/og/jingles.png"
+  ogImageAlt="Jingles, the clockwork jester Hunter from STATIC"
+>
+  <img
+    src="/img/jingles-720.webp"
+    width="418"
+    height="720"
+    alt="Jingles, a clockwork jester with a skull mask, a belled cap and metal claws"
+    class="float-right ml-6 mb-4 hidden h-auto w-48 sm:block"
+    loading="eager"
+  />
+  <p class="text-lg">
+    <strong>Jingles</strong> is the Hunter in STATIC: a clockwork jester with a grinning skull
+    mask, a belled cap, brass-jointed limbs and hooked metal claws. It's not a bot. Every round,
+    one real player in the server is picked to play Jingles, and everyone else is trying to get
+    away from it.
+  </p>
+  <p>
+    Jingles is the only Hunter in the beta. More Hunters are planned.
+  </p>
+
+  <h2 id="stats">Stats</h2>
+  <p>Values from the beta build. Speeds are in studs per second.</p>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Stat</th><th scope="col">Value</th><th scope="col">Notes</th></tr></thead>
+      <tbody>
+        {stats.map(([k, v, n]) => (
+          <tr><td class="text-facility-100">{k}</td><td class="font-mono text-signal">{v}</td><td>{n}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="abilities">Abilities</h2>
+  <h3>Dash</h3>
+  <p>
+    A burst to {JINGLES.dash.speed} studs per second for {JINGLES.dash.durationSec} seconds, on an
+    {JINGLES.dash.cooldownSec}-second cooldown. It fires instantly with a sound cue and a camera
+    punch. It can't break or pass through anything, and it doesn't work while Jingles is dragging
+    someone.
+  </p>
+  <h3>Swing</h3>
+  <p>
+    A melee hit with a {JINGLES.attack.windupSec}-second wind-up. During the wind-up, every player
+    sees a <strong>red danger zone</strong> where the swing will land. The first hit drops a
+    Scrapper to half health; the second knocks them down.
+  </p>
+  <h3>Bloodlust</h3>
+  <p>
+    Every {JINGLES.bloodlust.everySec} seconds, Bloodlust triggers: Jingles sees every Scrapper's
+    position for a moment and gets a {JINGLES.bloodlust.speedMult}× speed burst for
+    {JINGLES.bloodlust.revealSec} seconds. Scrappers dragging heavy scrap together can set it off
+    too.
+  </p>
+  <h3>Carry and finish</h3>
+  <p>
+    A downed Scrapper can be finished in {JINGLES.executeSec} seconds, or picked up and carried to
+    a pod. Carrying slows Jingles to {MOVEMENT.hunterCarrying} studs per second, and Dash is
+    disabled until the drop. Read <a href="/guide/capture-and-rescue/">pods and rescue</a> for
+    what happens next.
+  </p>
+
+  <h2 id="senses">How Jingles finds you</h2>
+  <p>
+    Jingles has no wallhack and no minimap. It finds Scrappers with its eyes, with Bloodlust,
+    and with pings from noise. These always ping the Hunter:
+  </p>
+  <ul>
+    <li>A Scrapper ringing their bell.</li>
+    <li>A console fault (a failed minigame).</li>
+    <li>A Scrapper staying in a locker past {SCRAPPER.lockerMaxSec} seconds.</li>
+  </ul>
+
+  <h2 id="limits">What Jingles can't do</h2>
+  <ul>
+    <li>Feed or operate the crushers and consoles.</li>
+    <li>Stand in the extraction safe zone. The {EXTRACTION.room} pushes it back out.</li>
+    <li>Camp a pod forever. Standing near one fills an overload meter that eventually stuns Jingles and frees the captive.</li>
+    <li>Get attacked by Worms. They only go after Scrappers.</li>
+  </ul>
+
+  <h2 id="survive">How to survive Jingles</h2>
+  <ol>
+    <li><strong>Read the red zone.</strong> {JINGLES.attack.windupSec} seconds is enough to step out of a swing if you're watching for it.</li>
+    <li><strong>Count the Dash.</strong> After a Dash, Jingles has {JINGLES.dash.cooldownSec} seconds without one. That's your window to break line of sight.</li>
+    <li><strong>Assume Bloodlust is coming.</strong> It fires every {JINGLES.bloodlust.everySec} seconds and shows everyone. Don't rely on one hiding spot.</li>
+    <li><strong>Struggle when carried.</strong> Tap to fill the struggle meter. Breaking free stuns Jingles for {POD.struggleStunSec} seconds.</li>
+    <li><strong>Make Jingles carry.</strong> At {MOVEMENT.hunterCarrying} studs per second with no Dash, a carrying Jingles can't catch a sprinting Scrapper. That's the moment for everyone else to work.</li>
+    <li><strong>Keep your bell quiet.</strong> A bell ring tells Jingles exactly where you are.</li>
+  </ol>
+
+  <h2 id="play-as">Tips for playing as Jingles</h2>
+  <ul>
+    <li>Your base speed is only {MOVEMENT.hunter - MOVEMENT.scrapperSprint} studs per second faster than a sprinting Scrapper. Chases are won with Dash and corners, not straight lines.</li>
+    <li>Save Dash for the last few studs of a chase, or to cut off someone heading for a pod rescue.</li>
+    <li>Use each Bloodlust reveal to plan your next target, not just the nearest one.</li>
+    <li>Crushers fill up over time. Patrolling between them keeps Scrappers nervous.</li>
+    <li>Don't hover at a pod. Camping overloads it and hands the captive back to their team.</li>
+  </ul>
+</GuideLayout>

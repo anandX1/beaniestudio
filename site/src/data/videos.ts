@@ -2,6 +2,7 @@
  * Video registry — real uploads from @official_beaniestudios (channel UC9kfYF5VWu5ZEZdMfkWOa1w).
  * Thumbnails are self-hosted at /yt/<id>.jpg (downloaded at build-authoring time from i.ytimg.com,
  * 1280×720). To add a video: drop its maxresdefault.jpg at public/yt/<id>.jpg and add an entry.
+ * Notes describe only what the video is — never game mechanics (those live in data/game.ts).
  */
 import { LINKS } from '../site.config';
 
@@ -14,72 +15,67 @@ export interface SiteVideo {
   note: string;
   /** ISO publish date (from the channel RSS feed). */
   date: string;
-  /** Curio-board tag. Tag styling is reserved for signal amber. */
-  tag: 'STATIC' | 'DEVLOG' | 'GAMEPLAY' | 'COMMUNITY';  // DEVLOG label kept (it's the standard YouTube word viewers search for)
+  /** Card tag. Tag styling is reserved for signal amber. */
+  tag: 'STATIC' | 'DEVLOG' | 'GAMEPLAY' | 'COMMUNITY';
 }
 
 export const FEATURED_VIDEO: SiteVideo = {
   id: '7mjWe7s1jFE',
   title: "Don't trust your friend in this game",
-  note: 'The core hook in thirty seconds — one of you is not coming back.',
+  note: 'STATIC gameplay: a crew of Scrappers, one Hunter, and nobody watching your back.',
   date: '2026-09-07',
   tag: 'STATIC',
 };
 
-/** Home page transmissions grid (newest first). */
+/** Home page grid (newest first). */
 export const VIDEOS: SiteVideo[] = [
   FEATURED_VIDEO,
   {
-    id: '9nR4wjaOpMs',
-    title: 'Making a $150K Roblox Menu',
-    note: 'How the facility UI gets built to feel like a terminal.',
-    date: '2026-09-05',
-    tag: 'DEVLOG',
-  },
-  {
     id: 'YqXT145afBA',
     title: "Don't trust your friends in this game",
-    note: 'STATIC playtest — sprint once and the whole wreck hears it.',
+    note: 'Playtest footage from inside the bunker.',
     date: '2026-09-04',
     tag: 'STATIC',
   },
   {
     id: 'PJdjuL2hKWs',
     title: 'We picked the WORST place to hide',
-    note: 'Hide-and-seek gone wrong, exactly as designed.',
+    note: 'A hiding spot that did not work out.',
     date: '2026-09-01',
     tag: 'GAMEPLAY',
   },
   {
     id: 'ZnU8pAC6uJ8',
     title: 'The start of your worst nightmare',
-    note: 'First contact with the wreck. Headphones recommended.',
+    note: 'Early footage. Headphones recommended.',
     date: '2026-08-23',
     tag: 'STATIC',
   },
   {
+    id: '9nR4wjaOpMs',
+    title: 'Making a $150K Roblox Menu',
+    note: 'Devlog: building the game’s menu UI.',
+    date: '2026-09-05',
+    tag: 'DEVLOG',
+  },
+  {
     id: 'q01DyGE1ggw',
     title: 'That one friend who leaves you in the dark',
-    note: 'Community clip — the betrayal genre writes itself.',
+    note: 'Community clip.',
     date: '2026-08-23',
     tag: 'COMMUNITY',
   },
   {
     id: 'DSP8Kr5EXeQ',
     title: 'Can AI make a scary Roblox game?',
-    note: 'Where the tools help, and where they make slop.',
+    note: 'Devlog: what AI tools can and can’t do for a Roblox horror game.',
     date: '2026-08-10',
     tag: 'DEVLOG',
   },
 ];
 
-/** Play page strip — gameplay-heavy picks, deliberately different order from home. */
-export const PLAY_VIDEOS: SiteVideo[] = [
-  VIDEOS[3], // worst place to hide
-  VIDEOS[4], // worst nightmare
-  VIDEOS[5], // leaves you in the dark
-  VIDEOS[6], // can AI make a scary game
-];
+/** Play page strip — different picks from the home grid. */
+export const PLAY_VIDEOS: SiteVideo[] = [VIDEOS[3], VIDEOS[4], VIDEOS[5], VIDEOS[2]];
 
 export function watchUrl(id: string): string {
   return `https://www.youtube.com/watch?v=${id}`;

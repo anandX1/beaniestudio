@@ -1,41 +1,32 @@
 ---
 /**
- * Pre-launch capture module — the "gather the audience before launch" block.
- *
- * Growth rules it follows:
- *  - Every outbound link is the community action we want (follow/join), not a
- *    dead-end. Copy comes from CHANNELS in site.config.ts.
- *  - The share button uses the Web Share API where available (phones: native
- *    share sheet) and falls back to clipboard copy with a UTM-tagged URL so
- *    shares are attributable in analytics.
- *  - No third-party requests, no tracking scripts — nothing here can break
- *    CWV or trip ad blockers.
+ * Community capture block — every visitor leaves with a channel we can reach
+ * again (Discord / YouTube / Roblox group) plus a UTM-tagged share button.
+ * No third-party requests, no tracking scripts.
  */
 import { SITE, LINKS } from '../site.config';
+import { GAME } from '../data/game';
 
-const shareUrl = `${SITE.url}/?utm_source=shared&utm_medium=friend&utm_campaign=prelaunch`;
-const playtestUrl = `${SITE.url}/playtest/?utm_source=site&utm_medium=cta&utm_campaign=playtest`;
+const shareUrl = `${SITE.url}/?utm_source=shared&utm_medium=friend&utm_campaign=beta`;
 ---
 
-<section class="act" aria-label="Stay on the signal">
-  <div class="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6">
-    <p class="kicker">Stay on the signal</p>
+<section class="border-t border-facility-800" aria-label="Community">
+  <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6">
+    <p class="kicker">Community</p>
     <h2 class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
-      Pick your frequency
+      Don't go in alone
     </h2>
-    <p class="beat mx-auto mt-5 max-w-2xl text-facility-300" style="--beat-delay: 100ms">
-      One follow today is a player on launch day. Playtests, blog updates and the launch alarm all go
-      out through these channels first — the next playtest night is
-      <a href="/playtest/" class="text-signal hover:text-signal-dim underline underline-offset-4">announced here</a>.
+    <p class="beat mt-5 max-w-2xl text-facility-300" style="--beat-delay: 100ms">
+      A round of STATIC holds up to {GAME.serverSize} players, and it plays best with people you
+      know. The Discord is where squads form, bugs get reported and the next update gets decided.
     </p>
 
     <div class="mt-10 grid gap-5 sm:grid-cols-2">
       <div class="beat panel p-7" style="--beat-delay: 150ms">
-        <h3 class="font-display text-lg font-bold uppercase tracking-wide">Discord — playtest nights</h3>
+        <h3 class="font-display text-lg font-bold uppercase tracking-wide">Discord</h3>
         <p class="mt-3 text-sm leading-relaxed text-facility-300">
-          Playtests before anyone else, voice hunts with the crew, and the launch ping the moment
-          doors open. Next slot: see the
-          <a href={playtestUrl} class="text-signal hover:text-signal-dim underline underline-offset-4">playtest briefing</a>.
+          Find a squad, report bugs straight to the developers, and vote on what gets built next:
+          modes, rooms, Hunters.
         </p>
         <p class="mt-5">
           <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-primary">Join the Discord <span aria-hidden="true">→</span></a>
@@ -45,8 +36,8 @@ const playtestUrl = `${SITE.url}/playtest/?utm_source=site&utm_medium=cta&utm_ca
       <div class="beat panel p-7" style="--beat-delay: 220ms">
         <h3 class="font-display text-lg font-bold uppercase tracking-wide">YouTube</h3>
         <p class="mt-3 text-sm leading-relaxed text-facility-300">
-          Every video and playtest upload lands here first — the video grid on this page
-          is pulled from the same channel.
+          Gameplay Shorts and devlogs from the team. Every video on this site comes from this
+          channel.
         </p>
         <p class="mt-5">
           <a href={LINKS.youtube} rel="noopener" target="_blank" class="btn-secondary">Subscribe on YouTube <span aria-hidden="true">→</span></a>
@@ -54,29 +45,24 @@ const playtestUrl = `${SITE.url}/playtest/?utm_source=site&utm_medium=cta&utm_ca
       </div>
 
       <div class="beat panel p-7" style="--beat-delay: 290ms">
-        <h3 class="font-display text-lg font-bold uppercase tracking-wide">Roblox community</h3>
+        <h3 class="font-display text-lg font-bold uppercase tracking-wide">Roblox group</h3>
         <p class="mt-3 text-sm leading-relaxed text-facility-300">
-          Following now means STATIC shows up in your Roblox home the day it ships. Zero effort,
-          first in line.
+          Join the Beanie's Studios group on Roblox to get update announcements where you already
+          play.
         </p>
         <p class="mt-5">
-          <a href={LINKS.roblox} rel="noopener" target="_blank" class="btn-secondary">Follow on Roblox <span aria-hidden="true">→</span></a>
+          <a href={LINKS.roblox} rel="noopener" target="_blank" class="btn-secondary">Join the group <span aria-hidden="true">→</span></a>
         </p>
       </div>
 
       <div class="beat panel p-7" style="--beat-delay: 360ms">
-        <h3 class="font-display text-lg font-bold uppercase tracking-wide">Recruit a friend</h3>
+        <h3 class="font-display text-lg font-bold uppercase tracking-wide">Bring your squad</h3>
         <p class="mt-3 text-sm leading-relaxed text-facility-300">
-          STATIC is a 5v1 — it literally needs five people who trust each other. Send them the
-          briefing.
+          Rounds are better with people you know, and better still when one of them is the Hunter.
+          Send them the link.
         </p>
         <p class="mt-5">
-          <button
-            type="button"
-            id="shareStatic"
-            class="btn-primary"
-            data-url={shareUrl}
-          >
+          <button type="button" id="shareStatic" class="btn-primary" data-url={shareUrl}>
             Share STATIC <span aria-hidden="true">→</span>
           </button>
         </p>
@@ -99,8 +85,8 @@ const playtestUrl = `${SITE.url}/playtest/?utm_source=site&utm_medium=cta&utm_ca
     btn.addEventListener('click', function () {
       const url = btn.getAttribute('data-url') || window.location.origin + '/';
       const data = {
-        title: 'STATIC: Salvage vs Hunter',
-        text: 'Free 5v1 horror on Roblox — five salvagers, one hunter, no radar. Only ears.',
+        title: 'STATIC — free Roblox horror game',
+        text: 'Free co-op horror on Roblox: haul scrap to the crushers while a jester called Jingles hunts you. Play with me?',
         url: url,
       } as const;
 
@@ -108,14 +94,14 @@ const playtestUrl = `${SITE.url}/playtest/?utm_source=site&utm_medium=cta&utm_ca
       const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
       if (nav.share) {
         nav.share(data).then(
-          function () { setStatus('SENT — THANKS FOR THE RECRUIT'); },
+          function () { setStatus('SENT — SEE YOU IN THE BUNKER'); },
           function () { /* user canceled — stay quiet */ }
         );
         return;
       }
 
       navigator.clipboard.writeText(url).then(
-        function () { setStatus('LINK COPIED — GO RECRUIT SOMEONE'); },
+        function () { setStatus('LINK COPIED'); },
         function () { setStatus('COPY FAILED — SHARE ' + url); }
       );
     });

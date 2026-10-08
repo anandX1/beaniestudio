@@ -1,312 +1,93 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import VideoCard from '../components/VideoCard.astro';
-import { LINKS } from '../site.config';
+import { SITE, LINKS } from '../site.config';
+import { GAME, CRUSHERS } from '../data/game';
 import { PLAY_VIDEOS, watchUrl } from '../data/videos';
 
 const videoLd = PLAY_VIDEOS.map((v) => ({
   '@context': 'https://schema.org',
   '@type': 'VideoObject',
-  name: `${v.title} — STATIC: Salvage vs Hunter`,
+  name: `${v.title} — STATIC`,
   description: v.note,
-  thumbnailUrl: [new URL(`/yt/${v.id}.jpg`, 'https://beaniestudio.site').href],
+  thumbnailUrl: [new URL(`/yt/${v.id}.jpg`, SITE.url).href],
   uploadDate: v.date,
   embedUrl: `https://www.youtube.com/embed/${v.id}`,
   contentUrl: watchUrl(v.id),
-  publisher: { '@type': 'Organization', name: 'Beanie Studio', url: 'https://beaniestudio.site' },
+  publisher: { '@id': `${SITE.url}/#org` },
 }));
 
 const steps = [
   {
     n: '1',
-    title: 'Follow the community',
-    body: 'The Roblox community page is where the game goes live. Follow it now and the round-one doors are one click away on launch day.',
-    href: LINKS.roblox,
-    cta: 'Open Roblox →',
+    title: 'Open STATIC on Roblox',
+    body: 'Free on PC and mobile. You need a Roblox account and the Roblox app (or a browser on PC).',
+    href: LINKS.game,
+    cta: 'Open the game page',
+    external: true,
   },
   {
     n: '2',
-    title: 'Get in the Discord',
-    body: 'Playtests, balance notes, bug reports, and the dev diaries happen here first. Founders get their names in the facility.',
+    title: 'Bring a squad',
+    body: `A server holds up to ${GAME.serverSize} players. Rounds are better with people you know, and the Discord is the fastest place to find a group.`,
     href: LINKS.discord,
-    cta: 'Join Discord →',
+    cta: 'Find players in the Discord',
+    external: true,
   },
   {
     n: '3',
-    title: 'Learn the loop',
-    body: 'Read the mission brief so your first round isn\'t the one where you sprint past the Hunter. Your ears matter more than your aim.',
-    href: '/#main',
-    cta: 'Read the brief →',
+    title: 'Learn the basics in 3 minutes',
+    body: `Controls, how to fill the ${CRUSHERS.totalKg} kg quota, and how to deal with Jingles and the Worm.`,
+    href: '/guide/',
+    cta: 'Read the beginner guide',
+    external: false,
   },
 ];
 ---
 
 <BaseLayout
-  title="Play STATIC — free on Roblox at launch"
-  description="STATIC: Salvage vs Hunter launches on Roblox in Q4 2026 — free, crossplay, mobile-first. Follow the community and be there for round one."
+  title="Play STATIC — Free Roblox Horror Game (PC & Mobile)"
+  description="How to play STATIC on Roblox: free on PC and mobile, up to 7 players per server. Open the game, find a squad in the Discord, and learn the basics."
   path="/play"
   ogImage="/og/play.png"
   jsonLd={videoLd}
   breadcrumb={[{ name: 'Home', path: '/' }, { name: 'Play', path: '/play' }]}
 >
-  <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+  <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
     <p class="kicker flex items-center gap-3">
       <span class="dot" aria-hidden="true"></span>
-      Status: pre-launch
+      {GAME.status} · free · {GAME.platforms.join(' + ')}
     </p>
     <h1 class="mt-6 font-display text-4xl font-bold uppercase leading-tight tracking-tight sm:text-6xl">
       Play STATIC
     </h1>
     <p class="mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
-      STATIC is free on Roblox at launch — crossplay between mobile, PC, and console, tuned to run
-      on iPhone-8-class phones. The doors open in Q4 2026. Here's how to be there for round one.
+      STATIC is free on Roblox. Play on PC or mobile, in the same servers, with up to
+      {GAME.serverSize - 1} other players.
     </p>
+    <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary mt-9">Play free on Roblox <span aria-hidden="true">→</span></a>
 
-    <div class="mt-14 grid gap-6 md:grid-cols-3">
+    <ol class="mt-16 grid gap-5 md:grid-cols-3">
       {steps.map((s) => (
-        <article class="panel flex flex-col p-7">
-          <span class="font-mono text-sm text-signal-dim" aria-hidden="true">0{s.n}</span>
+        <li class="panel flex flex-col p-7">
+          <span class="font-mono text-sm text-signal-dim">STEP {s.n}</span>
           <h2 class="mt-3 font-display text-xl font-bold uppercase tracking-wide">{s.title}</h2>
-          <p class="mt-4 flex-1 text-sm leading-relaxed text-facility-300">{s.body}</p>
-          <a href={s.href} class="mt-6 inline-flex items-center gap-2 font-mono text-sm text-signal hover:text-signal-dim">
-            {s.cta}
-          </a>
-        </article>
-      ))}
-    </div>
-
-    <!-- Signal tuner: rotate the dial, find the hidden frequencies. The wreck
-         is talking — dragging the dial is how you listen. -->
-    <section class="mt-20" aria-labelledby="tuner-heading">
-      <p class="kicker flex items-center gap-3">
-        <span class="dot" aria-hidden="true"></span>
-        Intercept a transmission
-      </p>
-      <h2 id="tuner-heading" class="mt-4 font-display text-2xl font-bold uppercase tracking-wide sm:text-4xl">
-        The wreck is still broadcasting
-      </h2>
-      <p class="mt-4 max-w-2xl text-sm leading-relaxed text-facility-300">
-        Four frequencies are still live out there. Rotate the dial until the needle locks — what
-        you hear is what a Scrapper's radio picks up mid-round. Headphones recommended.
-      </p>
-
-      <div class="panel mt-10 grid items-start gap-10 p-7 sm:grid-cols-[auto_1fr] sm:p-9">
-        <div class="flex flex-col items-center gap-5">
-          <div
-            id="tunerDial"
-            class="tuner-dial"
-            role="slider"
-            tabindex="0"
-            aria-label="Radio tuner — rotate to search frequencies"
-            aria-valuemin="0"
-            aria-valuemax="359"
-            aria-valuenow="45"
-            aria-valuetext="95.7 megahertz, searching"
+          <p class="mt-3 flex-1 text-sm leading-relaxed text-facility-300">{s.body}</p>
+          <a
+            href={s.href}
+            rel={s.external ? 'noopener' : undefined}
+            target={s.external ? '_blank' : undefined}
+            class="mt-6 font-mono text-sm text-signal hover:text-signal-dim"
           >
-            <span class="tuner-station" style="--station-deg: 0" data-label="88.1"></span>
-            <span class="tuner-station" style="--station-deg: 90" data-label="97.3"></span>
-            <span class="tuner-station" style="--station-deg: 180" data-label="103.7"></span>
-            <span class="tuner-station" style="--station-deg: 270" data-label="147.9"></span>
-          </div>
-          <p class="tuner-readout text-[0.7rem] text-facility-300" id="tunerReadout">95.7 MHz — SIGNAL: SEARCHING</p>
-          <p class="font-mono text-[0.6rem] tracking-[0.2em] text-facility-500">DRAG THE DIAL — ARROW KEYS WORK TOO</p>
-        </div>
+            {s.cta} <span aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ol>
 
-        <div class="min-h-[7rem]">
-          <p class="noise-label text-facility-500">Decoded transmission</p>
-          <div id="tunerMsg" class="mt-4 hidden border-l-2 border-signal pl-4 font-mono text-sm leading-relaxed text-facility-100" aria-live="polite"></div>
-          <p id="tunerIdle" class="mt-4 font-mono text-sm leading-relaxed text-facility-500">
-            [ static ] — no carrier detected. The Hunter broadcasts on 147.9. Everyone regrets
-            finding that one.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Gameplay footage strip -->
-    <section class="mt-20" aria-labelledby="footage-heading">
-      <p class="kicker flex items-center gap-3">
-        <span class="dot" aria-hidden="true"></span>
-        Caught on camera
-      </p>
-      <h2 id="footage-heading" class="mt-4 font-display text-2xl font-bold uppercase tracking-wide sm:text-4xl">
-        See it run before it ships
-      </h2>
-      <p class="mt-4 max-w-2xl text-sm leading-relaxed text-facility-300">
-        Real playtest footage from the current build — chase audio, hide-and-seek chaos, and the
-        occasional betrayal. Click any card to play it right here.
-      </p>
-      <div class="mt-10 grid gap-6 md:grid-cols-2">
-        {PLAY_VIDEOS.map((v) => <VideoCard video={v} />)}
-      </div>
-    </section>
-
-    <div class="panel mt-16 flex flex-col items-start justify-between gap-6 p-8 sm:flex-row sm:items-center">
-      <div>
-        <p class="font-display text-xl font-bold uppercase tracking-wide">Zero cost. Zero download hoops.</p>
-        <p class="mt-2 max-w-xl text-sm leading-relaxed text-facility-300">
-          STATIC runs inside Roblox — if you have Roblox, you have STATIC. No launcher, no key, no
-          purchase at launch.
-        </p>
-      </div>
-      <a href={LINKS.roblox} rel="noopener" target="_blank" class="btn-primary shrink-0">
-        Follow on Roblox <span aria-hidden="true">→</span>
-      </a>
+    <h2 class="mt-24 font-display text-2xl font-bold uppercase tracking-wide sm:text-3xl">See it first</h2>
+    <div class="mt-8 grid gap-6 md:grid-cols-2">
+      {PLAY_VIDEOS.map((v) => <VideoCard video={v} />)}
     </div>
   </section>
-
-  <!-- Tuner: pointer drag + keyboard rotate the needle; locking a station
-       types out the transmission and plays a synthesized static burst.
-       Audio only inside a real user gesture; everything degrades to text. -->
-  <script>
-    (function () {
-      const dial = document.getElementById('tunerDial');
-      const readout = document.getElementById('tunerReadout');
-      const msgEl = document.getElementById('tunerMsg');
-      const idleEl = document.getElementById('tunerIdle');
-      if (!dial || !readout || !msgEl) return;
-
-      const STATIONS = [
-        { deg: 0, freq: '88.1', msg: '…SALVAGE WINDOW IS 60 SECONDS. REPEAT: 60 SECONDS. WHEN THE HORN SOUNDS, YOU RUN. YOU DO NOT LOOK BACK…' },
-        { deg: 90, freq: '97.3', msg: '…CONTROL TO ALL CREWS: EXTRACTION PAD IS LIT. FIVE SOULS IN, FIVE SOULS OUT. THAT IS THE WHOLE JOB…' },
-        { deg: 180, freq: '103.7', msg: '…DO NOT SPRINT. I AM REPEATING MYSELF BECAUSE CREW THREE SPRINTED. WALK. CROUCH. IT ONLY NEEDS ONE SOUND…' },
-        { deg: 270, freq: '147.9', msg: '…I HEAR YOU BREATHING…', hunter: true },
-      ];
-      const LOCK_DEG = 7;
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      let deg = 45; // start between stations — the first lock should be earned
-      let locked = -1;
-      let typeTimer = 0;
-
-      const freqLabel = function () {
-        const f = 88 + (deg / 360) * 62;
-        return f.toFixed(1);
-      };
-
-      const nearest = function () {
-        let best = -1;
-        let bestDist = 361;
-        for (let i = 0; i < STATIONS.length; i++) {
-          const d = Math.abs((((STATIONS[i].deg - deg) % 360) + 540) % 360 - 180);
-          if (d < bestDist) { bestDist = d; best = i; }
-        }
-        return bestDist <= LOCK_DEG ? best : -1;
-      };
-
-      const typeOut = function (text: string) {
-        if (typeTimer) { clearInterval(typeTimer); typeTimer = 0; }
-        if (reduce) { msgEl.textContent = text; return; }
-        msgEl.textContent = '';
-        let i = 0;
-        typeTimer = window.setInterval(function () {
-          i += 2;
-          msgEl.textContent = text.slice(0, i);
-          if (i >= text.length && typeTimer) { clearInterval(typeTimer); typeTimer = 0; }
-        }, 24);
-      };
-
-      // Synthesized lock feedback: a static burst, then two confirmation blips.
-      let ctx: AudioContext | null = null;
-      const burst = function () {
-        try {
-          const AC = window.AudioContext || (window as any).webkitAudioContext;
-          if (!AC) return;
-          if (!ctx) ctx = new AC();
-          void ctx.resume();
-          const t = ctx.currentTime;
-          const len = Math.floor(ctx.sampleRate * 0.3);
-          const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-          const ch = buf.getChannelData(0);
-          for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / len);
-          const src = ctx.createBufferSource();
-          src.buffer = buf;
-          const bp = ctx.createBiquadFilter();
-          bp.type = 'bandpass';
-          bp.frequency.value = 1400;
-          const g = ctx.createGain();
-          g.gain.value = 0.12;
-          src.connect(bp).connect(g).connect(ctx.destination);
-          src.start(t);
-          for (const off of [0.36, 0.5]) {
-            const osc = ctx.createOscillator();
-            const og = ctx.createGain();
-            osc.type = 'square';
-            osc.frequency.value = 920;
-            og.gain.setValueAtTime(0.0001, t + off);
-            og.gain.exponentialRampToValueAtTime(0.06, t + off + 0.01);
-            og.gain.exponentialRampToValueAtTime(0.0001, t + off + 0.07);
-            osc.connect(og).connect(ctx.destination);
-            osc.start(t + off);
-            osc.stop(t + off + 0.09);
-          }
-        } catch { /* audio is decorative — never break the tuner over it */ }
-      };
-
-      const render = function () {
-        dial.style.setProperty('--tune-deg', deg + 'deg');
-        const n = nearest();
-        dial.setAttribute('aria-valuenow', String(Math.round(deg)));
-        if (n >= 0) {
-          readout.textContent = STATIONS[n].freq + ' MHz — SIGNAL: LOCKED';
-          readout.classList.toggle('text-signal', true);
-          dial.setAttribute('aria-valuetext', STATIONS[n].freq + ' megahertz, locked');
-          if (n !== locked) {
-            locked = n;
-            msgEl.classList.remove('hidden');
-            if (idleEl) idleEl.classList.add('hidden');
-            typeOut(STATIONS[n].msg);
-            msgEl.classList.toggle('text-status-red', !!STATIONS[n].hunter);
-            msgEl.style.borderColor = STATIONS[n].hunter ? 'var(--color-status-red)' : '';
-            burst();
-          }
-        } else {
-          readout.textContent = freqLabel() + ' MHz — SIGNAL: SEARCHING';
-          readout.classList.toggle('text-signal', false);
-          dial.setAttribute('aria-valuetext', freqLabel() + ' megahertz, searching');
-          if (locked !== -1) {
-            locked = -1;
-            msgEl.classList.add('hidden');
-            if (idleEl) idleEl.classList.remove('hidden');
-          }
-        }
-      };
-
-      const angleFrom = function (e: PointerEvent) {
-        const r = dial.getBoundingClientRect();
-        const dx = e.clientX - (r.left + r.width / 2);
-        const dy = e.clientY - (r.top + r.height / 2);
-        return (Math.atan2(dy, dx) * 180) / Math.PI + 90;
-      };
-
-      let dragging = false;
-      dial.addEventListener('pointerdown', function (e) {
-        dragging = true;
-        try { dial.setPointerCapture(e.pointerId); } catch { /* synthetic/untrusted pointers */ }
-        deg = (angleFrom(e) + 360) % 360;
-        render();
-      });
-      dial.addEventListener('pointermove', function (e) {
-        if (!dragging) return;
-        deg = (angleFrom(e) + 360) % 360;
-        render();
-      });
-      const endDrag = function () { dragging = false; };
-      dial.addEventListener('pointerup', endDrag);
-      dial.addEventListener('pointercancel', endDrag);
-
-      dial.addEventListener('keydown', function (e) {
-        const step = e.shiftKey ? 12 : 4;
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') deg = (deg - step + 360) % 360;
-        else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') deg = (deg + step) % 360;
-        else if (e.key === 'Home') deg = 0;
-        else if (e.key === 'End') deg = 359;
-        else return;
-        e.preventDefault();
-        render();
-      });
-
-      render();
-    })();
-  </script>
 </BaseLayout>

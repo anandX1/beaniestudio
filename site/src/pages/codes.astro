@@ -1,0 +1,39 @@
+---
+import GuideLayout from '../layouts/GuideLayout.astro';
+import { LINKS } from '../site.config';
+---
+
+<GuideLayout
+  title="STATIC Codes (October 2026) — Roblox"
+  description="Every working code for STATIC on Roblox, checked by the developers. No codes are live yet in the October 2026 beta. Launch codes are planned; this page lists them first."
+  path="/codes/"
+  h1="STATIC codes"
+  kicker="Official · Checked by the developers"
+  crumb="Codes"
+  updated="2026-10-08"
+>
+  <p class="text-lg">
+    This is the official list of codes for STATIC on Roblox, kept by the developers, so it's the
+    first list to change when a code goes live or expires.
+  </p>
+
+  <h2 id="active">Active codes</h2>
+  <div class="callout">
+    <strong>No codes are live yet.</strong> STATIC is in its first beta. Codes are planned, and the
+    first ones will go up here and in the Discord at the same moment.
+  </div>
+
+  <h2 id="expired">Expired codes</h2>
+  <p>None yet.</p>
+
+  <h2 id="where">Where new codes come from</h2>
+  <ul>
+    <li>Announcements in the <a href={LINKS.discord} rel="noopener" target="_blank">STATIC Discord</a>, usually first.</li>
+    <li>Update posts in the <a href={LINKS.roblox} rel="noopener" target="_blank">Beanie's Studios Roblox group</a>.</li>
+    <li>Descriptions of new videos on the <a href={LINKS.youtube} rel="noopener" target="_blank">YouTube channel</a>.</li>
+  </ul>
+  <p>
+    Codes you see on other sites that aren't listed here aren't real. If a site asks for your
+    Roblox password to "unlock" a code, it's a scam.
+  </p>
+</GuideLayout>

@@ -157,7 +157,7 @@ These don't sell the game; they make beaniestudio.site a place devs cite.
 | SEO lint | Studio `/api/seo` | 15-point instant scoring incl. 900-word bar |
 | audit-live | `npm run audit:live` | 140-point production audit incl. og:image fetching |
 | IndexNow pinger | `npm run ping:indexnow` | Bing/Yandex instant indexing |
-| OG card generator | `generate-og.mjs` | per-page social cards |
+| OG card generator | `og-cards.mjs` | per-page social cards (headless Chromium) |
 | RSS + llms.txt + sitemap | deploy | search + AI-engine discovery |
 | Social broadcaster | CI | Discord/Bluesky auto-posting with UTM |
 

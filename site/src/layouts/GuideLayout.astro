@@ -1,0 +1,122 @@
+---
+/**
+ * Official guide page shell: breadcrumb, H1 + plain-language intro, sticky
+ * guide index, Article JSON-LD, and a play CTA at the end. Every number on
+ * a guide page must come from src/data/game.ts.
+ */
+import BaseLayout from './BaseLayout.astro';
+import { SITE, LINKS } from '../site.config';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  h1: string;
+  kicker: string;
+  /** Last date the page's facts were checked against the game build. */
+  updated: string;
+  crumb: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  jsonLd?: Record<string, unknown>[];
+}
+
+const { title, description, path, h1, kicker, updated, crumb, ogImage = '/og/guide.png', ogImageAlt, jsonLd = [] } = Astro.props;
+
+const GUIDE_PAGES = [
+  { href: '/guide/', label: 'Beginner guide' },
+  { href: '/guide/jingles/', label: 'Jingles, the Hunter' },
+  { href: '/guide/worm/', label: 'The Worm' },
+  { href: '/guide/scrap/', label: 'Scrap items & weights' },
+  { href: '/guide/crushers/', label: 'Crushers, minigames & escape' },
+  { href: '/guide/capture-and-rescue/', label: 'Pods & rescue' },
+  { href: '/codes/', label: 'Codes' },
+];
+
+const norm = (p: string) => (p.endsWith('/') ? p : `${p}/`);
+const here = norm(path);
+const isHub = here === '/guide/';
+
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: h1,
+  description,
+  dateModified: updated,
+  datePublished: '2026-10-08',
+  mainEntityOfPage: new URL(here, SITE.url).href,
+  image: new URL(ogImage, SITE.url).href,
+  author: { '@id': `${SITE.url}/#org` },
+  publisher: { '@id': `${SITE.url}/#org` },
+  about: { '@id': `${SITE.url}/#game` },
+};
+
+const breadcrumb = isHub
+  ? [{ name: 'Home', path: '/' }, { name: 'Guide', path: '/guide/' }]
+  : here === '/codes/'
+    ? [{ name: 'Home', path: '/' }, { name: crumb, path: here }]
+    : [{ name: 'Home', path: '/' }, { name: 'Guide', path: '/guide/' }, { name: crumb, path: here }];
+---
+
+<BaseLayout {title} {description} path={here} {ogImage} ogImageAlt={ogImageAlt ?? `${h1} — STATIC official guide`} ogType="article" jsonLd={[articleLd, ...jsonLd]} {breadcrumb}>
+  <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+    <nav aria-label="Breadcrumb" class="font-mono text-xs tracking-[0.14em] text-facility-500">
+      <ol class="flex flex-wrap items-center gap-2">
+        {breadcrumb.map((c, i) => (
+          <li class="flex items-center gap-2">
+            {i < breadcrumb.length - 1 ? (
+              <a href={c.path} class="hover:text-signal">{c.name.toUpperCase()}</a>
+            ) : (
+              <span aria-current="page" class="text-facility-300">{c.name.toUpperCase()}</span>
+            )}
+            {i < breadcrumb.length - 1 && <span aria-hidden="true">/</span>}
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <div class="mt-10 grid gap-12 lg:grid-cols-[1fr_15rem]">
+      <article class="min-w-0">
+        <p class="kicker">{kicker}</p>
+        <h1 class="mt-4 font-display text-4xl font-bold uppercase leading-tight tracking-tight sm:text-5xl">{h1}</h1>
+        <p class="mt-4 font-mono text-xs tracking-[0.14em] text-facility-500">
+          OFFICIAL GUIDE · CHECKED AGAINST THE BETA BUILD · UPDATED {updated}
+        </p>
+        <div class="prose-guide mt-8">
+          <slot />
+        </div>
+
+        <div class="panel mt-16 flex flex-col gap-5 p-7 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="font-display text-xl font-bold uppercase tracking-wide">Try it yourself</p>
+            <p class="mt-1 text-sm text-facility-300">STATIC is free on Roblox for PC and mobile.</p>
+          </div>
+          <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary shrink-0">Play free on Roblox <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+
+      <aside class="lg:sticky lg:top-24 lg:self-start" aria-label="Guide pages">
+        <p class="kicker">Official guide</p>
+        <ul class="mt-4 border-l border-facility-700 text-sm">
+          {GUIDE_PAGES.map((g) => (
+            <li>
+              <a
+                href={g.href}
+                aria-current={g.href === here ? 'page' : undefined}
+                class:list={[
+                  '-ml-px block border-l py-2 pl-4 transition-colors',
+                  g.href === here ? 'border-signal text-signal' : 'border-transparent text-facility-300 hover:text-facility-100',
+                ]}
+              >
+                {g.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="mt-8 text-xs leading-relaxed text-facility-500">
+          Spotted something out of date? Tell us in the <a href={LINKS.discord} rel="noopener" target="_blank" class="text-signal hover:text-signal-dim">Discord</a>.
+        </p>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

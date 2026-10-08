@@ -1,0 +1,67 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { POD, JINGLES, MOVEMENT, SCRAPPER } from '../../data/game';
+---
+
+<GuideLayout
+  title="STATIC Pods & Rescue — How Capture Works (Roblox Guide)"
+  description={`What happens when Jingles catches you in STATIC: the ${POD.timerSec}-second pod timer, ${POD.rescueHoldSec}-second rescues, struggling free, the 5% escape gamble and anti-camp overload.`}
+  path="/guide/capture-and-rescue/"
+  h1="Pods and rescue: what happens when you're caught"
+  kicker="Official guide · Capture"
+  crumb="Pods & rescue"
+  updated="2026-10-08"
+>
+  <p class="text-lg">
+    Getting caught in STATIC isn't the end of your round. Jingles has to knock you down, carry
+    you to a pod, and then keep you there for <strong>{POD.timerSec} seconds</strong> while your
+    team tries to get you out.
+  </p>
+
+  <h2 id="downed">1. Getting downed</h2>
+  <ul>
+    <li>Jingles needs <strong>{JINGLES.attack.hitsToDown} hits</strong> to down you. The first leaves you at half health.</li>
+    <li>While downed you can crawl at {MOVEMENT.downedCrawl} studs per second, or {MOVEMENT.downedSprint} if you push it.</li>
+    <li>A teammate can revive you by holding for {SCRAPPER.reviveHoldSec} seconds.</li>
+    <li>Jingles can finish you on the spot in {JINGLES.executeSec} seconds, or pick you up.</li>
+  </ul>
+
+  <h2 id="carried">2. Being carried</h2>
+  <p>
+    Jingles drags you to a pod. While you're being carried, <strong>tap to fill the struggle
+    meter</strong>. Fill it and you break free, and Jingles is stunned for {POD.struggleStunSec}
+    seconds. Carrying also slows Jingles to {MOVEMENT.hunterCarrying} studs per second and turns
+    off its Dash.
+  </p>
+
+  <h2 id="pod">3. The pod</h2>
+  <ul>
+    <li>The timer starts at <strong>{POD.timerSec} seconds</strong>.</li>
+    <li>If no teammate is left free to rescue you, it runs <strong>twice as fast</strong>.</li>
+    <li>Caught again later? The timer doesn't reset to {POD.timerSec}. It picks up where it left off, but never below {POD.floorSec} seconds.</li>
+    <li>When it hits zero, you're out of the round and back in the lobby.</li>
+  </ul>
+  <h3>The {POD.selfEscapeChance}% gamble</h3>
+  <p>
+    Once you're sealed in, you get exactly one self-escape attempt with a
+    {POD.selfEscapeChance}% chance to work. If it fails, {POD.selfEscapePenaltySec} seconds come off
+    your timer. Use it when nobody is coming.
+  </p>
+
+  <h2 id="rescue">4. Rescuing a teammate</h2>
+  <ul>
+    <li>Get within {POD.rescueRangeStuds} studs of the pod and <strong>hold E for {POD.rescueHoldSec} seconds</strong>. No item needed.</li>
+    <li>The rescued player gets <strong>{POD.rescueShieldSec} seconds</strong> where they can't be hit, plus their speed back.</li>
+    <li>Rescues are fast. Time them for when Jingles is carrying someone else or has just used its Dash.</li>
+  </ul>
+
+  <h2 id="camping">5. Anti-camping: overload</h2>
+  <p>
+    Jingles can't stand guard at a pod forever. While the Hunter lingers nearby, an
+    <strong>overload meter</strong> fills, faster the closer it stands. When it maxes out, the pod
+    knocks Jingles back and stuns it, frees the captive with a shield, and burns out for
+    {POD.overloadBurnoutSec} seconds.
+  </p>
+
+  <p>Next: <a href="/guide/jingles/">everything about Jingles</a>, or the <a href="/guide/">beginner guide</a>.</p>
+</GuideLayout>

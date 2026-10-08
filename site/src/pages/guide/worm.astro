@@ -1,0 +1,71 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { WORM, SCRAPPER } from '../../data/game';
+---
+
+<GuideLayout
+  title="The Worm in STATIC (Roblox) — What Triggers It & How to Survive"
+  description="How the Worm works in STATIC on Roblox: what makes it spawn, the bell, its attack, and how to repel it with your flashlight. Official guide with real numbers."
+  path="/guide/worm/"
+  h1="The Worm: what triggers it and how to survive"
+  kicker="Official guide · Hazards"
+  crumb="The Worm"
+  updated="2026-10-08"
+>
+  <p class="text-lg">
+    The <strong>Worm</strong> is the second threat in STATIC. It burrows under the bunker floor,
+    surfaces near a Scrapper, rears up, grabs them, and drains their health. It never attacks the
+    Hunter. The good news: it hates light.
+  </p>
+
+  <div class="callout">
+    <strong>Short version:</strong> don't ring your bell, don't miss your throws, and when a Worm
+    rears up, point your flashlight at it and hold it there.
+  </div>
+
+  <h2 id="triggers">What makes a Worm spawn</h2>
+  <h3>The bell (guaranteed)</h3>
+  <p>
+    Every Scrapper carries a bell that can't be dropped (key 4, {SCRAPPER.bellCooldownSec}-second
+    cooldown). Ringing it always spawns a Worm <strong>{WORM.bellSpawnDelaySec} seconds</strong>
+    later, {WORM.bellSpawnDistStuds} studs away.
+  </p>
+  <h3>Random chance</h3>
+  <p>
+    Even if you do nothing, each Scrapper has a <strong>{WORM.baseChancePct}% chance every
+    {WORM.baseChanceEverySec} seconds</strong> of drawing a Worm. These things raise that chance
+    (×1.5 each, up to ×2 in total):
+  </p>
+  <ul>
+    {WORM.lures.map((l) => <li>{l}</li>)}
+  </ul>
+  <p>
+    Some scrap isn't what it looks like. Rare <strong>mimic</strong> items scream, and the
+    screaming draws Worms.
+  </p>
+  <h3>What doesn't attract it</h3>
+  <p>Sprinting and voice chat don't draw Worms. Talk and run all you like, as far as the Worm is concerned.</p>
+
+  <h2 id="attack">How the Worm attacks</h2>
+  <ol>
+    <li><strong>Travel.</strong> It moves to its target, pathfinding through the bunker. If there's no path, it burrows under the floor out of sight.</li>
+    <li><strong>Warning.</strong> It surfaces and rears up. This is your moment.</li>
+    <li><strong>Grab.</strong> It freezes you in place and drains {WORM.grabDamagePct}% of your max health. The longer it holds you, the more it takes.</li>
+    <li><strong>Leave.</strong> Each Worm hunts one Scrapper, then disappears.</li>
+  </ol>
+  <p>Up to {WORM.maxAlive} Worms can be active at once. A Worm doesn't kill outright, but a grab leaves you hurt and frozen, which is the worst way to be when Jingles is nearby.</p>
+
+  <h2 id="counter">How to survive the Worm</h2>
+  <ol>
+    <li><strong>Light it up during the warning.</strong> Hold your flashlight (F) on the Worm while it rears up and it backs off. It costs you nothing.</li>
+    <li><strong>Light it up during a grab.</strong> If it already has you, keep the beam on it. It lets go, and if you're quick, you take no damage.</li>
+    <li><strong>Mind the heavy scrap.</strong> Your flashlight switches off while you're carrying something heavy. Being near or holding heavy scrap also raises your Worm chance. Drop it (Q) if you need your light.</li>
+    <li><strong>Throw carefully.</strong> A missed or near-miss throw is a Worm lure. Walk the scrap in if you can.</li>
+  </ol>
+
+  <h2 id="faq">Worm FAQ</h2>
+  <h3>Does the Worm kill you?</h3>
+  <p>Not outright. It drains health and holds you in place, then leaves.</p>
+  <h3>Can the Worm attack the Hunter?</h3>
+  <p>No. Worms only target Scrappers.</p>
+</GuideLayout>

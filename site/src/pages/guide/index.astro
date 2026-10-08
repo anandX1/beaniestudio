@@ -1,0 +1,177 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import {
+  GAME, MOVEMENT, JINGLES, POD, SCRAPPER, CRUSHERS, MINIGAMES, EXTRACTION, CONTROLS, SCRAP, ROOMS,
+} from '../../data/game';
+---
+
+<GuideLayout
+  title="How to Play STATIC on Roblox — Beginner's Guide"
+  description="How STATIC on Roblox works: roles, controls, the round from lobby to extraction, and beginner tips for surviving Jingles and the Worm. Official guide."
+  path="/guide/"
+  h1="How to play STATIC: beginner's guide"
+  kicker="Official guide"
+  crumb="Guide"
+  updated="2026-10-08"
+>
+  <p class="text-lg">
+    <strong>STATIC</strong> is a free co-op horror game on Roblox by Beanie Studios. Up to
+    {GAME.scrappers.max} players (Scrappers) search a bunker for scrap and feed {CRUSHERS.totalKg} kg
+    of it into {CRUSHERS.count} crushers, then escape. One more player is the Hunter, Jingles,
+    and tries to catch them first. This page covers everything you need for your first round.
+  </p>
+
+  <nav aria-label="On this page" class="callout">
+    <p class="font-mono text-xs tracking-[0.16em] text-facility-500">ON THIS PAGE</p>
+    <ol class="mt-2">
+      <li><a href="#roles">The two roles</a></li>
+      <li><a href="#round">A round, step by step</a></li>
+      <li><a href="#controls">Controls</a></li>
+      <li><a href="#health">Health, getting downed and revives</a></li>
+      <li><a href="#tools">Your tools: flashlight, bell, shove, lockers</a></li>
+      <li><a href="#map">The map</a></li>
+      <li><a href="#tips">Ten beginner tips</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="roles">The two roles</h2>
+  <p>
+    Each server holds up to {GAME.serverSize} players: {GAME.scrappers.min}–{GAME.scrappers.max}
+    Scrappers and {GAME.hunters} Hunter.
+  </p>
+  <ul>
+    <li>
+      <strong>Scrappers</strong> find scrap, feed the crushers, solve the console minigames and
+      escape. Winning is personal: if you reach the exit, you win, whatever happens to the rest
+      of your crew.
+    </li>
+    <li>
+      <strong>The Hunter</strong> plays as Jingles, a clockwork jester. Jingles knocks Scrappers
+      down, carries them to pods and tries to stop them escaping. If the {GAME.roundLimitMin}-minute
+      round runs out, the Hunter wins. Full breakdown: <a href="/guide/jingles/">Jingles guide</a>.
+    </li>
+  </ul>
+  <p>
+    The game picks a new Hunter every round. Who hunted last time, a bit of luck, and whether
+    you're playing with friends all affect who gets picked.
+  </p>
+
+  <h2 id="round">A round, step by step</h2>
+  <ol>
+    <li>
+      <strong>Lobby.</strong> Once there are enough players, a one-minute countdown starts. If the
+      server fills up, it drops to seven seconds.
+    </li>
+    <li>
+      <strong>Hunter reveal.</strong> The round opens by revealing who plays Jingles.
+    </li>
+    <li>
+      <strong>Spawn.</strong> Scrappers start together in the central hub. Jingles is released
+      shortly after from one of {GAME.hunterSpawnPoints} random spawn points, so you never know
+      which side it's coming from.
+    </li>
+    <li>
+      <strong>Scavenge.</strong> Search the rooms for scrap. There are {SCRAP.length} item types,
+      from {SCRAP[0].kg} kg to {SCRAP[SCRAP.length - 1].kg} kg. See the
+      <a href="/guide/scrap/">full scrap list</a>.
+    </li>
+    <li>
+      <strong>Crush.</strong> Feed the {CRUSHERS.count} crushers until they hit their quotas:
+      {CRUSHERS.quotasKg.join(' kg, ')} kg. Crushers spawn in different places every round.
+    </li>
+    <li>
+      <strong>Calibrate.</strong> A full crusher unlocks its console. Clear
+      {CRUSHERS.minigamesPerConsole} quick minigames (picked from {MINIGAMES.length}), then pull the
+      lever. Details: <a href="/guide/crushers/">crushers and minigames</a>.
+    </li>
+    <li>
+      <strong>Extract.</strong> When all {CRUSHERS.count} crushers are done, a siren sounds and the
+      {EXTRACTION.room} opens for {EXTRACTION.windowSec} seconds. Step into the safe zone and a UFO
+      beams you out.
+    </li>
+    <li>
+      <strong>Results.</strong> The end screen shows each player's round: scrap delivered,
+      assists, revives and more, for Scrappers and the Hunter alike.
+    </li>
+  </ol>
+
+  <h2 id="controls">Controls</h2>
+  <p>PC key binds. On mobile, the same actions are on-screen buttons.</p>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Key</th><th scope="col">Action</th></tr></thead>
+      <tbody>
+        {CONTROLS.map((c) => (
+          <tr><td class="font-mono text-facility-100">{c.key}</td><td>{c.action}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p>
+    Sprint has no stamina bar: you can run for as long as you like. You walk at
+    {MOVEMENT.scrapperWalk} and sprint at {MOVEMENT.scrapperSprint} studs per second. There is no
+    crouch or slide.
+  </p>
+
+  <h2 id="health">Health, getting downed and revives</h2>
+  <ul>
+    <li>
+      You can take <strong>{SCRAPPER.hitsToDown} hits</strong>. The first drops you to half health;
+      the second knocks you down.
+    </li>
+    <li>
+      Downed Scrappers crawl at {MOVEMENT.downedCrawl} studs per second, or {MOVEMENT.downedSprint}
+      if they push it.
+    </li>
+    <li>
+      A teammate can revive you by holding interact for {SCRAPPER.reviveHoldSec} seconds. There are
+      no med kits and no self-healing.
+    </li>
+    <li>
+      Once you're down, Jingles can finish you in {JINGLES.executeSec} seconds or carry you to a pod
+      ({POD.timerSec}-second timer). See <a href="/guide/capture-and-rescue/">pods and rescue</a>.
+    </li>
+  </ul>
+
+  <h2 id="tools">Your tools</h2>
+  <h3>Flashlight</h3>
+  <p>
+    Press F (or 3). Scrappers only. It's your one real answer to the
+    <a href="/guide/worm/">Worm</a>. It switches off while your hands are full with heavy scrap.
+  </p>
+  <h3>The bell</h3>
+  <p>
+    Every Scrapper carries a bell on key 4. You can't drop it. Ringing it is loud, alerts the
+    Hunter, and always brings a Worm a few seconds later. It has a {SCRAPPER.bellCooldownSec}-second
+    cooldown.
+  </p>
+  <h3>Shove</h3>
+  <p>Everyone has a shove on an {SCRAPPER.shoveCooldownSec}-second cooldown.</p>
+  <h3>Lockers</h3>
+  <p>
+    Lockers are the only hiding spots. You get {SCRAPPER.lockerMaxSec} seconds inside. After that,
+    the locker throws you out and your position pings to the Hunter.
+  </p>
+
+  <h2 id="map">The map</h2>
+  <p>
+    The beta has one map: an abandoned underground bunker. Its rooms include the
+    {ROOMS.slice(0, -1).join(', ')} and {ROOMS[ROOMS.length - 1]}, with the
+    {EXTRACTION.room} as the way out. Scrap, crushers and pods are spread across the map, and
+    crusher positions change every round, so no two rounds play the same.
+  </p>
+
+  <h2 id="tips">Ten beginner tips</h2>
+  <ol>
+    <li><strong>Don't ring the bell</strong> unless you mean to. It always brings a Worm, and the Hunter hears it.</li>
+    <li><strong>Fill your backpack first.</strong> Small scrap in your {SCRAPPER.backpackSlots} backpack slots doesn't slow you. Heavy scrap in your hands does, by up to {SCRAPPER.heavyCarrySlowMaxPct}%.</li>
+    <li><strong>Keep your light free.</strong> Carrying heavy scrap turns off your flashlight, which is exactly when a Worm hurts most.</li>
+    <li><strong>Watch for red.</strong> Every Jingles swing flashes a red danger zone {JINGLES.attack.windupSec} seconds before it lands. Move out of it.</li>
+    <li><strong>Expect Bloodlust.</strong> Every {JINGLES.bloodlust.everySec} seconds Jingles sees every Scrapper for a moment. Long hides don't last.</li>
+    <li><strong>Don't camp lockers.</strong> {SCRAPPER.lockerMaxSec} seconds and you're out, and Jingles knows where.</li>
+    <li><strong>Pair up on consoles.</strong> Two players can work one console side by side and clear it much faster.</li>
+    <li><strong>Rescue fast.</strong> A pod rescue takes {POD.rescueHoldSec} seconds and gives the rescued player {POD.rescueShieldSec} seconds of protection.</li>
+    <li><strong>Don't be the last one free.</strong> When nobody is left to rescue, pod timers run twice as fast.</li>
+    <li><strong>Move when the siren goes.</strong> The exit is only open for {EXTRACTION.windowSec} seconds.</li>
+  </ol>
+</GuideLayout>

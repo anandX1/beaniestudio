@@ -359,6 +359,15 @@ const crashNote = (kind, e) => {
 process.on('uncaughtException', (e) => { crashNote('uncaughtException', e); process.exit(1); });
 process.on('unhandledRejection', (e) => { crashNote('unhandledRejection', e); process.exit(1); });
 
+// Kill switch (2026-10-08): mass-generated posts contradicted the shipped game
+// and match the "scaled content" pattern Google demotes. Publishing and
+// generation stay off until a human flips `paused` to false in the config.
+if (cfg.paused && (cmd === 'fill' || cmd === 'tick' || cmd === 'refresh')) {
+  console.log('autopilot: paused in tools/autopilot-config.json — nothing generated or published');
+  log({ op: 'paused', cmd });
+  process.exit(0);
+}
+
 if (cmd === 'fill') await fill();
 else if (cmd === 'tick') await tick();
 else if (cmd === 'status') status();

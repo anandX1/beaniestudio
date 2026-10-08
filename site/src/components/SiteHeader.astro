@@ -1,10 +1,10 @@
 ---
-import { SITE } from '../site.config';
+import { SITE, LINKS } from '../site.config';
 
 const nav = [
-  { href: '/', label: 'HOME' },
-  { href: '/play', label: 'PLAY' },
-  { href: '/blog', label: 'BLOG' },
+  { href: '/guide', label: 'GUIDE' },
+  { href: '/guide/jingles', label: 'JINGLES' },
+  { href: '/blog', label: 'DEVLOG' },
   { href: '/faq', label: 'FAQ' },
   { href: '/press', label: 'PRESS' },
 ];
@@ -13,6 +13,7 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 function isActive(href: string): boolean {
   if (href === '/') return current === '/';
+  if (href === '/guide') return current === '/guide' || (current.startsWith('/guide/') && !current.startsWith('/guide/jingles'));
   return current === href || current.startsWith(href + '/');
 }
 ---
@@ -31,7 +32,7 @@ function isActive(href: string): boolean {
         aria-hidden="true"
       />
       <span class="font-display text-sm font-bold tracking-[0.18em] text-facility-100 uppercase">
-        Beanie&nbsp;Studio
+        Beanie&nbsp;Studios
       </span>
     </a>
 
@@ -50,7 +51,7 @@ function isActive(href: string): boolean {
       ))}
     </nav>
 
-    <a href="/play" class="btn-primary hidden !px-4 !py-2 text-xs md:inline-flex">Play</a>
+    <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary hidden !px-4 !py-2 text-xs md:inline-flex">Play free</a>
 
     <!-- Mobile menu: checkbox hack, zero JS -->
     <details class="relative md:hidden">
@@ -75,7 +76,7 @@ function isActive(href: string): boolean {
             {item.label}
           </a>
         ))}
-        <a href="/play" class="mt-1 bg-signal px-3 py-2.5 text-center font-bold text-facility-950">PLAY</a>
+        <a href={LINKS.game} rel="noopener" target="_blank" class="mt-1 bg-signal px-3 py-2.5 text-center font-bold text-facility-950">PLAY FREE ON ROBLOX</a>
       </nav>
     </details>
   </div>
