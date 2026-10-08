@@ -22,3 +22,17 @@ These are Roblox library sounds. Their licence covers use inside Roblox only, so
 - Worm: defined in `Config/Worm.lua` (`WormClient` plays them)
 
 See `MISSING.md` for everything still to capture.
+
+## Owner screenshots (`owner-shots/`)
+
+Shots captured by the owner in Studio and the live game, in higher resolution than the shots above.
+
+| Folder | Contents |
+|---|---|
+| `rooms/` | cargo dock, control panel, crusher and console, hunter reveal, interrogation room, medbay, nuclear reactor, security, storage bay |
+| `hallways/` | corridors next to each room |
+| `jingles/` | Jingles shots, including a close-up with a player |
+| `ui/` | in-game GUI screens (`gui-1` to `gui-8`) |
+| `lobby/`, `pods/`, `worm/`, `misc/` | lobby, pod (idle + working), the Worm, two unlabelled shots |
+
+Videos are coming separately.
