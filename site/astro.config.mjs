@@ -7,6 +7,9 @@ export default defineConfig({
   site: 'https://beaniestudio.site',
   integrations: [
     sitemap({
+      // The image sitemap (src/pages/sitemap-images.xml.ts) is listed in the
+      // index too, so submitting sitemap-index.xml covers everything.
+      customSitemaps: ['https://beaniestudio.site/sitemap-images.xml'],
       // Utility pages are noindex — keep them out of the sitemap so crawlers
       // never see conflicting signals.
       filter: (page) => !page.includes('/404'),
