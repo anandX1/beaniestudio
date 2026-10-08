@@ -1,3 +1,12 @@
+# Files in the repo root that must NOT be uploaded as website assets.
+# Workers Static Assets uploads the whole directory, .git included —
+# its pack files passed the 25 MiB per-file limit and broke every deploy.
+.git
+.github
+.gitignore
+.assetsignore
+wrangler.jsonc
 site/
-README.md
 game-assets/
+README.md
+node_modules

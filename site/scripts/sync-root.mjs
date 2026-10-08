@@ -13,7 +13,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const SITE = path.resolve(here, '..');
 const ROOT = path.resolve(SITE, '..');
 const DIST = path.join(SITE, 'dist');
-const KEEP = new Set(['.git', '.github', '.gitignore', '.assetsignore', 'README.md', 'site', 'game-assets', 'node_modules']);
+const KEEP = new Set(['.git', '.github', '.gitignore', '.assetsignore', 'wrangler.jsonc', 'README.md', 'site', 'game-assets', 'node_modules']);
 
 if (!fs.existsSync(path.join(DIST, 'index.html'))) {
   console.error('sync-root: site/dist is missing — run `npm run build` first');

@@ -1,0 +1,14 @@
+// Cloudflare Workers config for beaniestudio.site.
+// The repo root is the built static site (see README "Deploy model").
+// Without this file, `npx wrangler deploy` auto-generates one on every build.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "beaniestudio",
+  "compatibility_date": "2026-10-06",
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": ".",
+    // Serve /404.html (noindex) for unknown URLs instead of an empty 404.
+    "not_found_handling": "404-page"
+  }
+}
