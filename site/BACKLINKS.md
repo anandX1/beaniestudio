@@ -1,5 +1,12 @@
 # Backlinks blueprint — the honest version
 
+> **Read `REACH-PLAYBOOK.md` first (added 2026-10-14).** It captures Roblox's official
+> Discovery documentation, and it changes what backlinks are *for*: Roblox explicitly does
+> not count engagement from externally-acquired users in its ranking signals — external
+> traffic only "accelerates consideration" in the retrieval stage. Signals are per-user
+> averages, so scale is not required. Backlinks are for consideration and brand search,
+> not for ranking points.
+
 **Read the warning first:** automated backlink schemes (bot-submitted directories, bought
 links, comment/forum spam, link exchanges) are exactly what [Google's link spam
 policy](https://developers.google.com/search/docs/essentials/spam-policies) penalizes —
@@ -17,7 +24,7 @@ legitimate editorial listing. Paste-ready copy is in `PROMO-COPY.md`.
 | **Roblox community page** | Keep the game description current | The single most-linked "backlink" for a Roblox game; feeds the ecosystem |
 | **Reddit** r/roblox, r/RobloxDev, r/indiegames | Playtest/announcement posts following each sub's rules | DoFollow-adjacent traffic + real players; Reddit links dominate AI answers now |
 | **Discord servers** (Roblox dev hubs, horror-game servers) | Genuine participation + #showcase channels | First-100-players source, not just links |
-| **YouTube** — your channel descriptions | Link beaniestudio.site in every upload's description | You already have 21 videos = 21 real links |
+| **YouTube** — your channel descriptions | Link beaniestudio.site in every upload's description | 7 uploads (all Shorts) = 7 links you fully control. **Corrected 2026-10-14:** this said 21 videos; the channel has 7. |
 | **itch.io** — devlog mirror | Mirror each site devlog post | Game-dev community + a real profile backlink |
 | **IndieDB / Indie game websites** | Studio + game profile | Long-standing indie directories, still crawled |
 | **Google Business Profile** | Studio listing | Brand SERP real estate |
@@ -41,9 +48,12 @@ at, on every push and daily:
 
 1. **Build + typecheck** — nothing broken ships.
 2. **Internal link check** — dead links leak authority; this fails the build on any.
-3. **Lighthouse CI** — Google's open-source engine, hard gates: performance ≥85,
-   SEO ≥95, accessibility ≥95, LCP ≤2.5s, CLS ≤0.1. Regressions can't deploy quietly.
-4. **Live production audit** — `npm run audit:live` (62 checks) against the deployed site.
+3. **Lighthouse CI** — Google's open-source engine, tracked in `warn` mode. **Corrected
+   2026-10-14:** this file previously claimed hard gates of performance ≥85. That was
+   never true — Lighthouse is not a dependency, so the local runner crashed and the
+   number was never measured. Measured performance is **72 simulated / 51 real-throttled**,
+   so the gate is not met. Nothing fails the build; treat performance as an open item.
+4. **Live production audit** — `npm run audit:live` (217 checks as of 2026-10-14) against the deployed site.
 5. **IndexNow ping** — new/changed URLs submitted to Bing/Yandex/Seznam within minutes.
 6. **Daily schedule** — even with no pushes, the site is re-audited every morning.
 
