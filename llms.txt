@@ -44,17 +44,18 @@ Facts below are taken from the game's scripts (beta build, 10 October 2026).
 - [Codes](https://beaniestudio.site/codes/): official code list.
 - [FAQ](https://beaniestudio.site/faq/): price, devices, players, round length, voice chat, age.
 - [Press kit](https://beaniestudio.site/press/): fact sheet, descriptions, downloadable art, contact.
-- [Videos](https://beaniestudio.site/videos/): every official gameplay video and devlog, newest first.
+- [Videos](https://beaniestudio.site/videos/): every official clip, with how a round works.
 - [Devlog](https://beaniestudio.site/blog/) and [RSS](https://beaniestudio.site/rss.xml).
 
 ## Videos
 
-Official uploads from Beanie Studios. Each has its own page with the player embedded.
+Official uploads from Beanie Studios. These are YouTube Shorts (6-18 seconds each), all listed on
+one page rather than a page per clip.
 
-- [Don't trust your friend in this game](https://beaniestudio.site/videos/dont-trust-your-friend-in-this-game/) — STATIC gameplay: a crew of Scrappers, one Hunter, and nobody watching your back. (2026-09-07)
-- [Don't trust your friends in this game](https://beaniestudio.site/videos/dont-trust-your-friends-in-this-game/) — Playtest footage from inside the bunker. (2026-09-04)
-- [We picked the WORST place to hide](https://beaniestudio.site/videos/we-picked-the-worst-place-to-hide/) — A hiding spot that did not work out. (2026-09-01)
-- [The start of your worst nightmare](https://beaniestudio.site/videos/the-start-of-your-worst-nightmare/) — Early footage. Headphones recommended. (2026-08-23)
-- [Making a $150K Roblox Menu](https://beaniestudio.site/videos/making-a-150k-roblox-menu/) — Devlog: building the game’s menu UI. (2026-09-05)
-- [That one friend who leaves you in the dark](https://beaniestudio.site/videos/that-one-friend-who-leaves-you-in-the-dark/) — Community clip. (2026-08-23)
-- [Can AI make a scary Roblox game?](https://beaniestudio.site/videos/can-ai-make-a-scary-roblox-game/) — Devlog: what AI tools can and can’t do for a Roblox horror game. (2026-08-10)
+- Don't trust your friend in this game — STATIC gameplay: a crew of Scrappers, one Hunter, and nobody watching your back. (2026-09-07, PT12S)
+- Don't trust your friends in this game — Playtest footage from inside the bunker. (2026-09-04, PT17S)
+- We picked the WORST place to hide — A hiding spot that did not work out. (2026-09-01, PT15S)
+- The start of your worst nightmare — Early footage. Headphones recommended. (2026-08-23, PT16S)
+- Making a $150K Roblox Menu — Devlog: building the game’s menu UI. (2026-09-05, PT6S)
+- That one friend who leaves you in the dark — Community clip. (2026-08-23, PT11S)
+- Can AI make a scary Roblox game? — Devlog: what AI tools can and can’t do for a Roblox horror game. (2026-08-10, PT18S)

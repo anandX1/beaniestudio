@@ -3,7 +3,7 @@
  * src/data/game.ts at build time so it can never drift from the game.
  */
 import { SITE, LINKS } from '../site.config';
-import { VIDEOS } from '../data/videos';
+import { VIDEOS, isoDuration } from '../data/videos';
 import {
   GAME, MOVEMENT, JINGLES, POD, SCRAP, RARITY, CRUSHERS, MINIGAMES, EXTRACTION, WORM, TEAM, SCRAPPER,
 } from '../data/game';
@@ -56,14 +56,15 @@ Facts below are taken from the game's scripts (beta build, ${GAME.launchLabel}).
 - [Codes](${u('/codes/')}): official code list.
 - [FAQ](${u('/faq/')}): price, devices, players, round length, voice chat, age.
 - [Press kit](${u('/press/')}): fact sheet, descriptions, downloadable art, contact.
-- [Videos](${u('/videos/')}): every official gameplay video and devlog, newest first.
+- [Videos](${u('/videos/')}): every official clip, with how a round works.
 - [Devlog](${u('/blog/')}) and [RSS](${u('/rss.xml')}).
 
 ## Videos
 
-Official uploads from ${SITE.name}. Each has its own page with the player embedded.
+Official uploads from ${SITE.name}. These are YouTube Shorts (6-18 seconds each), all listed on
+one page rather than a page per clip.
 
-${VIDEOS.map((v) => `- [${v.title}](${u(`/videos/${v.slug}/`)}) — ${v.note} (${v.date})`).join('\n')}
+${VIDEOS.map((v) => `- ${v.title} — ${v.note} (${v.date}, ${isoDuration(v.durationSec)})`).join('\n')}
 `;
   return new Response(body, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
 }

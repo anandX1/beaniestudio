@@ -1,18 +1,30 @@
 /**
  * Video registry — real uploads from @official_beaniestudios (channel UC9kfYF5VWu5ZEZdMfkWOa1w).
- * Thumbnails are self-hosted at /yt/<id>.jpg (downloaded at build-authoring time from i.ytimg.com,
- * 1280×720). To add a video: drop its maxresdefault.jpg at public/yt/<id>.jpg and add an entry.
- * Notes describe only what the video is — never game mechanics (those live in data/game.ts).
+ *
+ * These are YouTube SHORTS: every clip is 6–18 seconds. That matters, and it was
+ * not known when per-video watch pages were first built here — 7 pages of ~300
+ * words each around a 6-second clip is exactly the thin/doorway pattern Google
+ * rejects, and they measured as the thinnest pages on the site. They were retired
+ * in favour of the single /videos/ hub (see _redirects).
+ *
+ * `slug` is therefore no longer a live URL segment. It is kept only as the record
+ * of the retired URL that _redirects must keep 301ing.
+ *
+ * `durationSec` is the real length from YouTube's player response, not an
+ * estimate. VideoObject.duration is a documented Google field and it must be ISO
+ * 8601, which is what isoDuration() is for.
+ *
+ * Thumbnails are self-hosted at /yt/<id>.jpg. To add a video: drop its thumbnail
+ * at public/yt/<id>.jpg, add an entry with its real duration, and add its
+ * dimensions to THUMB_DIMS. Notes describe only what the video is — never game
+ * mechanics (those live in data/game.ts).
  */
 import { LINKS } from '../site.config';
 
 export interface SiteVideo {
   /** YouTube video ID. */
   id: string;
-  /**
-   * Permanent URL segment for the /videos/<slug>/ watch page. Once a watch page
-   * is indexed this must never change — treat it like the /media/* filenames.
-   */
+  /** Retired URL segment, kept so _redirects can 301 it. Not a live route. */
   slug: string;
   /** Cleaned public title (hashtag spam stripped). */
   title: string;
@@ -20,6 +32,8 @@ export interface SiteVideo {
   note: string;
   /** ISO publish date (from the channel RSS feed). */
   date: string;
+  /** Real clip length in seconds, read from YouTube. */
+  durationSec: number;
   /** Card tag. Tag styling is reserved for signal amber. */
   tag: 'STATIC' | 'DEVLOG' | 'GAMEPLAY' | 'COMMUNITY';
 }
@@ -30,10 +44,11 @@ export const FEATURED_VIDEO: SiteVideo = {
   title: "Don't trust your friend in this game",
   note: 'STATIC gameplay: a crew of Scrappers, one Hunter, and nobody watching your back.',
   date: '2026-09-07',
+  durationSec: 12,
   tag: 'STATIC',
 };
 
-/** Home page grid (newest first). */
+/** Newest first. */
 export const VIDEOS: SiteVideo[] = [
   FEATURED_VIDEO,
   {
@@ -42,6 +57,7 @@ export const VIDEOS: SiteVideo[] = [
     title: "Don't trust your friends in this game",
     note: 'Playtest footage from inside the bunker.',
     date: '2026-09-04',
+    durationSec: 17,
     tag: 'STATIC',
   },
   {
@@ -50,6 +66,7 @@ export const VIDEOS: SiteVideo[] = [
     title: 'We picked the WORST place to hide',
     note: 'A hiding spot that did not work out.',
     date: '2026-09-01',
+    durationSec: 15,
     tag: 'GAMEPLAY',
   },
   {
@@ -58,6 +75,7 @@ export const VIDEOS: SiteVideo[] = [
     title: 'The start of your worst nightmare',
     note: 'Early footage. Headphones recommended.',
     date: '2026-08-23',
+    durationSec: 16,
     tag: 'STATIC',
   },
   {
@@ -66,6 +84,7 @@ export const VIDEOS: SiteVideo[] = [
     title: 'Making a $150K Roblox Menu',
     note: 'Devlog: building the game’s menu UI.',
     date: '2026-09-05',
+    durationSec: 6,
     tag: 'DEVLOG',
   },
   {
@@ -74,6 +93,7 @@ export const VIDEOS: SiteVideo[] = [
     title: 'That one friend who leaves you in the dark',
     note: 'Community clip.',
     date: '2026-08-23',
+    durationSec: 11,
     tag: 'COMMUNITY',
   },
   {
@@ -82,16 +102,10 @@ export const VIDEOS: SiteVideo[] = [
     title: 'Can AI make a scary Roblox game?',
     note: 'Devlog: what AI tools can and can’t do for a Roblox horror game.',
     date: '2026-08-10',
+    durationSec: 18,
     tag: 'DEVLOG',
   },
 ];
-
-/** Watch-page lookup. Throws on an unknown slug so a bad link fails the build. */
-export function videoBySlug(slug: string): SiteVideo {
-  const v = VIDEOS.find((x) => x.slug === slug);
-  if (!v) throw new Error(`videos: unknown slug "${slug}"`);
-  return v;
-}
 
 /** Play page strip — different picks from the home grid. */
 export const PLAY_VIDEOS: SiteVideo[] = [VIDEOS[3], VIDEOS[4], VIDEOS[5], VIDEOS[2]];
@@ -100,12 +114,7 @@ export function watchUrl(id: string): string {
   return `https://www.youtube.com/watch?v=${id}`;
 }
 
-/**
- * Param-free privacy-mode embed. This is what goes in the /videos/<slug>/ page
- * HTML and in VideoObject.embedUrl — Google only treats a video as page content
- * when it can see the embed in the served HTML, so this URL must be static.
- * No autoplay: the visitor already chose to be here.
- */
+/** Privacy-mode embed, no params. Used by VideoObject.embedUrl and the facades. */
 export function embedUrlPlain(id: string): string {
   return `https://www.youtube-nocookie.com/embed/${id}`;
 }
@@ -119,13 +128,20 @@ export function thumbUrl(id: string): string {
   return `/yt/${id}.jpg`;
 }
 
+/** Seconds → ISO 8601 duration, which is what schema.org VideoObject requires. */
+export function isoDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `PT${m ? `${m}M` : ''}${s}S`;
+}
+
 /**
  * True pixel size of each self-hosted /yt/<id>.jpg, measured from the files.
  *
  * Do not assume 1280×720: YouTube does not always serve a maxresdefault, and one
  * of these clips only has a 4:3 640×480 frame. Every consumer (intrinsic size on
- * the <img>, og:image:width/height on the watch page) reads it from here, so the
- * numbers can never disagree with the bytes we actually ship.
+ * the <img>) reads it from here, so the numbers can never disagree with the bytes
+ * we actually ship.
  */
 const THUMB_DIMS: Record<string, { w: number; h: number }> = {
   '7mjWe7s1jFE': { w: 862, h: 486 },
