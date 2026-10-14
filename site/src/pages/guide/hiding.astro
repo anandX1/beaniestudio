@@ -1,0 +1,147 @@
+---
+/**
+ * /guide/hiding/ — hiding, lockers and being found.
+ *
+ * Gap from content/keywords-game.json: SCRAPPER.lockerMaxSec was in the data and used
+ * only in a homepage section; there was no page targeting hiding queries.
+ *
+ * Deliberate framing: hiding in STATIC is a DELAY, not safety. The page says so up
+ * front rather than overselling it, because Bloodlust reveals every Scrapper on a
+ * timer and an over-confident player who hides and dies is worse off than one who
+ * keeps moving. No mechanic is claimed that is not in game.ts or already stated on
+ * the homepage.
+ */
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { ROOM_INFO } from '../../data/rooms';
+import { SCRAPPER, JINGLES, MOVEMENT, WORM, POD } from '../../data/game';
+
+/** Rooms whose own description says something about being seen. */
+const sightlines = ROOM_INFO.filter((r) =>
+  /hide|aisle|open space|light|bright|corner/i.test(r.blurb),
+);
+
+const hidingLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: 'Hiding in STATIC: what lockers actually do',
+  about: { '@id': 'https://beaniestudio.site/#game' },
+};
+---
+
+<GuideLayout
+  title="STATIC Hiding Spots and Lockers (Roblox)"
+  description={`Hiding in STATIC on Roblox, honestly: what lockers do, the ${SCRAPPER.lockerMaxSec}-second limit, why Bloodlust finds you anyway, and which rooms give you cover.`}
+  path="/guide/hiding/"
+  h1="Hiding, lockers and being found"
+  kicker="Official guide · Survival"
+  crumb="Hiding"
+  updated="2026-10-14"
+  jsonLd={[hidingLd]}
+>
+  <p class="text-lg">
+    Hiding in STATIC buys you time. It does not make you safe. Lockers are the only hiding spots in
+    the game, you get <strong>{SCRAPPER.lockerMaxSec} seconds</strong> in one, and there is an ability
+    that reveals every Scrapper on a timer whether you are hidden or not.
+  </p>
+
+  <div class="callout">
+    <strong>Read this first:</strong> if you are planning to win by hiding, the game will find you.
+    {' '}{JINGLES.name}'s Bloodlust fires every {JINGLES.bloodlust.everySec} seconds and shows the
+    Hunter every Scrapper for {JINGLES.bloodlust.revealSec} seconds. Hiding is for breaking a chase
+    and resetting, not for waiting out a round.
+  </div>
+
+  <h2 id="lockers">Lockers, exactly</h2>
+  <ul>
+    <li><strong>Lockers are the only hiding spots.</strong> There is no crouch-in-the-dark mechanic.</li>
+    <li><strong>You get {SCRAPPER.lockerMaxSec} seconds inside.</strong></li>
+    <li>
+      <strong>Then the locker throws you out</strong> — and your position is pinged to the Hunter.
+      Staying in is not a safe option; it announces you.
+    </li>
+  </ul>
+  <p>
+    This is why camping a locker is a losing habit: at the {SCRAPPER.lockerMaxSec}-second mark you are
+    ejected and marked, usually with {JINGLES.name} already on the way. See{' '}
+    <a href="/guide/jingles/">what else gives you away</a>.
+  </p>
+
+  <h2 id="reveals">What finds you anyway</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">What</th><th scope="col" class="num">Detail</th><th scope="col">What to do</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Bloodlust</td>
+          <td class="num">every {JINGLES.bloodlust.everySec} s, reveals for {JINGLES.bloodlust.revealSec} s</td>
+          <td>Assume it is coming; be somewhere you can run from</td>
+        </tr>
+        <tr>
+          <td>Overstaying a locker</td>
+          <td class="num">&gt; {SCRAPPER.lockerMaxSec} s</td>
+          <td>Leave before the limit, on your terms</td>
+        </tr>
+        <tr>
+          <td>Heavy scrap</td>
+          <td class="num">{SCRAPPER.heavyCarrySlowMaxPct}% slowdown, flashlight off</td>
+          <td>Drop it if you are being chased</td>
+        </tr>
+        <tr>
+          <td>Noise</td>
+          <td class="num">missed throws, screaming mimics</td>
+          <td>See <a href="/guide/worm/">the Worm's triggers</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="rooms">Which rooms give you cover</h2>
+  <p>
+    The map is not uniform. Some rooms are built against you, and their own descriptions say so —
+    these notes come from our own in-game captures:
+  </p>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Room</th><th scope="col">What it gives you</th></tr></thead>
+      <tbody>
+        {sightlines.map((r) => (
+          <tr>
+            <td class="text-facility-100"><a href={`/guide/map/#${r.slug}`}>{r.name}</a></td>
+            <td>{r.blurb}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p>
+    The short version: <strong>Medbay's long centre aisle leaves nowhere to hide</strong>, the{' '}
+    <strong>Storage Bay has corners you cannot see past</strong> (good for breaking a sightline, bad
+    for being trapped in), and the <strong>Nuclear Reactor is the darkest room</strong>. The{' '}
+    <a href="/guide/danger/">room danger guide</a> covers this in more detail.
+  </p>
+
+  <h2 id="moving">Being downed is not the end</h2>
+  <p>
+    If you go down, you are not out. You can still move: crawling at {MOVEMENT.downedCrawl} studs per
+    second or sprinting at {MOVEMENT.downedSprint}. Use it to get behind something or toward a
+    teammate — a revive takes {SCRAPPER.reviveHoldSec} seconds, so being reachable matters more than
+    being hidden.
+  </p>
+  <p>
+    Caught properly and you go in a pod: {POD.timerSec} seconds, twice as fast if nobody is free.
+    That is covered in <a href="/guide/capture-and-rescue/">capture and rescue</a>.
+  </p>
+
+  <h2 id="better">What actually works</h2>
+  <ol>
+    <li><strong>Break the sightline, then move.</strong> Corners in the Storage Bay beat standing still.</li>
+    <li><strong>Use lockers as a reset, not a home.</strong> In and out well inside {SCRAPPER.lockerMaxSec} seconds.</li>
+    <li><strong>Drop the heavy item when chased.</strong> {SCRAPPER.heavyCarrySlowMaxPct}% slower and no flashlight is how chases end badly.</li>
+    <li><strong>Expect to be revealed.</strong> Bloodlust is on a {JINGLES.bloodlust.everySec}-second clock, not a one-off.</li>
+    <li><strong>Stay near someone.</strong> A reachable teammate is worth more than a good hiding spot.</li>
+  </ol>
+  <p>
+    Also worth knowing: the Worm is not fooled by any of this. It is drawn by noise and by heavy
+    scrap — <a href="/guide/worm/">how to survive the Worm</a>.
+  </p>
+</GuideLayout>

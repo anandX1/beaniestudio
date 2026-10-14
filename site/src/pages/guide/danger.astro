@@ -1,0 +1,165 @@
+---
+/**
+ * /guide/danger/ — which rooms are dangerous, and why.
+ *
+ * Gap from content/keywords-game.json. Derived, not invented: every room observation
+ * below comes from ROOM_INFO blurbs, which were themselves written from our own
+ * in-game screenshots. The intro says that plainly and invites corrections, because
+ * "which room is dangerous" is partly a judgement call and the owner knows the map
+ * better than the descriptions do.
+ *
+ * The mechanics side (what makes ANY room dangerous) is all game.ts.
+ */
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { ROOM_INFO } from '../../data/rooms';
+import { JINGLES, WORM, CRUSHERS, EXTRACTION, SCRAPPER, POD } from '../../data/game';
+
+/**
+ * Read off our own screenshots via the room blurbs. Light and sightline notes are
+ * observations, not config values, so they are kept in one place and labelled.
+ */
+const RISK: Record<string, { light: string; sightlines: string; hiding: string }> = {
+  'central-room': { light: 'Red-lit, glowing globe', sightlines: 'Open hub, walkways off it', hiding: 'Low — it is the crossroads' },
+  'cargo-dock': { light: 'Red warning light', sightlines: 'The biggest open space in the bunker', hiding: 'Low — catwalks and crates, but you are seen crossing' },
+  'storage-bay': { light: 'Dim aisles', sightlines: 'Long aisles, corners you cannot see past', hiding: 'Good for breaking a sightline, risky if cornered' },
+  'control-room': { light: 'One of the brightest rooms', sightlines: 'Banks of consoles, blue screens', hiding: 'Poor — brightness works against you' },
+  'nuclear-reactor': { light: 'Very little light', sightlines: 'Red coils and green tanks, tight', hiding: 'Best cover, worst navigation' },
+  medbay: { light: 'Blue curtains, cold', sightlines: 'A long centre aisle', hiding: 'Poor — nowhere to hide on the aisle' },
+  security: { light: 'Cold blue', sightlines: 'Corridor in, desks and monitors', hiding: 'Mixed — the corridor is the problem' },
+  'interrogation-room': { light: 'Harsh, with a red observation window', sightlines: 'Open room, watched through glass', hiding: 'Poor — harsh light and sightlines' },
+};
+
+const dangerLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: 'Which rooms in STATIC are dangerous',
+  about: { '@id': 'https://beaniestudio.site/#game' },
+};
+---
+
+<GuideLayout
+  title="STATIC Map Danger — Which Rooms to Avoid"
+  description={`Which rooms in STATIC are dangerous: light, sightlines and cover for every room, plus what draws the Worm and where Jingles has the advantage.`}
+  path="/guide/danger/"
+  h1="Which rooms are dangerous"
+  kicker="Official guide · Map tactics"
+  crumb="Room danger"
+  updated="2026-10-14"
+  jsonLd={[dangerLd]}
+>
+  <p class="text-lg">
+    No room in STATIC is safe, but they are not equally dangerous. Bright rooms and long aisles favour{' '}
+    {JINGLES.name}; dark, cluttered rooms favour you. This page rates every room on light, sightlines
+    and cover.
+  </p>
+  <p class="text-facility-300">
+    These notes are read off our own in-game screenshots. They are observations rather than game
+    config, so if you know the map better than the descriptions do, tell us in the{' '}
+    <a href="/guide/map/">map guide</a> discussion.
+  </p>
+
+  <h2 id="table">Room by room</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Room</th>
+          <th scope="col">Light</th>
+          <th scope="col">Sightlines</th>
+          <th scope="col">Cover</th>
+        </tr>
+      </thead>
+      <tbody>
+        {ROOM_INFO.map((r) => {
+          const risk = RISK[r.slug];
+          if (!risk) return null;
+          return (
+            <tr>
+              <td class="text-facility-100"><a href={`/guide/map/#${r.slug}`}>{r.name}</a></td>
+              <td>{risk.light}</td>
+              <td>{risk.sightlines}</td>
+              <td>{risk.hiding}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="winners">Where Jingles has the advantage</h2>
+  <p>
+    {JINGLES.name} is faster than you ({JINGLES.bloodlust.speedMult}× during Bloodlust, and a dash at{' '}
+    {JINGLES.dash.speed} studs per second for {JINGLES.dash.durationSec} seconds). So the Hunter wins
+    in any space where the two of you can see each other for long enough to close the gap:
+  </p>
+  <ul>
+    <li><strong>Long, bright aisles.</strong> The Medbay centre aisle is the clearest example — no cover and nowhere to break line of sight.</li>
+    <li><strong>Big open rooms.</strong> The Cargo Dock is the largest space in the bunker; crossing it is the risk, not being in it.</li>
+    <li><strong>The Control Room.</strong> One of the brightest rooms, which removes your main advantage.</li>
+  </ul>
+  <p>
+    Read the counterplay in <a href="/guide/jingles/">the Jingles guide</a> — the{' '}
+    {JINGLES.attack.windupSec}-second wind-up is the window you get to dodge.
+  </p>
+
+  <h2 id="yours">Where you have the advantage</h2>
+  <ul>
+    <li>
+      <strong>The Nuclear Reactor.</strong> Very little light to see by. Bad for navigating, good for
+      not being seen — and <a href="/guide/hiding/">lockers</a> matter less when the room is already dark.
+    </li>
+    <li>
+      <strong>The Storage Bay.</strong> Long aisles of shelving with corners you cannot see past. That
+      cuts both ways, but it is the best room for breaking a chase.
+    </li>
+    <li>
+      <strong>Anywhere with a teammate.</strong> A {SCRAPPER.reviveHoldSec}-second revive or a{' '}
+      {POD.rescueHoldSec}-second pod rescue changes the maths more than any piece of cover.
+    </li>
+  </ul>
+
+  <h2 id="anywhere">What makes any room dangerous</h2>
+  <p>
+    The room matters less than what you are doing in it. Three things turn a safe room into a death
+    trap regardless of where it is on the map:
+  </p>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Trigger</th><th scope="col" class="num">Numbers</th><th scope="col">Why it is dangerous</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Ringing the bell</td>
+          <td class="num">Worm in {WORM.bellSpawnDelaySec} s, {WORM.bellSpawnDistStuds} studs away</td>
+          <td>Always summons one, wherever you are</td>
+        </tr>
+        <tr>
+          <td>Heavy scrap in hand</td>
+          <td class="num">&minus;{SCRAPPER.heavyCarrySlowMaxPct}% speed, no flashlight</td>
+          <td>Slow, blind, and it attracts Worms</td>
+        </tr>
+        <tr>
+          <td>Noise</td>
+          <td class="num">{WORM.baseChancePct}% base, checked every {WORM.baseChanceEverySec} s</td>
+          <td>Missed throws and screaming mimics multiply it</td>
+        </tr>
+        <tr>
+          <td>Being the last one up</td>
+          <td class="num">pod timer at double speed</td>
+          <td>No rescue is coming; the {POD.timerSec} s clock halves</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="plan">A route that works</h2>
+  <ol>
+    <li><strong>Start from the Central Room</strong> and pick a crusher. You need {CRUSHERS.totalKg} kg across {CRUSHERS.count}.</li>
+    <li><strong>Search dark rooms first</strong> — the Reactor and the Storage Bay — while the round is quiet.</li>
+    <li><strong>Cross the bright rooms deliberately.</strong> The Control Room and Medbay are where you are most visible, so do not linger.</li>
+    <li><strong>Finish near the exit.</strong> The {EXTRACTION.room} window is {EXTRACTION.windowSec} seconds and it is per player, so being on the far side of the map when it opens costs you the round.</li>
+  </ol>
+  <p>
+    The extraction flow is in <a href="/guide/crushers/">crushers and minigames</a>, and every room is
+    photographed in the <a href="/guide/map/">map guide</a>.
+  </p>
+</GuideLayout>

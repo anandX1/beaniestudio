@@ -64,8 +64,9 @@
       "intent": "How do I play with friends?",
       "query": "static roblox how to play with friends",
       "sourceOfTruth": "GAME.serverSize / GAME.voiceChat / LINKS.discord",
-      "answeredBy": null,
-      "status": "missing"
+      "answeredBy": "/guide/with-friends/",
+      "status": "answered",
+      "writtenAt": "2026-10-14"
     },
     {
       "intent": "Are there codes?",
@@ -379,15 +380,17 @@
       "intent": "Where are the best hiding spots?",
       "query": "static roblox hiding spots",
       "sourceOfTruth": "SCRAPPER.lockerMaxSec",
-      "answeredBy": null,
-      "status": "missing"
+      "answeredBy": "/guide/hiding/",
+      "status": "answered",
+      "writtenAt": "2026-10-14"
     },
     {
       "intent": "Which rooms are dangerous?",
       "query": "static roblox dangerous rooms",
       "sourceOfTruth": "derived from screenshots (light, sightlines)",
-      "answeredBy": null,
-      "status": "missing"
+      "answeredBy": "/guide/danger/",
+      "status": "answered",
+      "writtenAt": "2026-10-14"
     },
     {
       "intent": "Where is the reactor / medbay / security?",
@@ -435,8 +438,9 @@
       "intent": "Is there a wiki?",
       "query": "static roblox wiki",
       "sourceOfTruth": "WIKI-KIT.md exists",
-      "answeredBy": null,
-      "status": "missing"
+      "answeredBy": "/community/",
+      "status": "answered",
+      "writtenAt": "2026-10-14"
     },
     {
       "intent": "Where is the community?",
@@ -469,18 +473,14 @@
   ],
   "gapSummary": {
     "totalIntents": 65,
-    "answered": 53,
+    "answered": 57,
     "partial": 7,
-    "missing": 4,
+    "missing": 0,
     "blocked": 1,
-    "missingPages": [
-      "/guide/with-friends/ — how to play STATIC with friends (party, voice chat, server size)",
-      "/guide/hiding/ — hiding spots and lockers (SCRAPPER.lockerMaxSec is unused on the site today)",
-      "/guide/danger/ — which rooms are dangerous (light level, sightlines, escape routes)",
-      "/wiki/ — a community/wiki hub page (WIKI-KIT.md is written but unpublished)"
-    ],
+    "missingPages": [],
     "blockedItems": [
       "The homepage claims every round pays 'XP'. XP is NOT in game.ts. Rule 9 says if it is not in the data the site does not claim it — either add it to game.ts or remove the claim."
-    ]
+    ],
+    "resolvedAt": "2026-10-14"
   }
 }

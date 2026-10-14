@@ -34,6 +34,10 @@ Facts below are taken from the game's scripts (beta build, 10 October 2026).
 - [Home](https://beaniestudio.site/): what STATIC is, gameplay videos, how a round works, Jingles, roadmap, team.
 - [About](https://beaniestudio.site/about/): who Beanie Studios is, the three people behind the game, and official channels.
 - [Numbers](https://beaniestudio.site/guide/numbers/): every stat, weight and timer in one page, free to cite.
+- [Playing with friends](https://beaniestudio.site/guide/with-friends/): getting into the same server, voice chat, splitting roles.
+- [Hiding and lockers](https://beaniestudio.site/guide/hiding/): what lockers do, the 18-second limit, and what reveals you.
+- [Room danger](https://beaniestudio.site/guide/danger/): light, sightlines and cover for every room.
+- [Community](https://beaniestudio.site/community/): Discord, the Roblox group, how to help, and verified facts for wiki editors.
 - [Beginner guide](https://beaniestudio.site/guide/): roles, round flow, controls, health, tools, tips.
 - [Map](https://beaniestudio.site/guide/map/): every room of the bunker with screenshots.
 - [Screenshots](https://beaniestudio.site/screenshots/): official screenshot gallery.

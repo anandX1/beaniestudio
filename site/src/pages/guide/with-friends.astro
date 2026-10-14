@@ -1,0 +1,128 @@
+---
+/**
+ * /guide/with-friends/ — the co-op onboarding page.
+ *
+ * Gap found in content/keywords-game.json: "how do I play with friends" had no page,
+ * despite being one of the most likely queries for a co-op game. Everything here is
+ * either a game.ts value or an existing site claim; nothing is promised that the game
+ * does not actually do (there is no custom lobby system, so we do not imply one).
+ */
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { SITE, LINKS } from '../../site.config';
+import { GAME, SCRAPPER, POD, CRUSHERS, JINGLES } from '../../data/game';
+
+const friendLd = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to play STATIC with friends',
+  description: `Get into the same STATIC server as your friends on Roblox, and split the work once you are in.`,
+  totalTime: 'PT5M',
+  about: { '@id': `${SITE.url}/#game` },
+  step: [
+    { '@type': 'HowToStep', name: 'Get into the same server', text: 'The simplest route is for one person to join STATIC and for everyone else to join them from their friends list, so you land in the same server rather than a random one.' },
+    { '@type': 'HowToStep', name: 'Check the player count', text: `A server holds up to ${GAME.serverSize}: ${GAME.scrappers.min}–${GAME.scrappers.max} Scrappers and ${GAME.hunters} Hunter. If it is full, wait for a slot or pick a fresh server.` },
+    { '@type': 'HowToStep', name: 'Turn on voice chat', text: 'Proximity voice chat is on. You can hear players near you and they can hear you, which is how you call out a crusher, a pod rescue or Jingles.' },
+    { '@type': 'HowToStep', name: 'Split the roles', text: `You need ${CRUSHERS.totalKg} kg crushed across ${CRUSHERS.count} crushers. Two players on one console clear it faster, so send one pair to calibrate and the rest to haul scrap.` },
+    { '@type': 'HowToStep', name: 'Stay reachable', text: `A pod rescue needs someone within ${POD.rescueRangeStuds} studs, and a revive takes ${SCRAPPER.reviveHoldSec} seconds. Playing spread out is how people die alone.` },
+  ],
+};
+---
+
+<GuideLayout
+  title="How to Play STATIC With Friends (Roblox)"
+  description={`How to play STATIC with friends on Roblox: same server, voice chat, splitting work, and why a partner is the difference between a pod and a rescue.`}
+  path="/guide/with-friends/"
+  h1="How to play STATIC with friends"
+  kicker="Official guide · Co-op"
+  crumb="With friends"
+  updated="2026-10-14"
+  jsonLd={[friendLd]}
+>
+  <p class="text-lg">
+    STATIC is built for a group. A server holds up to <strong>{GAME.serverSize} players</strong> —
+    {GAME.scrappers.min}–{GAME.scrappers.max} Scrappers and {GAME.hunters} Hunter, who is another
+    player in the same round. You are not meant to do this alone, and the game mechanics punish it.
+  </p>
+
+  <h2 id="same-server">Getting into the same server</h2>
+  <p>
+    STATIC has no separate lobby system. The reliable route is the ordinary Roblox one: one of you
+    joins the game first, then everyone else joins <em>that</em> player from their friends list.
+    You land in their server rather than a random one.
+  </p>
+  <ul>
+    <li>
+      <strong>Friends list.</strong> Open the friends list and join the friend who is already in
+      STATIC. This is the only way to be sure you are in the same round.
+    </li>
+    <li>
+      <strong>Check the count first.</strong> With {GAME.serverSize} slots the server fills, and once
+      the Hunter slot is taken the round is set. If it is full, wait for a slot to open.
+    </li>
+    <li>
+      <strong>PC and mobile share servers.</strong> STATIC runs on {GAME.platforms.join(' and ')} and
+      they play together, so a friend on a phone can be in your round.
+    </li>
+  </ul>
+
+  <h2 id="voice">Voice chat is the actual tool</h2>
+  <p>
+    Proximity voice chat is on. That means it is directional in the game world: someone across the
+    bunker will not hear you, and someone around the corner will. It is the fastest way to call a
+    crusher quota, shout a pod, or warn that {JINGLES.name} is behind someone.
+  </p>
+  <p>
+    It also means noise is a liability. The Worm is drawn to noise, so a squad that shouts constantly
+    is a squad that keeps summoning it. See <a href="/guide/worm/">how the Worm is triggered</a>.
+  </p>
+
+  <h2 id="why">Why co-op is a mechanic, not a preference</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Situation</th><th scope="col" class="num">Solo</th><th scope="col" class="num">With a partner</th></tr></thead>
+      <tbody>
+        <tr><td>Downed by {JINGLES.name}</td><td class="num">Nobody revives you</td><td class="num">Revive takes {SCRAPPER.reviveHoldSec} s</td></tr>
+        <tr><td>Put in a pod</td><td class="num">Timer runs at double speed</td><td class="num">{POD.rescueHoldSec} s hold, {POD.rescueRangeStuds} studs away</td></tr>
+        <tr><td>Clearing a console</td><td class="num">One pair of hands</td><td class="num">Two players, noticeably faster</td></tr>
+        <tr><td>Carrying heavy scrap</td><td class="num">Slow, no flashlight, draws Worms</td><td class="num">Someone else can escort or haul</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    The pod row is the important one: the {POD.timerSec}-second timer runs at
+    <strong>twice the speed when no teammate is free</strong> to come for you. Being the last one
+    alive is the worst position in the game, not the safest. The full rules are in{' '}
+    <a href="/guide/capture-and-rescue/">capture and rescue</a>.
+  </p>
+
+  <h2 id="roles">Splitting the work</h2>
+  <p>
+    You need <strong>{CRUSHERS.totalKg} kg</strong> crushed across {CRUSHERS.count} crushers
+    ({CRUSHERS.quotasKg.join(' / ')} kg each), and each console holds{' '}
+    {CRUSHERS.minigamesPerConsole} of the {CRUSHERS.minigamesPerConsole + 6} minigames in the pool.
+    A split that works:
+  </p>
+  <ol>
+    <li><strong>Two on a console.</strong> Minigames go faster with two people working one console.</li>
+    <li><strong>Two or three hauling.</strong> Scrap is scattered across the map, and the heavy items
+      cannot be carried while doing anything else.</li>
+    <li><strong>Nobody alone in a far room.</strong> A downed player in a corner the squad has left is
+      a free kill for {JINGLES.name}.</li>
+  </ol>
+  <p>
+    Weight and carrying rules are in the <a href="/guide/scrap/">scrap guide</a>; the console and
+    crusher flow is in <a href="/guide/crushers/">crushers and minigames</a>.
+  </p>
+
+  <h2 id="find">Finding people to play with</h2>
+  <p>
+    If you do not have a squad, the <a href={LINKS.discord} rel="noopener" target="_blank">Discord</a>{' '}
+    is where players group up, and it is also where bug reports and update votes happen. The{' '}
+    <a href={LINKS.roblox} rel="noopener" target="_blank">Roblox group</a> is the other place to hear
+    about updates.
+  </p>
+  <p>
+    New to the game? Start with the <a href="/guide/">beginner guide</a>, which covers the round from
+    the lobby to extraction.
+  </p>
+</GuideLayout>

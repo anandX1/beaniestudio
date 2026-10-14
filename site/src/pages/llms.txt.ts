@@ -46,6 +46,10 @@ Facts below are taken from the game's scripts (beta build, ${GAME.launchLabel}).
 - [Home](${u('/')}): what STATIC is, gameplay videos, how a round works, Jingles, roadmap, team.
 - [About](${u('/about/')}): who ${SITE.name} is, the three people behind the game, and official channels.
 - [Numbers](${u('/guide/numbers/')}): every stat, weight and timer in one page, free to cite.
+- [Playing with friends](${u('/guide/with-friends/')}): getting into the same server, voice chat, splitting roles.
+- [Hiding and lockers](${u('/guide/hiding/')}): what lockers do, the 18-second limit, and what reveals you.
+- [Room danger](${u('/guide/danger/')}): light, sightlines and cover for every room.
+- [Community](${u('/community/')}): Discord, the Roblox group, how to help, and verified facts for wiki editors.
 - [Beginner guide](${u('/guide/')}): roles, round flow, controls, health, tools, tips.
 - [Map](${u('/guide/map/')}): every room of the bunker with screenshots.
 - [Screenshots](${u('/screenshots/')}): official screenshot gallery.
