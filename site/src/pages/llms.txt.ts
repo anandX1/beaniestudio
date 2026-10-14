@@ -45,6 +45,7 @@ Facts below are taken from the game's scripts (beta build, ${GAME.launchLabel}).
 
 - [Home](${u('/')}): what STATIC is, gameplay videos, how a round works, Jingles, roadmap, team.
 - [About](${u('/about/')}): who ${SITE.name} is, the three people behind the game, and official channels.
+- [Numbers](${u('/guide/numbers/')}): every stat, weight and timer in one page, free to cite.
 - [Beginner guide](${u('/guide/')}): roles, round flow, controls, health, tools, tips.
 - [Map](${u('/guide/map/')}): every room of the bunker with screenshots.
 - [Screenshots](${u('/screenshots/')}): official screenshot gallery.

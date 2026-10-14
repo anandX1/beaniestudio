@@ -1,0 +1,283 @@
+---
+/**
+ * /guide/numbers/ — every number in the game, in one page.
+ *
+ * Why this page exists: it is the site's linkable asset. Wikis, Roblox guide
+ * sites and AI answer engines all need numbers, and nobody else has ours — every
+ * value here is imported from src/data/game.ts, which is read from the game's own
+ * config, so this page cannot drift from the build. It is also the page a
+ * journalist or wiki editor can cite instead of copying figures off a screenshot.
+ *
+ * Rule 9 applies with no exceptions here: nothing on this page is typed by hand.
+ */
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import { SITE } from '../../site.config';
+import {
+  GAME, MOVEMENT, JINGLES, POD, SCRAP, RARITY, CRUSHERS, MINIGAMES, TRANSITION_TASKS,
+  WORM, EXTRACTION, SCRAPPER, PROGRESSION, MOBILE_BUTTONS, CONTROLS, ROOMS, RESULTS, kg,
+} from '../../data/game';
+
+const lightest = SCRAP[0];
+const heaviest = SCRAP[SCRAP.length - 1];
+const backpack = SCRAP.filter((s) => s.slot === 'Backpack');
+const heavy = SCRAP.filter((s) => s.slot === 'Heavy');
+const core = heaviest;
+const charged = RARITY.find((r) => r.name === 'Charged')!;
+
+/** The citation block is the point of the page, so it is built from one source. */
+const citeUrl = new URL('/guide/numbers/', SITE.url).href;
+
+/** Flat list for consumers that want the raw numbers rather than the prose. */
+const datasetLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Every number in STATIC',
+  description: `Player counts, scrap weights, crusher quotas, movement speeds, Hunter stats and timers for ${GAME.fullName}, as shipped in the ${GAME.launchLabel} beta.`,
+  numberOfItems: SCRAP.length,
+  url: citeUrl,
+  itemListElement: SCRAP.map((s, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: `${s.name} — ${kg(s.kg)}`,
+  })),
+  isBasedOn: new URL('/llms.txt', SITE.url).href,
+  publisher: { '@id': `${SITE.url}/#org` },
+  about: { '@id': `${SITE.url}/#game` },
+};
+---
+
+<GuideLayout
+  title="STATIC Numbers — Every Stat and Timer (Roblox)"
+  description={`Every number in STATIC on Roblox: player counts, all ${SCRAP.length} scrap weights, crusher quotas, movement speeds, Jingles' stats, Worm chances and the extraction timer.`}
+  path="/guide/numbers/"
+  h1="Every number in STATIC"
+  kicker="Official reference · Free to cite"
+  crumb="Numbers"
+  updated="2026-10-14"
+  jsonLd={[datasetLd]}
+>
+  <p class="text-lg">
+    This is the whole game in figures: how many players, how much scrap, how fast everything
+    moves, and every timer. Each value is read out of the {GAME.name} config at build time, so
+    this page cannot disagree with the shipped build.
+  </p>
+
+  <div class="callout">
+    <strong>Free to cite.</strong> Quote or republish any figure here, with a link to{' '}
+    <a href="/guide/numbers/">{SITE.url.replace('https://', '')}/guide/numbers/</a>. A
+    plain-text copy for AI tools and editors is at{' '}
+    <a href="/llms.txt">/llms.txt</a>. Last checked against the{' '}
+    <strong>{GAME.launchLabel} beta</strong>.
+  </div>
+
+  <h2 id="round">At a glance</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <tbody>
+        <tr><th scope="row">Game</th><td>{GAME.fullName}</td></tr>
+        <tr><th scope="row">Status</th><td>{GAME.status}, public since {GAME.launchLabel}</td></tr>
+        <tr><th scope="row">In development since</th><td>{GAME.devStarted}</td></tr>
+        <tr><th scope="row">Price</th><td>{GAME.price}</td></tr>
+        <tr><th scope="row">Platforms</th><td>{GAME.platforms.join(' and ')} (same servers)</td></tr>
+        <tr><th scope="row">Genres</th><td>{GAME.genres.join(', ')}</td></tr>
+        <tr><th scope="row">Age guidance</th><td>{GAME.ageTarget}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="players">Players and the round</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Value</th><th scope="col" class="num">Number</th></tr></thead>
+      <tbody>
+        <tr><td>Players per server</td><td class="num text-facility-100">{GAME.serverSize}</td></tr>
+        <tr><td>Scrappers</td><td class="num text-facility-100">{GAME.scrappers.min}–{GAME.scrappers.max}</td></tr>
+        <tr><td>Hunters ({JINGLES.name})</td><td class="num text-facility-100">{GAME.hunters}</td></tr>
+        <tr><td>Round length limit</td><td class="num text-facility-100">{GAME.roundLimitMin} min</td></tr>
+        <tr><td>Hunter released after</td><td class="num text-facility-100">{GAME.hunterReleaseSec} s</td></tr>
+        <tr><td>Hunter spawn points</td><td class="num text-facility-100">{GAME.hunterSpawnPoints}</td></tr>
+        <tr><td>Proximity voice chat</td><td class="num text-facility-100">{GAME.voiceChat ? 'Yes' : 'No'}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="scrap">Scrap and the quota</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Value</th><th scope="col" class="num">Number</th></tr></thead>
+      <tbody>
+        <tr><td>Scrap items</td><td class="num text-facility-100">{SCRAP.length}</td></tr>
+        <tr><td>Lightest item</td><td class="num text-facility-100">{lightest.name}, {kg(lightest.kg)}</td></tr>
+        <tr><td>Heaviest item</td><td class="num text-facility-100">{heaviest.name}, {kg(heaviest.kg)}</td></tr>
+        <tr><td>Total quota</td><td class="num text-facility-100">{kg(CRUSHERS.totalKg)}</td></tr>
+        <tr><td>Per-crusher quotas</td><td class="num text-facility-100">{CRUSHERS.quotasKg.map((q) => `${q} kg`).join(' / ')}</td></tr>
+        <tr><td>Crushers</td><td class="num text-facility-100">{CRUSHERS.count}</td></tr>
+        <tr><td>Backpack items</td><td class="num text-facility-100">{backpack.length}</td></tr>
+        <tr><td>Heavy items (carried in hands)</td><td class="num text-facility-100">{heavy.length}</td></tr>
+        <tr><td>Backpack slots</td><td class="num text-facility-100">{SCRAPPER.backpackSlots}</td></tr>
+        <tr><td>Max heavy-carry slowdown</td><td class="num text-facility-100">{SCRAPPER.heavyCarrySlowMaxPct}%</td></tr>
+        <tr><td>Heaviest possible single item (Charged {core.name.toLowerCase()})</td><td class="num text-signal">{kg(core.kg * charged.mult)}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="rarity">Rarity multipliers</h3>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Rarity</th><th scope="col" class="num">Weight multiplier</th><th scope="col" class="num">Chance</th></tr></thead>
+      <tbody>
+        {RARITY.map((r) => (
+          <tr><td class="text-facility-100">{r.name}</td><td class="num">×{r.mult}</td><td class="num">{r.pct}%</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p>Full item-by-item list with spawn chances: <a href="/guide/scrap/">the scrap guide</a>.</p>
+
+  <h2 id="consoles">Crushers and consoles</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Value</th><th scope="col" class="num">Number</th></tr></thead>
+      <tbody>
+        <tr><td>Minigames per console</td><td class="num text-facility-100">{CRUSHERS.minigamesPerConsole}</td></tr>
+        <tr><td>Minigame pool</td><td class="num text-facility-100">{MINIGAMES.length}</td></tr>
+        <tr><td>Transition tasks</td><td class="num text-facility-100">{TRANSITION_TASKS.length}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The pool: {MINIGAMES.join(', ')}. Transitions: {TRANSITION_TASKS.join(', ')}.</p>
+
+  <h2 id="movement">Movement (studs per second)</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">State</th><th scope="col" class="num">Speed</th></tr></thead>
+      <tbody>
+        <tr><td>Scrapper walking</td><td class="num">{MOVEMENT.scrapperWalk}</td></tr>
+        <tr><td>Scrapper sprinting</td><td class="num text-facility-100">{MOVEMENT.scrapperSprint}</td></tr>
+        <tr><td>Jingles base</td><td class="num text-signal">{MOVEMENT.hunter}</td></tr>
+        <tr><td>Jingles carrying a Scrapper</td><td class="num">{MOVEMENT.hunterCarrying}</td></tr>
+        <tr><td>Jingles dash</td><td class="num text-signal">{MOVEMENT.hunterDash}</td></tr>
+        <tr><td>Downed crawling</td><td class="num">{MOVEMENT.downedCrawl}</td></tr>
+        <tr><td>Downed sprinting</td><td class="num">{MOVEMENT.downedSprint}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="jingles">Jingles, the Hunter</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Value</th><th scope="col" class="num">Number</th></tr></thead>
+      <tbody>
+        <tr><td>Dash speed</td><td class="num text-facility-100">{JINGLES.dash.speed} studs/s</td></tr>
+        <tr><td>Dash duration</td><td class="num">{JINGLES.dash.durationSec} s</td></tr>
+        <tr><td>Dash cooldown</td><td class="num">{JINGLES.dash.cooldownSec} s</td></tr>
+        <tr><td>Attack range</td><td class="num">{JINGLES.attack.rangeStuds} studs</td></tr>
+        <tr><td>Attack wind-up (the tell)</td><td class="num text-signal">{JINGLES.attack.windupSec} s</td></tr>
+        <tr><td>Attack cooldown</td><td class="num">{JINGLES.attack.cooldownSec} s</td></tr>
+        <tr><td>Hits to down a Scrapper</td><td class="num text-facility-100">{JINGLES.attack.hitsToDown}</td></tr>
+        <tr><td>Execution time</td><td class="num">{JINGLES.executeSec} s</td></tr>
+        <tr><td>Bloodlust interval</td><td class="num">{JINGLES.bloodlust.everySec} s</td></tr>
+        <tr><td>Bloodlust reveal</td><td class="num">{JINGLES.bloodlust.revealSec} s</td></tr>
+        <tr><td>Bloodlust speed multiplier</td><td class="num text-signal">×{JINGLES.bloodlust.speedMult}</td></tr>
+        <tr><td>Bloodlust cooldown</td><td class="num">{JINGLES.bloodlust.cooldownSec} s</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Abilities and counterplay: <a href="/guide/jingles/">the Jingles guide</a>.</p>
+
+  <h2 id="pod">The {POD.name}</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Value</th><th scope="col" class="num">Number</th></tr></thead>
+      <tbody>
+        <tr><td>Pod timer</td><td class="num text-facility-100">{POD.timerSec} s</td></tr>
+        <tr><td>Timer runs twice as fast when nobody is free</td><td class="num">{POD.doubleSpeedWhenAlone ? 'Yes' : 'No'}</td></tr>
+        <tr><td>Minimum time before the pod can kill</td><td class="num">{POD.floorSec} s</td></tr>
+        <tr><td>Rescue hold</td><td class="num">{POD.rescueHoldSec} s</td></tr>
+        <tr><td>Rescue range</td><td class="num">{POD.rescueRangeStuds} studs</td></tr>
+        <tr><td>Post-rescue shield</td><td class="num">{POD.rescueShieldSec} s</td></tr>
+        <tr><td>Struggle stun on the Hunter</td><td class="num">{POD.struggleStunSec} s</td></tr>
+        <tr><td>Self-escape chance</td><td class="num text-signal">{POD.selfEscapeChance}%</td></tr>
+        <tr><td>Self-escape penalty</td><td class="num">{POD.selfEscapePenaltySec} s</td></tr>
+        <tr><td>Anti-camp overload burnout</td><td class="num">{POD.overloadBurnoutSec} s</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="worm">The Worm</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Value</th><th scope="col" class="num">Number</th></tr></thead>
+      <tbody>
+        <tr><td>Maximum alive at once</td><td class="num text-facility-100">{WORM.maxAlive}</td></tr>
+        <tr><td>Delay after ringing the bell</td><td class="num">{WORM.bellSpawnDelaySec} s</td></tr>
+        <tr><td>Spawn distance from the bell</td><td class="num">{WORM.bellSpawnDistStuds} studs</td></tr>
+        <tr><td>Base spawn chance</td><td class="num">{WORM.baseChancePct}%</td></tr>
+        <tr><td>Base chance checked every</td><td class="num">{WORM.baseChanceEverySec} s</td></tr>
+        <tr><td>Grab damage</td><td class="num">{WORM.grabDamagePct}% health</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Triggers that multiply the base chance (×1.5 each, capped at ×2):</p>
+  <ul>{WORM.lures.map((l) => <li>{l}</li>)}</ul>
+
+  <h2 id="scrapper">Scrapper values</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Value</th><th scope="col" class="num">Number</th></tr></thead>
+      <tbody>
+        <tr><td>Hits to down a Scrapper</td><td class="num text-facility-100">{SCRAPPER.hitsToDown}</td></tr>
+        <tr><td>Revive hold</td><td class="num">{SCRAPPER.reviveHoldSec} s</td></tr>
+        <tr><td>Locker maximum hide</td><td class="num">{SCRAPPER.lockerMaxSec} s</td></tr>
+        <tr><td>Shove cooldown</td><td class="num">{SCRAPPER.shoveCooldownSec} s</td></tr>
+        <tr><td>Bell cooldown</td><td class="num">{SCRAPPER.bellCooldownSec} s</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="extraction">Extraction and progression</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Value</th><th scope="col">Number</th></tr></thead>
+      <tbody>
+        <tr><td>Exit room</td><td>{EXTRACTION.room}</td></tr>
+        <tr><td>Escape window</td><td>{EXTRACTION.windowSec} s</td></tr>
+        <tr><td>Currency earned</td><td>{PROGRESSION.currency}</td></tr>
+        <tr><td>Scrapper stats tracked</td><td>{PROGRESSION.scrapperStats.join(', ')}</td></tr>
+        <tr><td>End-of-round screens</td><td>{RESULTS.map((r) => `“${r.title}”`).join(', ')}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="rooms">Rooms on the map</h2>
+  <p>
+    {ROOMS.length} rooms as built in Studio: {ROOMS.join(', ')}. Photographed room by room in{' '}
+    <a href="/guide/map/">the map guide</a>.
+  </p>
+
+  <h2 id="controls">Controls</h2>
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead><tr><th scope="col">Key</th><th scope="col">Action</th></tr></thead>
+      <tbody>
+        {CONTROLS.map((c) => (
+          <tr><td class="text-facility-100">{c.key}</td><td>{c.action}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p>Mobile uses on-screen buttons: {MOBILE_BUTTONS.join(', ')}.</p>
+
+  <h2 id="cite">How to cite this page</h2>
+  <p>
+    Figures are read from the {GAME.name} config at build time, so they are current as of the
+    deploy that published this page. If you need a specific value confirmed for an article,
+    email <a href={`mailto:${SITE.press}`}>{SITE.press}</a> and we will verify it against the
+    live build.
+  </p>
+  <p>
+    Machine-readable: <a href="/llms.txt">/llms.txt</a> carries the same facts as plain text for
+    AI assistants. Screenshots are free to use — see the{' '}
+    <a href="/press/">press kit</a>.
+  </p>
+</GuideLayout>
