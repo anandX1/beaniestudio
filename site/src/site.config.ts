@@ -18,6 +18,28 @@ export const SITE = {
   press: 'press@beaniestudio.site',
 } as const;
 
+/**
+ * Licensing metadata for every ImageObject we publish (the screenshot gallery
+ * and the map page). Google Images uses these to render the "Licensable" badge
+ * and they are a documented Search Console requirement — the coverage report
+ * flagged 170 images missing copyrightNotice / license / creditText and 90
+ * missing acquireLicensePage.
+ *
+ * The terms themselves are the ones already published on /press/: press assets
+ * are free to use for coverage. This states that in machine-readable form, it
+ * does not invent a licence we have not granted.
+ */
+export const IMAGE_LICENSE = {
+  /** Shown alongside the image. Year is resolved at build time so it cannot rot. */
+  copyrightNotice: `© ${new Date().getFullYear()} ${SITE.name}`,
+  /** Who to credit when the image is reused. */
+  creditText: SITE.name,
+  /** Where the usage terms are stated. */
+  license: new URL('/press/', SITE.url).href,
+  /** Where a licence can be obtained — free for coverage, so the same page. */
+  acquireLicensePage: new URL('/press/', SITE.url).href,
+} as const;
+
 export const LINKS = {
   /** The playable game page — every PLAY button points here. */
   game: 'https://www.roblox.com/games/80261274887781/STATIC',

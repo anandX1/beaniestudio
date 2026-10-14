@@ -38,7 +38,7 @@
      mobile menu, sticky rails, lightbox chrome. It is deliberately not applied
      to ordinary content panels — blurring every surface is the generic look this
      site avoids, and a backdrop-filter on a large area is also real paint cost. — */
-  --color-glass: oklch(0.21 0.015 240 / 0.72);
+  --color-glass: oklch(0.19 0.014 240 / 0.9);
   --color-glass-line: oklch(1 0 0 / 0.09);
   /* A 1px inset highlight is what reads as "machined" rather than flat. */
   --edge-highlight: inset 0 1px 0 0 oklch(1 0 0 / 0.05);

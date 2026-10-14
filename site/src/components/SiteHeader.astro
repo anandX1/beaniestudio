@@ -1,22 +1,28 @@
 ---
 import { SITE, LINKS } from '../site.config';
 
+// Link targets use the CANONICAL trailing-slash form. Pointing at /guide, /faq, …
+// made Cloudflare 307-redirect every nav click to the slash version — wasted
+// round-trip on each navigation, and Google Search Console listed 13 URLs as
+// "Page with redirect" because of it.
 const nav = [
-  { href: '/guide', label: 'GUIDE' },
-  { href: '/guide/map', label: 'MAP' },
-  { href: '/guide/jingles', label: 'JINGLES' },
-  { href: '/screenshots', label: 'MEDIA' },
-  { href: '/blog', label: 'DEVLOG' },
-  { href: '/faq', label: 'FAQ' },
-  { href: '/press', label: 'PRESS' },
+  { href: '/guide/', label: 'GUIDE' },
+  { href: '/guide/map/', label: 'MAP' },
+  { href: '/guide/jingles/', label: 'JINGLES' },
+  { href: '/screenshots/', label: 'MEDIA' },
+  { href: '/blog/', label: 'DEVLOG' },
+  { href: '/faq/', label: 'FAQ' },
+  { href: '/press/', label: 'PRESS' },
 ];
 
-const current = Astro.url.pathname.replace(/\/$/, '') || '/';
+const norm = (p: string) => p.replace(/\/$/, '') || '/';
+const current = norm(Astro.url.pathname);
 
 function isActive(href: string): boolean {
-  if (href === '/') return current === '/';
-  if (href === '/guide') return current === '/guide' || (current.startsWith('/guide/') && !/^\/guide\/(jingles|map)/.test(current));
-  return current === href || current.startsWith(href + '/');
+  const h = norm(href);
+  if (h === '/') return current === '/';
+  if (h === '/guide') return current === '/guide' || (current.startsWith('/guide/') && !/^\/guide\/(jingles|map)/.test(current));
+  return current === h || current.startsWith(h + '/');
 }
 ---
 

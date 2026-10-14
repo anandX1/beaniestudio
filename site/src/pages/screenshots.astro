@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Shot from '../components/Shot.astro';
 import Lightbox from '../components/Lightbox.astro';
-import { SITE, LINKS } from '../site.config';
+import { SITE, LINKS, IMAGE_LICENSE } from '../site.config';
 import { SHOTS, shot, fullDims, type Shot as ShotT } from '../data/media';
 
 /** og:image is a raw screenshot here, not a 1200×630 card — state its real size. */
@@ -33,7 +33,7 @@ const galleryLd = {
     height: fullDims(s).h,
     creator: { '@id': `${SITE.url}/#org` },
     copyrightHolder: { '@id': `${SITE.url}/#org` },
-    acquireLicensePage: new URL('/press/', SITE.url).href,
+    ...IMAGE_LICENSE,
   })),
 };
 ---

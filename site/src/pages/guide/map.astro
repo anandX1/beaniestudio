@@ -3,7 +3,7 @@ import GuideLayout from '../../layouts/GuideLayout.astro';
 import ShotFigure from '../../components/ShotFigure.astro';
 import { ROOM_INFO } from '../../data/rooms';
 import { ROOMS, CRUSHERS, EXTRACTION, GAME } from '../../data/game';
-import { SITE } from '../../site.config';
+import { SITE, IMAGE_LICENSE } from '../../site.config';
 import { shot, shotsForRoom, fullDims } from '../../data/media';
 
 const extras = (r: { name: string; shots: string[] }) => [...new Set([...r.shots.slice(1), ...shotsForRoom(r.name).map((x) => x.id)])].filter((id) => id !== r.shots[0]);
@@ -28,6 +28,7 @@ const galleryLd = {
       description: shot(id).alt,
       creator: { '@id': `${SITE.url}/#org` },
       copyrightHolder: { '@id': `${SITE.url}/#org` },
+      ...IMAGE_LICENSE,
     }))
   ),
 };
