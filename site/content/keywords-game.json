@@ -1,0 +1,486 @@
+{
+  "track": "game",
+  "authoredAt": "2026-10-14",
+  "authoredFrom": "src/data/game.ts",
+  "note": "AUTHORED, NOT HARVESTED. Autocomplete cannot see a new brand: harvesting 'static roblox' returned 32 keywords and none were about this game (Google read 'static' as the ordinary word and Roblox's 'static faces' feature, and 'salvage hunters' as a TV show). Every intent below is derived by asking, for each mechanic in game.ts, what a player will want to know. This file is a COVERAGE MAP, not a keyword dump: it exists to guarantee that no player question is left unanswered, and entries with status 'missing' are the pages still to write.",
+  "howToUse": [
+    "status 'answered'  — a real page answers this query; verify the page actually does.",
+    "status 'partial'   — a page touches it but does not target the query; a section or a new page is owed.",
+    "status 'missing'   — nothing answers it. These are the only new pages worth writing.",
+    "status 'blocked'   — the answer would need a game fact that is not in game.ts. Fix the data first."
+  ],
+  "answeredByLegend": "Paths are site routes. Validated against the build.",
+  "entries": [
+    {
+      "intent": "What is STATIC?",
+      "query": "what is static roblox",
+      "sourceOfTruth": "GAME.name / GAME.fullName / GAME.genres",
+      "answeredBy": "/guide/",
+      "status": "answered"
+    },
+    {
+      "intent": "Is STATIC free?",
+      "query": "is static roblox free",
+      "sourceOfTruth": "GAME.price",
+      "answeredBy": "/faq/",
+      "status": "answered"
+    },
+    {
+      "intent": "What devices can run it?",
+      "query": "static roblox mobile",
+      "sourceOfTruth": "GAME.platforms",
+      "answeredBy": "/faq/",
+      "status": "answered"
+    },
+    {
+      "intent": "How many players per server?",
+      "query": "static roblox how many players",
+      "sourceOfTruth": "GAME.serverSize / GAME.scrappers / GAME.hunters",
+      "answeredBy": "/guide/numbers/",
+      "status": "answered"
+    },
+    {
+      "intent": "How long is a round?",
+      "query": "static roblox round length",
+      "sourceOfTruth": "GAME.roundLimitMin",
+      "answeredBy": "/guide/",
+      "status": "answered"
+    },
+    {
+      "intent": "Is there voice chat?",
+      "query": "static roblox voice chat",
+      "sourceOfTruth": "GAME.voiceChat",
+      "answeredBy": "/faq/",
+      "status": "answered"
+    },
+    {
+      "intent": "What age is it for?",
+      "query": "static roblox age rating",
+      "sourceOfTruth": "GAME.ageTarget",
+      "answeredBy": "/faq/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I play with friends?",
+      "query": "static roblox how to play with friends",
+      "sourceOfTruth": "GAME.serverSize / GAME.voiceChat / LINKS.discord",
+      "answeredBy": null,
+      "status": "missing"
+    },
+    {
+      "intent": "Are there codes?",
+      "query": "static roblox codes",
+      "sourceOfTruth": "no codes live yet",
+      "answeredBy": "/codes/",
+      "status": "answered"
+    },
+    {
+      "intent": "Can I make videos of it?",
+      "query": "static roblox creator program",
+      "sourceOfTruth": "press assets free for coverage",
+      "answeredBy": "/creators/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I contact the devs?",
+      "query": "beanie studios contact",
+      "sourceOfTruth": "SITE.contact / SITE.press / TEAM",
+      "answeredBy": "/about/",
+      "status": "answered"
+    },
+    {
+      "intent": "What do Scrappers do?",
+      "query": "static roblox scrapper role",
+      "sourceOfTruth": "SCRAPPER / CRUSHERS",
+      "answeredBy": "/guide/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I become the Hunter?",
+      "query": "static roblox how to be jingles",
+      "sourceOfTruth": "GAME.hunters / JINGLES",
+      "answeredBy": "/guide/jingles/",
+      "status": "partial"
+    },
+    {
+      "intent": "What is the win condition?",
+      "query": "how to win static roblox",
+      "sourceOfTruth": "CRUSHERS.totalKg / EXTRACTION",
+      "answeredBy": "/guide/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I win as Jingles?",
+      "query": "static roblox how to play as hunter",
+      "sourceOfTruth": "JINGLES / POD",
+      "answeredBy": "/guide/jingles/",
+      "status": "answered"
+    },
+    {
+      "intent": "What do the end screens mean?",
+      "query": "static roblox endings",
+      "sourceOfTruth": "RESULTS",
+      "answeredBy": "/guide/numbers/",
+      "status": "partial"
+    },
+    {
+      "intent": "What currency do I earn?",
+      "query": "static roblox fragments",
+      "sourceOfTruth": "PROGRESSION.currency",
+      "answeredBy": "/guide/numbers/",
+      "status": "partial"
+    },
+    {
+      "intent": "Is there XP or levelling?",
+      "query": "static roblox progression",
+      "sourceOfTruth": "NOT IN game.ts — homepage claims XP",
+      "answeredBy": null,
+      "status": "blocked"
+    },
+    {
+      "intent": "What stats are tracked?",
+      "query": "static roblox stats tracked",
+      "sourceOfTruth": "PROGRESSION.scrapperStats",
+      "answeredBy": "/guide/numbers/",
+      "status": "answered"
+    },
+    {
+      "intent": "Every scrap item and its weight?",
+      "query": "static roblox scrap list",
+      "sourceOfTruth": "SCRAP",
+      "answeredBy": "/guide/scrap/",
+      "status": "answered"
+    },
+    {
+      "intent": "How much scrap is the total quota?",
+      "query": "static roblox crusher quota",
+      "sourceOfTruth": "CRUSHERS.totalKg / quotasKg",
+      "answeredBy": "/guide/scrap/",
+      "status": "answered"
+    },
+    {
+      "intent": "How many items can I carry?",
+      "query": "static roblox backpack slots",
+      "sourceOfTruth": "SCRAPPER.backpackSlots",
+      "answeredBy": "/guide/scrap/",
+      "status": "answered"
+    },
+    {
+      "intent": "Which scrap is worth the most?",
+      "query": "static roblox best scrap",
+      "sourceOfTruth": "SCRAP kg / RARITY.mult",
+      "answeredBy": "/guide/scrap/",
+      "status": "answered"
+    },
+    {
+      "intent": "Do heavy items slow me down?",
+      "query": "static roblox heavy scrap slowdown",
+      "sourceOfTruth": "SCRAPPER.heavyCarrySlowMaxPct",
+      "answeredBy": "/guide/scrap/",
+      "status": "answered"
+    },
+    {
+      "intent": "What are rarity multipliers?",
+      "query": "static roblox charged scrap",
+      "sourceOfTruth": "RARITY",
+      "answeredBy": "/guide/scrap/",
+      "status": "answered"
+    },
+    {
+      "intent": "Does scrap respawn?",
+      "query": "static roblox scrap respawn",
+      "sourceOfTruth": "scrap does not respawn mid-round",
+      "answeredBy": "/guide/scrap/",
+      "status": "answered"
+    },
+    {
+      "intent": "Where do I find scrap?",
+      "query": "static roblox where to find scrap",
+      "sourceOfTruth": "ROOMS / spawnPct",
+      "answeredBy": "/guide/scrap/",
+      "status": "partial"
+    },
+    {
+      "intent": "How many crushers are there?",
+      "query": "static roblox crushers",
+      "sourceOfTruth": "CRUSHERS.count",
+      "answeredBy": "/guide/crushers/",
+      "status": "answered"
+    },
+    {
+      "intent": "How many minigames per console?",
+      "query": "static roblox minigames",
+      "sourceOfTruth": "CRUSHERS.minigamesPerConsole",
+      "answeredBy": "/guide/crushers/",
+      "status": "answered"
+    },
+    {
+      "intent": "List every console minigame?",
+      "query": "static roblox all minigames list",
+      "sourceOfTruth": "MINIGAMES",
+      "answeredBy": "/guide/crushers/",
+      "status": "answered"
+    },
+    {
+      "intent": "Do I need a partner for a console?",
+      "query": "static roblox two players console",
+      "sourceOfTruth": "two players per console",
+      "answeredBy": "/guide/crushers/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I escape?",
+      "query": "static roblox how to escape",
+      "sourceOfTruth": "EXTRACTION.windowSec / EXTRACTION.room",
+      "answeredBy": "/guide/crushers/",
+      "status": "answered"
+    },
+    {
+      "intent": "Where is the exit?",
+      "query": "static roblox intake chute",
+      "sourceOfTruth": "EXTRACTION.room",
+      "answeredBy": "/guide/map/",
+      "status": "answered"
+    },
+    {
+      "intent": "How fast is Jingles?",
+      "query": "static roblox jingles speed",
+      "sourceOfTruth": "MOVEMENT.hunter / MOVEMENT.scrapperSprint",
+      "answeredBy": "/guide/jingles/",
+      "status": "answered"
+    },
+    {
+      "intent": "What does Bloodlust do?",
+      "query": "static roblox bloodlust",
+      "sourceOfTruth": "JINGLES.bloodlust",
+      "answeredBy": "/guide/jingles/",
+      "status": "answered"
+    },
+    {
+      "intent": "What is Jingles' dash?",
+      "query": "static roblox jingles dash",
+      "sourceOfTruth": "JINGLES.dash",
+      "answeredBy": "/guide/jingles/",
+      "status": "answered"
+    },
+    {
+      "intent": "How many hits to go down?",
+      "query": "static roblox how many hits",
+      "sourceOfTruth": "JINGLES.attack.hitsToDown / SCRAPPER.hitsToDown",
+      "answeredBy": "/guide/jingles/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I dodge the attack?",
+      "query": "static roblox jingles tell",
+      "sourceOfTruth": "JINGLES.attack.windupSec",
+      "answeredBy": "/guide/jingles/",
+      "status": "answered"
+    },
+    {
+      "intent": "How does Jingles find me?",
+      "query": "static roblox how does jingles find you",
+      "sourceOfTruth": "JINGLES.bloodlust.revealSec",
+      "answeredBy": "/guide/jingles/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I counter Jingles?",
+      "query": "static roblox how to survive jingles",
+      "sourceOfTruth": "JINGLES / POD",
+      "answeredBy": "/guide/jingles/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I get out of a pod?",
+      "query": "static roblox how to escape pod",
+      "sourceOfTruth": "POD.selfEscapeChance / POD.selfEscapePenaltySec",
+      "answeredBy": "/guide/capture-and-rescue/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I rescue a teammate?",
+      "query": "static roblox how to rescue",
+      "sourceOfTruth": "POD.rescueHoldSec / POD.rescueRangeStuds",
+      "answeredBy": "/guide/capture-and-rescue/",
+      "status": "answered"
+    },
+    {
+      "intent": "How long is the pod timer?",
+      "query": "static roblox pod timer",
+      "sourceOfTruth": "POD.timerSec / POD.floorSec",
+      "answeredBy": "/guide/capture-and-rescue/",
+      "status": "answered"
+    },
+    {
+      "intent": "What happens if I am alone?",
+      "query": "static roblox pod alone",
+      "sourceOfTruth": "POD.doubleSpeedWhenAlone",
+      "answeredBy": "/guide/capture-and-rescue/",
+      "status": "answered"
+    },
+    {
+      "intent": "Does camping the pod help the Hunter?",
+      "query": "static roblox pod camping",
+      "sourceOfTruth": "POD.overloadBurnoutSec",
+      "answeredBy": "/guide/capture-and-rescue/",
+      "status": "answered"
+    },
+    {
+      "intent": "What is the Worm?",
+      "query": "static roblox worm",
+      "sourceOfTruth": "WORM",
+      "answeredBy": "/guide/worm/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I stop the Worm?",
+      "query": "static roblox how to kill worm",
+      "sourceOfTruth": "flashlight repels it",
+      "answeredBy": "/guide/worm/",
+      "status": "answered"
+    },
+    {
+      "intent": "Does ringing the bell always summon a Worm?",
+      "query": "static roblox bell worm",
+      "sourceOfTruth": "WORM.bellSpawnDelaySec / WORM.bellSpawnDistStuds",
+      "answeredBy": "/guide/worm/",
+      "status": "answered"
+    },
+    {
+      "intent": "Does the Worm attack the Hunter?",
+      "query": "static roblox worm hunter",
+      "sourceOfTruth": "never targets the Hunter",
+      "answeredBy": "/guide/worm/",
+      "status": "answered"
+    },
+    {
+      "intent": "What triggers a Worm?",
+      "query": "static roblox worm spawn chance",
+      "sourceOfTruth": "WORM.baseChancePct / WORM.baseChanceEverySec / WORM.lures",
+      "answeredBy": "/guide/worm/",
+      "status": "answered"
+    },
+    {
+      "intent": "How much damage does the Worm do?",
+      "query": "static roblox worm damage",
+      "sourceOfTruth": "WORM.grabDamagePct",
+      "answeredBy": "/guide/worm/",
+      "status": "answered"
+    },
+    {
+      "intent": "What rooms are on the map?",
+      "query": "static roblox map",
+      "sourceOfTruth": "ROOMS / ROOM_INFO",
+      "answeredBy": "/guide/map/",
+      "status": "answered"
+    },
+    {
+      "intent": "Where are the best hiding spots?",
+      "query": "static roblox hiding spots",
+      "sourceOfTruth": "SCRAPPER.lockerMaxSec",
+      "answeredBy": null,
+      "status": "missing"
+    },
+    {
+      "intent": "Which rooms are dangerous?",
+      "query": "static roblox dangerous rooms",
+      "sourceOfTruth": "derived from screenshots (light, sightlines)",
+      "answeredBy": null,
+      "status": "missing"
+    },
+    {
+      "intent": "Where is the reactor / medbay / security?",
+      "query": "static roblox reactor location",
+      "sourceOfTruth": "ROOMS / ROOM_INFO",
+      "answeredBy": "/guide/map/",
+      "status": "answered"
+    },
+    {
+      "intent": "What are the controls?",
+      "query": "static roblox controls",
+      "sourceOfTruth": "CONTROLS",
+      "answeredBy": "/guide/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I play on mobile?",
+      "query": "static roblox mobile controls",
+      "sourceOfTruth": "MOBILE_BUTTONS",
+      "answeredBy": "/guide/",
+      "status": "partial"
+    },
+    {
+      "intent": "Can I sprint forever?",
+      "query": "static roblox sprint",
+      "sourceOfTruth": "MOVEMENT.scrapperSprint",
+      "answeredBy": "/guide/numbers/",
+      "status": "answered"
+    },
+    {
+      "intent": "How do I hide in a locker?",
+      "query": "static roblox locker",
+      "sourceOfTruth": "SCRAPPER.lockerMaxSec",
+      "answeredBy": "/guide/",
+      "status": "partial"
+    },
+    {
+      "intent": "What content is planned next?",
+      "query": "static roblox update roadmap",
+      "sourceOfTruth": "ROADMAP (PLANNED only)",
+      "answeredBy": "/",
+      "status": "partial"
+    },
+    {
+      "intent": "Is there a wiki?",
+      "query": "static roblox wiki",
+      "sourceOfTruth": "WIKI-KIT.md exists",
+      "answeredBy": null,
+      "status": "missing"
+    },
+    {
+      "intent": "Where is the community?",
+      "query": "static roblox discord",
+      "sourceOfTruth": "LINKS.discord / CHANNELS",
+      "answeredBy": "/about/",
+      "status": "answered"
+    },
+    {
+      "intent": "What videos exist?",
+      "query": "static roblox gameplay video",
+      "sourceOfTruth": "VIDEOS",
+      "answeredBy": "/videos/",
+      "status": "answered"
+    },
+    {
+      "intent": "Show me screenshots",
+      "query": "static roblox screenshots",
+      "sourceOfTruth": "SHOTS",
+      "answeredBy": "/screenshots/",
+      "status": "answered"
+    },
+    {
+      "intent": "Press / media assets",
+      "query": "static roblox press kit",
+      "sourceOfTruth": "press assets",
+      "answeredBy": "/press/",
+      "status": "answered"
+    }
+  ],
+  "gapSummary": {
+    "totalIntents": 65,
+    "answered": 53,
+    "partial": 7,
+    "missing": 4,
+    "blocked": 1,
+    "missingPages": [
+      "/guide/with-friends/ — how to play STATIC with friends (party, voice chat, server size)",
+      "/guide/hiding/ — hiding spots and lockers (SCRAPPER.lockerMaxSec is unused on the site today)",
+      "/guide/danger/ — which rooms are dangerous (light level, sightlines, escape routes)",
+      "/wiki/ — a community/wiki hub page (WIKI-KIT.md is written but unpublished)"
+    ],
+    "blockedItems": [
+      "The homepage claims every round pays 'XP'. XP is NOT in game.ts. Rule 9 says if it is not in the data the site does not claim it — either add it to game.ts or remove the claim."
+    ]
+  }
+}

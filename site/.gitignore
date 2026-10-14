@@ -10,5 +10,6 @@ dist/
 content/*
 !content/keywords.json
 !content/social-state.json
+!content/keywords-game.json
 tools/bin/
 reports/
