@@ -124,18 +124,42 @@ const videoGameLd = {
     (function () {
       if (!('IntersectionObserver' in window)) return;
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
       var io = null;
       var pending = [];
+
+      /** Reveal every armed element that has reached the viewport.
+       *  Every rect is read BEFORE any class is written. Interleaving the two made
+       *  each write dirty the element's style, so the next read forced a full style
+       *  recalculation of this ~19,000px document, once per element — Lighthouse
+       *  attributed 478ms of forced reflow to the unbatched version of this loop. */
+      function sweep() {
+        var stuck = document.querySelectorAll('.beat:not(.in)');
+        if (!stuck.length) return;
+        var limit = (window.innerHeight || document.documentElement.clientHeight) * 1.1;
+        var reveal = [];
+        for (var i = 0; i < stuck.length; i++) {
+          if (stuck[i].getBoundingClientRect().top < limit) reveal.push(stuck[i]);
+        }
+        for (var j = 0; j < reveal.length; j++) reveal[j].classList.add('in');
+      }
+
       function ensureIo() {
         if (io) return;
-        var obs = new IntersectionObserver(function (entries) {
-          for (var i = 0; i < entries.length; i++) if (entries[i].isIntersecting) entries[i].target.classList.add('in');
-        }, { threshold: 0.12 });
-        io = obs;
+        // threshold 0 + a bottom inset reveals as soon as an element has crossed
+        // into view. The previous 0.12 threshold meant a 40px heading needed 5px
+        // visible while an 800px card needed 96px — inconsistent, and either could
+        // be skipped outright by a fast flick (see the sweep below).
+        io = new IntersectionObserver(function (entries) {
+          for (var i = 0; i < entries.length; i++) {
+            if (entries[i].isIntersecting) entries[i].target.classList.add('in');
+          }
+        }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
         document.documentElement.classList.add('js-beats');
         for (var k = 0; k < pending.length; k++) io.observe(pending[k]);
         pending.length = 0;
       }
+
       function arm() {
         var els = document.querySelectorAll('.beat:not([data-armed])');
         for (var j = 0; j < els.length; j++) {
@@ -144,17 +168,25 @@ const videoGameLd = {
         }
         ensureIo();
       }
+
       arm();
       document.addEventListener('DOMContentLoaded', arm);
-      setTimeout(function () {
-        arm();
-        if (!io) { document.documentElement.classList.remove('js-beats'); return; }
-        var vh = window.innerHeight || document.documentElement.clientHeight;
-        var stuck = document.querySelectorAll('.beat:not(.in)');
-        for (var j = 0; j < stuck.length; j++) {
-          if (stuck[j].getBoundingClientRect().top < vh * 1.1) stuck[j].classList.add('in');
-        }
-      }, 5000);
+
+      // Safety net. An IntersectionObserver is sampled once per frame, so a hard
+      // flick can carry an element from below the viewport to above it without it
+      // ever being reported as intersecting: measured 0–5 of 41 headings left
+      // permanently invisible, varying run to run. A trailing sweep after the
+      // scroll settles makes that impossible, at the cost of one batched rect pass.
+      // (This is a correctness fallback, not a scroll-driven animation.)
+      var sweepTimer = 0;
+      window.addEventListener('scroll', function () {
+        if (sweepTimer) clearTimeout(sweepTimer);
+        sweepTimer = setTimeout(sweep, 120);
+      }, { passive: true });
+
+      // Above-fold copy must never wait for a scroll event to appear.
+      setTimeout(function () { arm(); sweep(); }, 600);
+      setTimeout(sweep, 2500);
     })();
   </script>
 

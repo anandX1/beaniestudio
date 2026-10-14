@@ -87,19 +87,35 @@
           update();
         }
 
+        /** Reveal every armed element that has reached the viewport.
+         *  Reads are batched ahead of writes on purpose: interleaving
+         *  getBoundingClientRect with classList.add dirties style on every
+         *  iteration and forces a full recalculation per element. */
+        function sweep() {
+          var stuck = document.querySelectorAll('.rise:not(.in), .reveal:not(.in)');
+          if (!stuck.length) return;
+          var limit = (window.innerHeight || d.clientHeight) * 1.2;
+          var reveal = [];
+          for (var i = 0; i < stuck.length; i++) {
+            if (stuck[i].getBoundingClientRect().top < limit) reveal.push(stuck[i]);
+          }
+          for (var j = 0; j < reveal.length; j++) reveal[j].classList.add('in');
+        }
+
         function boot() {
           arm();
           armScroll();
-          // Failsafe: if anything above threw, or an observer never fired,
-          // reveal whatever is still hidden rather than leaving holes.
-          window.setTimeout(function () {
-            var stuck = document.querySelectorAll('.rise:not(.in), .reveal:not(.in)');
-            for (var i = 0; i < stuck.length; i++) {
-              if (stuck[i].getBoundingClientRect().top < (window.innerHeight || d.clientHeight) * 1.2) {
-                stuck[i].classList.add('in');
-              }
-            }
-          }, 4000);
+          // Safety net: an IntersectionObserver is sampled once per frame, so a hard
+          // flick can carry an element past the viewport without it ever being
+          // reported as intersecting, leaving it stranded at opacity 0. A trailing
+          // sweep after the scroll settles makes that impossible.
+          var sweepTimer = 0;
+          window.addEventListener('scroll', function () {
+            if (sweepTimer) clearTimeout(sweepTimer);
+            sweepTimer = setTimeout(sweep, 120);
+          }, { passive: true });
+          window.setTimeout(sweep, 2500);
+          window.setTimeout(sweep, 4000);
         }
 
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
