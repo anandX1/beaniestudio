@@ -6,11 +6,20 @@
  *   node scripts/og-cards.mjs
  *
  * Needs Playwright with Chromium (`npm i -g playwright && npx playwright install chromium`).
- * Output is committed (public/og/*.png + public/press/static-key-art.png), so
+ * Output is committed (public/og/*.jpg + public/press/static-key-art.png), so
  * this only runs when card copy changes.
+ *
+ * og/ cards ship as JPEG: Chromium's PNG screenshot of one card is ~520 KB, and
+ * all 8 came to 4.09 MB. They are fetched by crawlers and chat clients (never by
+ * browsers), but half a megabyte per card is pure waste. Re-encoded through
+ * sharp at q88 they land at ~76 KB each — 86% smaller. Verified at 1:1 on the
+ * worst case for JPEG (large, hard-edged type over a flat dark ground): no
+ * visible ringing. The press key art stays PNG on purpose — it is a downloadable
+ * asset for journalists, not a social card.
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import sharp from 'sharp';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -28,15 +37,15 @@ function loadPlaywright() {
 }
 
 const CARDS = [
-  { file: 'og/home.png', kicker: 'FREE ON ROBLOX · PC + MOBILE', title: 'STATIC', sub: 'Co-op horror. One of you is the Hunter.', foot: '4–6 SCRAPPERS VS 1 HUNTER · 400 KG TO CRUSH' },
+  { file: 'og/home.jpg', kicker: 'FREE ON ROBLOX · PC + MOBILE', title: 'STATIC', sub: 'Co-op horror. One of you is the Hunter.', foot: '4–6 SCRAPPERS VS 1 HUNTER · 400 KG TO CRUSH' },
   { file: 'press/static-key-art.png', kicker: 'BEANIE STUDIOS', title: 'STATIC', sub: 'Salvage vs Hunter', foot: 'FREE ON ROBLOX · PC + MOBILE' },
-  { file: 'og/guide.png', kicker: 'OFFICIAL GUIDE', title: 'How to play', sub: 'Roles, controls, crushers and survival tips.', foot: 'STATIC · ROBLOX' },
-  { file: 'og/jingles.png', kicker: 'OFFICIAL GUIDE · THE HUNTER', title: 'Jingles', sub: 'Speed, Dash, Bloodlust, and how to survive it.', foot: 'STATIC · ROBLOX' },
-  { file: 'og/faq.png', kicker: 'FAQ', title: 'Questions', sub: 'Price, devices, players, voice chat, codes.', foot: 'STATIC · ROBLOX' },
-  { file: 'og/press.png', kicker: 'PRESS KIT', title: 'Cover STATIC', sub: 'Fact sheet, descriptions, art and contact.', foot: 'BEANIE STUDIOS' },
-  { file: 'og/play.png', kicker: 'FREE · PC + MOBILE', title: 'Play STATIC', sub: 'Open it on Roblox, bring a squad.', foot: 'STATIC · ROBLOX' },
-  { file: 'og/creators.png', kicker: 'FOR CREATORS', title: 'Film STATIC', sub: 'Free to stream and monetize. Art included.', foot: 'BEANIE STUDIOS' },
-  { file: 'og/blog.png', kicker: 'DEVLOG', title: 'From the team', sub: 'Update notes and design decisions.', foot: 'STATIC · BEANIE STUDIOS' },
+  { file: 'og/guide.jpg', kicker: 'OFFICIAL GUIDE', title: 'How to play', sub: 'Roles, controls, crushers and survival tips.', foot: 'STATIC · ROBLOX' },
+  { file: 'og/jingles.jpg', kicker: 'OFFICIAL GUIDE · THE HUNTER', title: 'Jingles', sub: 'Speed, Dash, Bloodlust, and how to survive it.', foot: 'STATIC · ROBLOX' },
+  { file: 'og/faq.jpg', kicker: 'FAQ', title: 'Questions', sub: 'Price, devices, players, voice chat, codes.', foot: 'STATIC · ROBLOX' },
+  { file: 'og/press.jpg', kicker: 'PRESS KIT', title: 'Cover STATIC', sub: 'Fact sheet, descriptions, art and contact.', foot: 'BEANIE STUDIOS' },
+  { file: 'og/play.jpg', kicker: 'FREE · PC + MOBILE', title: 'Play STATIC', sub: 'Open it on Roblox, bring a squad.', foot: 'STATIC · ROBLOX' },
+  { file: 'og/creators.jpg', kicker: 'FOR CREATORS', title: 'Film STATIC', sub: 'Free to stream and monetize. Art included.', foot: 'BEANIE STUDIOS' },
+  { file: 'og/blog.jpg', kicker: 'DEVLOG', title: 'From the team', sub: 'Update notes and design decisions.', foot: 'STATIC · BEANIE STUDIOS' },
 ];
 
 const font = (f) => pathToFileURL(path.join(PUB, 'fonts', f)).href;
@@ -85,14 +94,21 @@ const { chromium } = loadPlaywright();
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
 for (const c of CARDS) {
-  const tmp = path.join(here, `.og-${path.basename(c.file, '.png')}.html`);
+  const ext = path.extname(c.file);
+  const tmp = path.join(here, `.og-${path.basename(c.file, ext)}.html`);
   fs.writeFileSync(tmp, html(c));
   await page.goto(pathToFileURL(tmp).href);
   await page.evaluate(() => document.fonts.ready);
   const out = path.join(PUB, c.file);
   fs.mkdirSync(path.dirname(out), { recursive: true });
-  await page.screenshot({ path: out });
+  if (ext === '.jpg') {
+    // Let Chromium rasterise, then re-encode through sharp (see header comment).
+    const png = await page.screenshot();
+    await sharp(png).jpeg({ quality: 88, mozjpeg: true }).toFile(out);
+  } else {
+    await page.screenshot({ path: out });
+  }
   fs.rmSync(tmp);
-  console.log('✓', c.file);
+  console.log('✓', c.file, `${Math.round(fs.statSync(out).size / 1024)}KB`);
 }
 await browser.close();

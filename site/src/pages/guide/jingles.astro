@@ -1,4 +1,4 @@
----
+﻿---
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import ShotFigure from '../../components/ShotFigure.astro';
 import { JINGLES, MOVEMENT, POD, SCRAPPER, EXTRACTION } from '../../data/game';
@@ -10,19 +10,19 @@ const stats = [
   ['Attack range', `${JINGLES.attack.rangeStuds} studs`, `${JINGLES.attack.windupSec} s red telegraph, ${JINGLES.attack.cooldownSec} s cooldown`],
   ['Hits to down', `${JINGLES.attack.hitsToDown}`, 'Hit 1 halves health, hit 2 downs'],
   ['Finish a downed Scrapper', `${JINGLES.executeSec} s`, 'Or carry them to a pod instead'],
-  ['Bloodlust', `every ${JINGLES.bloodlust.everySec} s`, `Reveals all Scrappers + ${JINGLES.bloodlust.speedMult}× speed for ${JINGLES.bloodlust.revealSec} s`],
+  ['Bloodlust', `every ${JINGLES.bloodlust.everySec} s`, `Reveals all Scrappers + ${JINGLES.bloodlust.speedMult}Ã— speed for ${JINGLES.bloodlust.revealSec} s`],
 ];
 ---
 
 <GuideLayout
-  title="Jingles (STATIC Hunter) — Abilities, Stats & Counters"
+  title="Jingles (STATIC Hunter) â€” Abilities, Stats & Counters"
   description="Everything about Jingles, the Hunter in STATIC on Roblox: speed, Dash, Bloodlust, two-hit attack, carrying and pods, plus how to survive it and how to play it."
   path="/guide/jingles/"
   h1="Jingles: the Hunter in STATIC"
-  kicker="Official guide · The Hunter"
+  kicker="Official guide Â· The Hunter"
   crumb="Jingles"
   updated="2026-10-08"
-  ogImage="/og/jingles.png"
+  ogImage="/og/jingles.jpg"
   ogImageAlt="Jingles, the clockwork jester Hunter from STATIC"
 >
   <p class="text-lg">
@@ -67,7 +67,7 @@ const stats = [
   <h3>Bloodlust</h3>
   <p>
     Every {JINGLES.bloodlust.everySec} seconds, Bloodlust triggers: Jingles sees every Scrapper's
-    position for a moment and gets a {JINGLES.bloodlust.speedMult}× speed burst for
+    position for a moment and gets a {JINGLES.bloodlust.speedMult}Ã— speed burst for
     {JINGLES.bloodlust.revealSec} seconds. Scrappers dragging heavy scrap together can set it off
     too.
   </p>

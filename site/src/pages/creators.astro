@@ -1,4 +1,4 @@
----
+﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, LINKS } from '../site.config';
 import { JINGLES, POD, WORM, EXTRACTION } from '../data/game';
@@ -31,10 +31,10 @@ const faqs: [string, string][] = [
 ---
 
 <BaseLayout
-  title="STATIC for Creators — Stream and Make Videos"
+  title="STATIC for Creators â€” Stream and Make Videos"
   description="Make videos or stream STATIC on Roblox: free to monetize, ready-made art in the press kit, and the moments that make the best clips."
   path="/creators"
-  ogImage="/og/creators.png"
+  ogImage="/og/creators.jpg"
   breadcrumb={[{ name: 'Home', path: '/' }, { name: 'Creators', path: '/creators' }]}
   jsonLd={[
     {
@@ -58,8 +58,8 @@ const faqs: [string, string][] = [
       else. You're free to stream, upload and monetize it. Here's what makes the best content.
     </p>
     <div class="mt-8 flex flex-wrap gap-4">
-      <a href="/press/" class="btn-primary">Press kit &amp; art <span aria-hidden="true">→</span></a>
-      <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-secondary">Talk to the team <span aria-hidden="true">→</span></a>
+      <a href="/press/" class="btn-primary">Press kit &amp; art <span aria-hidden="true">â†’</span></a>
+      <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-secondary">Talk to the team <span aria-hidden="true">â†’</span></a>
     </div>
 
     <div class="mt-16 grid gap-5 sm:grid-cols-2">

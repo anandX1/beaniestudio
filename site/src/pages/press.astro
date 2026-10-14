@@ -1,4 +1,4 @@
----
+﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, LINKS } from '../site.config';
 import { GAME, CRUSHERS, MINIGAMES, SCRAP, JINGLES, POD, TEAM, COMMUNITY, EXTRACTION } from '../data/game';
@@ -11,12 +11,12 @@ const pressShots = SHOTS.filter((s) => s.press);
 
 const facts: [string, string][] = [
   ['Title', `${GAME.name} (also: ${GAME.fullName})`],
-  ['Developer', `${SITE.name} — independent, ${TEAM.length} people`],
-  ['Platform', `Roblox — ${GAME.platforms.join(' and ')}`],
+  ['Developer', `${SITE.name} â€” independent, ${TEAM.length} people`],
+  ['Platform', `Roblox â€” ${GAME.platforms.join(' and ')}`],
   ['Release', `Public beta, ${GAME.launchLabel}`],
   ['In development since', GAME.devStarted],
   ['Price', GAME.price],
-  ['Players', `Up to ${GAME.serverSize}: ${GAME.scrappers.min}–${GAME.scrappers.max} Scrappers vs ${GAME.hunters} Hunter`],
+  ['Players', `Up to ${GAME.serverSize}: ${GAME.scrappers.min}â€“${GAME.scrappers.max} Scrappers vs ${GAME.hunters} Hunter`],
   ['Round length', `Up to ${GAME.roundLimitMin} minutes`],
   ['Genre', 'Co-op asymmetrical horror'],
   ['Audience', `${GAME.ageTarget}`],
@@ -31,20 +31,20 @@ const longDesc = [
 ];
 
 const assets = [
-  { file: '/press/jingles-render.png', preview: '/img/jingles-480.webp', w: 279, h: 480, label: 'Jingles render', meta: 'PNG, transparent, 853×1469' },
-  { file: '/press/static-key-art.png', preview: '/img/press-key-art.webp', w: 480, h: 252, label: 'STATIC key art card', meta: 'PNG, 1200×630' },
-  { file: '/press/beanie-studios-logo.png', preview: '/img/beanie-studios-logo.webp', w: 600, h: 422, label: 'Beanie Studios logo', meta: 'PNG, 1496×1051' },
-  { file: '/press/beanie-studios-icon.png', preview: '/img/press-icon.webp', w: 320, h: 320, label: 'Beanie Studios icon', meta: 'PNG, 703×703' },
+  { file: '/press/jingles-render.png', preview: '/img/jingles-480.webp', w: 279, h: 480, label: 'Jingles render', meta: 'PNG, transparent, 853Ã—1469' },
+  { file: '/press/static-key-art.png', preview: '/img/press-key-art.webp', w: 480, h: 252, label: 'STATIC key art card', meta: 'PNG, 1200Ã—630' },
+  { file: '/press/beanie-studios-logo.png', preview: '/img/beanie-studios-logo.webp', w: 600, h: 422, label: 'Beanie Studios logo', meta: 'PNG, 1496Ã—1051' },
+  { file: '/press/beanie-studios-icon.png', preview: '/img/press-icon.webp', w: 320, h: 320, label: 'Beanie Studios icon', meta: 'PNG, 703Ã—703' },
 ];
 
 const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
 ---
 
 <BaseLayout
-  title="STATIC Press Kit — Facts, Assets and Contact"
+  title="STATIC Press Kit â€” Facts, Assets and Contact"
   description="Press kit for STATIC, the free co-op horror game on Roblox by Beanie Studios: fact sheet, descriptions, downloadable art, videos, team and press contact."
   path="/press"
-  ogImage="/og/press.png"
+  ogImage="/og/press.jpg"
   breadcrumb={[{ name: 'Home', path: '/' }, { name: 'Press kit', path: '/press' }]}
 >
   <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
@@ -57,7 +57,7 @@ const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
       to quote and all assets are free to use for coverage. No need to ask.
     </p>
     <div class="mt-8 flex flex-wrap gap-4">
-      <a href="/press/static-press-kit.zip" download class="btn-primary">Download everything (.zip) <span aria-hidden="true">↓</span></a>
+      <a href="/press/static-press-kit.zip" download class="btn-primary">Download everything (.zip) <span aria-hidden="true">â†“</span></a>
       <a href={`mailto:${SITE.press}`} class="btn-secondary">{SITE.press}</a>
     </div>
 
@@ -104,7 +104,7 @@ const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
           <div class="shot-frame aspect-[16/10]">
             <Shot id={s.id} lightbox="press" sizes="(min-width: 1024px) 280px, (min-width: 640px) 50vw, 100vw" imgClass="h-full w-full object-cover" />
           </div>
-          <a href={pressJpg(s.id)} download class="mt-1 flex min-h-11 items-center font-mono text-xs text-signal hover:text-signal-dim">static-{s.id}.jpg ↓</a>
+          <a href={pressJpg(s.id)} download class="mt-1 flex min-h-11 items-center font-mono text-xs text-signal hover:text-signal-dim">static-{s.id}.jpg â†“</a>
         </li>
       ))}
     </ul>
@@ -118,7 +118,7 @@ const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
           </div>
           <p class="mt-4 font-display text-sm font-bold uppercase tracking-wide">{a.label}</p>
           <p class="mt-1 font-mono text-xs text-facility-500">{a.meta}</p>
-          <a href={a.file} download class="mt-2 flex min-h-11 items-center font-mono text-sm text-signal hover:text-signal-dim">Download <span aria-hidden="true">↓</span></a>
+          <a href={a.file} download class="mt-2 flex min-h-11 items-center font-mono text-sm text-signal hover:text-signal-dim">Download <span aria-hidden="true">â†“</span></a>
         </li>
       ))}
     </ul>
@@ -128,7 +128,7 @@ const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
       {pressVideos.map((v) => (
         <li class="flex flex-wrap items-baseline justify-between gap-3 py-3">
           <a href={watchUrl(v.id)} rel="noopener" target="_blank" class="text-facility-100 hover:text-signal">{v.title}</a>
-          <span class="font-mono text-xs text-facility-500">{v.tag} · {v.date}</span>
+          <span class="font-mono text-xs text-facility-500">{v.tag} Â· {v.date}</span>
         </li>
       ))}
     </ul>
@@ -143,7 +143,7 @@ const pressVideos = VIDEOS.filter((v) => v.tag !== 'COMMUNITY').slice(0, 5);
               <p class="mt-1 text-sm text-facility-300">{m.role}</p>
               <p class="mt-1 font-mono text-xs uppercase tracking-widest text-signal-dim">{m.title}</p>
               <a href={`mailto:${m.email}`} class="mt-2 inline-block font-mono text-sm text-facility-100 hover:text-signal">{m.email}</a>
-              <p class="mt-1 font-mono text-xs text-facility-500">ROBLOX {m.roblox} · DISCORD {m.discord}</p>
+              <p class="mt-1 font-mono text-xs text-facility-500">ROBLOX {m.roblox} Â· DISCORD {m.discord}</p>
             </li>
           ))}
         </ul>

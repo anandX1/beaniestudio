@@ -1,4 +1,4 @@
----
+﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, LINKS } from '../site.config';
 import { GAME, JINGLES, CRUSHERS, POD, EXTRACTION, MOVEMENT, TEAM } from '../data/game';
@@ -90,10 +90,10 @@ const faqLd = {
 ---
 
 <BaseLayout
-  title="STATIC FAQ — Price, Devices, Players, Jingles"
+  title="STATIC FAQ â€” Price, Devices, Players, Jingles"
   description="Answers about STATIC on Roblox: is it free, what devices it runs on, how many players, round length, Jingles, the Worm, voice chat and codes."
   path="/faq"
-  ogImage="/og/faq.png"
+  ogImage="/og/faq.jpg"
   jsonLd={[faqLd]}
   breadcrumb={[{ name: 'Home', path: '/' }, { name: 'FAQ', path: '/faq' }]}
 >
@@ -116,15 +116,15 @@ const faqLd = {
           </summary>
           <p class="mt-4 max-w-3xl leading-relaxed text-facility-300">{f.a}</p>
           {f.link && (
-            <a href={f.link.href} class="mt-3 inline-block font-mono text-sm text-signal hover:text-signal-dim">{f.link.label} <span aria-hidden="true">→</span></a>
+            <a href={f.link.href} class="mt-3 inline-block font-mono text-sm text-signal hover:text-signal-dim">{f.link.label} <span aria-hidden="true">â†’</span></a>
           )}
         </details>
       ))}
     </div>
 
     <div class="mt-14 flex flex-wrap gap-4">
-      <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary">Play free on Roblox <span aria-hidden="true">→</span></a>
-      <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-secondary">Ask in the Discord <span aria-hidden="true">→</span></a>
+      <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary">Play free on Roblox <span aria-hidden="true">â†’</span></a>
+      <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-secondary">Ask in the Discord <span aria-hidden="true">â†’</span></a>
     </div>
   </section>
 </BaseLayout>

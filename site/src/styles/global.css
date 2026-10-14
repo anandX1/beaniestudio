@@ -1042,6 +1042,98 @@ body[data-noise='critical'] .dread-vignette {
   }
 }
 
+/* ============================================================
+   JS MOTION FALLBACK — for browsers without CSS scroll timelines.
+
+   Every scroll effect above lives behind @supports (animation-timeline: …).
+   Firefox has not shipped that (MDN: "limited availability"), so those
+   visitors currently get a correct page with no motion at all.
+
+   This section restores the motion there and ONLY there. The script in
+   BaseLayout adds `.fx-io` to <html> solely when `animation-timeline: view()`
+   is unsupported, so Chrome/Edge/Safari never match a single rule below and
+   keep the compositor-driven originals.
+
+   Same guarantees as the CSS path:
+   - no JS  → `.fx-io` is never added → every rule below is inert, page is whole
+   - reduce → the script exits before adding `.fx-io`
+   - the script also carries a failsafe that reveals anything still hidden
+
+   Scroll-linked values arrive as unitless numbers in custom properties that JS
+   writes inside one rAF; CSS owns all painting.
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* — Entry reveals: .rise (cards/stats) and .reveal (screenshot shutter) — */
+  .fx-io .rise {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+    transition:
+      opacity 0.7s var(--ease-terminal),
+      transform 0.7s var(--ease-terminal);
+    transition-delay: var(--rise-delay, 0ms);
+  }
+  .fx-io .reveal {
+    opacity: 0;
+    clip-path: inset(14% 6% 14% 6%);
+    transition:
+      opacity 0.7s var(--ease-terminal),
+      clip-path 0.9s var(--ease-terminal);
+  }
+  .fx-io .reveal img {
+    transform: scale(1.14);
+    transition: transform 1.1s var(--ease-terminal);
+  }
+  .fx-io .rise.in,
+  .fx-io .reveal.in {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0);
+  }
+  .fx-io .reveal.in img {
+    transform: none;
+  }
+
+  /* — SVG on entry instead of scrubbed: gauge arc fills, worm path draws — */
+  .fx-io .gauge-fill {
+    stroke-dashoffset: 100;
+    transition: stroke-dashoffset 1s var(--ease-terminal);
+  }
+  .fx-io .gauge-fill.in {
+    stroke-dashoffset: 0;
+  }
+  .fx-io .draw-path {
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1.6s var(--ease-terminal);
+  }
+  .fx-io .draw-path.in {
+    stroke-dashoffset: 0;
+  }
+
+  /* — Continuous scroll-linked transforms —
+     --fx-hero is set once on <html>, --fx-par / --fx-kin on each element. */
+  .fx-io .hero-cine-bg img {
+    transform: scale(calc(1 + 0.16 * var(--fx-hero, 0))) translateY(calc(6% * var(--fx-hero, 0)));
+  }
+  .fx-io .hero-cine-fg {
+    transform: translateY(calc(-9% * var(--fx-hero, 0))) scale(calc(1 + 0.06 * var(--fx-hero, 0)));
+  }
+  .fx-io .hero-cine-copy {
+    transform: translateY(calc(-14% * var(--fx-hero, 0)));
+    opacity: calc(1 - 0.85 * var(--fx-hero, 0));
+  }
+  .fx-io .parallax img {
+    transform: translateY(calc(-7% + 14% * var(--fx-par, 0)));
+    scale: 1.18;
+  }
+  .fx-io .kinetic-l {
+    transform: translateX(calc(5% - 40% * var(--fx-kin, 0)));
+  }
+  .fx-io .kinetic-r {
+    transform: translateX(calc(-35% + 40% * var(--fx-kin, 0)));
+  }
+}
+
 /* ---------- Reduced motion: kill every non-essential effect ---------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1068,6 +1160,16 @@ body[data-noise='critical'] .dread-vignette {
   .js-beats .beat {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+  /* Someone can flip the OS setting mid-session after `.fx-io` was already
+     added. Never leave fallback-armed content stranded at opacity 0. */
+  .fx-io .rise,
+  .fx-io .reveal,
+  .fx-io .reveal img {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
     transition: none;
   }
   .dread-vignette,

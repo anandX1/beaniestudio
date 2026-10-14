@@ -1,4 +1,4 @@
----
+﻿---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
@@ -11,10 +11,10 @@ const fmt = (d: Date) =>
 ---
 
 <BaseLayout
-  title="STATIC Devlog — News & Updates"
+  title="STATIC Devlog â€” News & Updates"
   description="Update notes, design decisions and behind-the-scenes posts on STATIC, the free co-op horror game on Roblox, written by the three people making it."
   path="/blog"
-  ogImage="/og/blog.png"
+  ogImage="/og/blog.jpg"
   breadcrumb={[{ name: 'Home', path: '/' }, { name: 'Devlog', path: '/blog' }]}
 >
   <section class="mx-auto max-w-4xl px-4 py-20 sm:px-6 sm:py-28">
@@ -40,7 +40,7 @@ const fmt = (d: Date) =>
           </div>
           <p class="mt-4 leading-relaxed text-facility-300">{post.data.description}</p>
           <a href={`/blog/${post.id}/`} class="mt-5 inline-flex items-center gap-2 font-mono text-sm text-signal hover:text-signal-dim">
-            Read entry <span aria-hidden="true">→</span>
+            Read entry <span aria-hidden="true">â†’</span>
           </a>
         </article>
       ))}

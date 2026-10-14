@@ -16,7 +16,7 @@ interface Props {
   description?: string;
   /** Path with leading slash, e.g. '/play'. Used for canonical + og:url (trailing slash normalized). */
   path: string;
-  /** Absolute path to the 1200×630 OG card (defaults to /og/home.png). */
+  /** Absolute path to the 1200×630 OG card (defaults to /og/home.jpg). */
   ogImage?: string;
   /**
    * Real pixel dimensions of `ogImage`. Only the generated `/og/*.png` cards are
@@ -43,7 +43,7 @@ const {
   title,
   description = SITE.description,
   path,
-  ogImage = '/og/home.png',
+  ogImage = '/og/home.jpg',
   ogImageWidth = 1200,
   ogImageHeight = 630,
   ogImageAlt = 'STATIC — free Roblox horror game by Beanie Studios',
@@ -194,6 +194,112 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
     <script type="application/ld+json" set:html={JSON.stringify(allLd)} />
 
     <slot name="head" />
+
+    <!-- Scroll-motion fallback for browsers without CSS scroll timelines.
+         MUST run in <head>, before body paints: `.fx-io` is what arms the
+         hidden starting states, so adding it later would flash the content
+         in and then hide it. Browsers that DO support animation-timeline
+         bail out on the first check and download/execute nothing further. -->
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        if (!('IntersectionObserver' in window)) return;
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        // Feature-detect rather than sniff: if scroll timelines work, the CSS
+        // originals are already better (compositor thread, zero main-thread cost).
+        if (window.CSS && CSS.supports && CSS.supports('animation-timeline: view()')) return;
+
+        d.classList.add('fx-io');
+
+        var io = null;
+        function arm() {
+          var els = document.querySelectorAll('.rise, .reveal, .draw-path, .gauge-fill, .count');
+          if (!els.length) return;
+          io = new IntersectionObserver(function (entries) {
+            for (var i = 0; i < entries.length; i++) {
+              var e = entries[i];
+              if (!e.isIntersecting) continue;
+              io.unobserve(e.target);
+              e.target.classList.add('in');
+              var real = e.target.querySelector('.count-real');
+              if (real) countUp(real);
+            }
+          }, { threshold: 0.12, rootMargin: '0px 0px -5% 0px' });
+          for (var j = 0; j < els.length; j++) io.observe(els[j]);
+        }
+
+        /** Count a stat from 0 to its real value. The real string is already in
+         *  the DOM, so no-JS readers see the number itself. */
+        function countUp(el) {
+          var final = el.textContent || '';
+          var to = parseInt(final.replace(/[^0-9]/g, ''), 10);
+          if (!isFinite(to) || to <= 0) return;
+          var start = null;
+          var DUR = 1200;
+          function step(ts) {
+            if (start === null) start = ts;
+            var p = Math.min(1, (ts - start) / DUR);
+            var eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = String(Math.round(to * eased));
+            if (p < 1) requestAnimationFrame(step);
+            else el.textContent = final;
+          }
+          el.textContent = '0';
+          requestAnimationFrame(step);
+        }
+
+        /** Scroll-linked transforms. Progress is the same 0→1 the equivalent
+         *  `view()` timeline would report over its cover range. */
+        function armScroll() {
+          var hero = document.querySelector('.hero-cine');
+          var par = [].slice.call(document.querySelectorAll('.parallax'));
+          var kin = [].slice.call(document.querySelectorAll('.kinetic'));
+          if (!hero && !par.length && !kin.length) return;
+
+          var ticking = false;
+          function viewProgress(el) {
+            var r = el.getBoundingClientRect();
+            var vh = window.innerHeight || d.clientHeight;
+            var total = r.height + vh;
+            if (total <= 0) return 0;
+            var p = (vh - r.top) / total;
+            return p < 0 ? 0 : p > 1 ? 1 : p;
+          }
+          function update() {
+            ticking = false;
+            if (hero) {
+              var vh = window.innerHeight || d.clientHeight;
+              var hp = vh > 0 ? (window.pageYOffset || d.scrollTop || 0) / vh : 0;
+              d.style.setProperty('--fx-hero', String(hp < 0 ? 0 : hp > 1 ? 1 : hp));
+            }
+            for (var i = 0; i < par.length; i++) par[i].style.setProperty('--fx-par', String(viewProgress(par[i])));
+            for (var k = 0; k < kin.length; k++) kin[k].style.setProperty('--fx-kin', String(viewProgress(kin[k])));
+          }
+          function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+          window.addEventListener('scroll', onScroll, { passive: true });
+          window.addEventListener('resize', onScroll, { passive: true });
+          update();
+        }
+
+        function boot() {
+          arm();
+          armScroll();
+          // Failsafe: if anything above threw, or an observer never fired,
+          // reveal whatever is still hidden rather than leaving holes.
+          window.setTimeout(function () {
+            var stuck = document.querySelectorAll('.rise:not(.in), .reveal:not(.in)');
+            for (var i = 0; i < stuck.length; i++) {
+              if (stuck[i].getBoundingClientRect().top < (window.innerHeight || d.clientHeight) * 1.2) {
+                stuck[i].classList.add('in');
+              }
+            }
+          }, 4000);
+        }
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+        else boot();
+      })();
+    </script>
 
     <!-- Cloudflare Web Analytics — cookie-free, GDPR-friendly. The beacon's
          startup burns 300–500ms of main-thread time on a throttled phone, so
