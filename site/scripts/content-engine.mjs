@@ -71,28 +71,94 @@ const ROBLOX_URL = grab('roblox');
 const PLAYTEST_URL = `${SITE_URL}/playtest/`;
 
 // ---------- 1. HARVEST ----------
-// Topic tracks: the blog is not only about the game — indie-dev lessons and
-// Roblox-technical posts earn links and reach audiences the game posts can't.
+// Topic tracks. WHICH TRACK YOU HARVEST DECIDES EVERYTHING DOWNSTREAM.
+//
+// This used to have three tracks and all of them were generic genre terms, so
+// every keyword harvested was generic too: 113 of 113 contained no brand or game
+// term. The blog was therefore aimed entirely at fights a one-month-old domain
+// cannot win ("roblox horror games", "hide and seek game"), while ignoring the
+// terms where we are the only credible source.
+//
+// - `brand` (default): the game's own name and mechanics. This is where we win,
+//   because for "static roblox codes" there is no competition — we ARE the source.
+// - `dev`: devlog and Roblox-technical posts. These earn links from developers,
+//   which is the other real lever, and they do not pretend to be game guides.
+// - `genre`: DISCOVERY ONLY. Harvest these to learn what people ask about this
+//   kind of game, then answer it on a game-specific page. A young site will not
+//   outrank established sites for the bare genre term — do not target these
+//   directly. They are research input, not a to-do list.
+//
+// MEASURED 2026-10-14 — AUTOCOMPLETE CANNOT PRODUCE BRAND KEYWORDS FOR A NEW GAME.
+// The `brand` track above was added expecting it to surface our own terms. It
+// returned 32 keywords and ZERO of them were usable:
+//   "static roblox doors" / "static roblox jailbreak" / "static roblox script"
+//        -> other games and exploit scripts
+//   "static miku roblox id" / "static roblox song id" / "static roblox sound id"
+//        -> Roblox audio asset IDs
+//   "is roblox removing static faces" / "why is roblox static"
+//        -> Roblox's own "static faces" feature
+//   "has salvage hunters finished" / "salvage hunters latest series"
+//        -> a television show of the same name, not our game
+// Google Suggest only returns queries with real search volume, so it reads
+// "static" as the ordinary English word until the game is searched enough to be
+// recognised as an entity. Seed choice cannot fix that.
+//
+// THE REAL KEYWORD SOURCES FOR A NEW GAME, in order:
+//   1. Google Search Console -> Queries. The only authoritative record of what
+//      people actually type to find us. Export it and build a page for anything
+//      that appears with impressions but no good landing page. This is the
+//      engine's keyword source once there is any traffic at all.
+//   2. The game itself. Every mechanic in src/data/game.ts implies a question a
+//      player will ask ("how do I get out of the pod", "what is the crusher
+//      quota"). Those are authored, not harvested — see content/keywords-game.json.
+//   3. Autocomplete, but ONLY for established topics (the `dev` track), where
+//      real volume exists. That track returned 85 usable queries.
+// Never seed generic genre terms and treat the output as a target list. That is
+// how 113 of 113 keywords ended up containing no brand term, and how ~20
+// generated blog posts ended up retired.
 const TRACKS = {
-  game: [
-    'roblox horror game', 'asymmetrical horror', 'roblox horror multiplayer',
-    'hide and seek horror game', '5v1 horror game', 'roblox horror with friends',
-    'roblox sound based horror', 'new roblox horror 2026', 'roblox horror no radar',
-    'scary roblox games to play with friends',
+  brand: [
+    'static roblox',
+    'static roblox code',
+    'static roblox how to',
+    'static roblox jingles',
+    'static roblox map',
+    'static roblox scrap',
+    'static roblox worm',
+    'static roblox crusher',
+    'static roblox pod',
+    'static roblox escape',
+    'static roblox ending',
+    'static roblox beta',
+    'is static roblox',
+    'static salvage vs hunter',
+    'beanie studios roblox',
+    'static roblox horror',
   ],
-  indie: [
-    'indie game marketing', 'how to market an indie game', 'roblox game dev tips',
-    'solo game developer', 'game dev devlog', 'how to grow a discord server',
-    'indie game launch checklist', 'game development motivation',
+  dev: [
+    'roblox devlog',
+    'indie game devlog',
+    'roblox game dev tips',
+    'how to make a horror game on roblox',
+    'roblox asymmetrical gameplay',
+    'roblox proximity chat',
+    'roblox sound design',
+    'game dev marketing',
   ],
-  technical: [
-    'roblox sound design', 'roblox proximity chat', 'roblox ai npc',
-    'roblox horror map ideas', 'roblox game optimization', 'roblox studio tips',
-    'how to make a horror game on roblox', 'roblox asymmetrical gameplay',
+  genre: [
+    'asymmetrical horror game',
+    'roblox horror with friends',    '5v1 horror game',
+    'roblox horror multiplayer',
+    'new roblox horror 2026',
   ],
 };
-const SEEDS = TRACKS[opt('track') || 'game'] || TRACKS.game;
-const TRACK = opt('track') || 'game';
+// Backwards compatibility: `--track indie` and `--track technical` were the old
+// names for what is now `dev`.
+TRACKS.indie = TRACKS.dev;
+TRACKS.technical = TRACKS.dev;
+
+const TRACK = opt('track') || 'brand';
+const SEEDS = TRACKS[TRACK] || TRACKS.brand;
 
 async function fetchGoogle(q) {
   const res = await fetch(`https://suggestqueries.google.com/complete/search?client=firefox&hl=en&q=${encodeURIComponent(q)}`);
