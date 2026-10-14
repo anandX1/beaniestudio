@@ -46,3 +46,22 @@
 # Retired pages
 /playtest/  /play/  301
 /playtest  /play/  301
+
+# 2026-10-14: seven per-video watch pages retired. The uploads turned out to be
+# YouTube Shorts (6-18s each), so each page was ~300 words of boilerplate wrapped
+# around a six-second clip - the thinnest pages on the site, and a thin/doorway
+# pattern. They consolidate onto the single /videos/ hub.
+/videos/dont-trust-your-friend-in-this-game/  /videos/  301
+/videos/dont-trust-your-friend-in-this-game  /videos/  301
+/videos/dont-trust-your-friends-in-this-game/  /videos/  301
+/videos/dont-trust-your-friends-in-this-game  /videos/  301
+/videos/we-picked-the-worst-place-to-hide/  /videos/  301
+/videos/we-picked-the-worst-place-to-hide  /videos/  301
+/videos/the-start-of-your-worst-nightmare/  /videos/  301
+/videos/the-start-of-your-worst-nightmare  /videos/  301
+/videos/making-a-150k-roblox-menu/  /videos/  301
+/videos/making-a-150k-roblox-menu  /videos/  301
+/videos/that-one-friend-who-leaves-you-in-the-dark/  /videos/  301
+/videos/that-one-friend-who-leaves-you-in-the-dark  /videos/  301
+/videos/can-ai-make-a-scary-roblox-game/  /videos/  301
+/videos/can-ai-make-a-scary-roblox-game  /videos/  301
