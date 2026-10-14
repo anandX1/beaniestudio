@@ -5,6 +5,7 @@ const guideLinks = [
   { href: '/guide/', label: 'Beginner guide' },
   { href: '/guide/map/', label: 'Map' },
   { href: '/screenshots/', label: 'Screenshots' },
+  { href: '/videos/', label: 'Videos' },
   { href: '/guide/jingles/', label: 'Jingles (Hunter)' },
   { href: '/guide/worm/', label: 'The Worm' },
   { href: '/guide/scrap/', label: 'Scrap list' },
@@ -25,7 +26,7 @@ const year = new Date().getFullYear();
           {SITE.name} is a three-person team making STATIC, a free co-op horror game on Roblox.
         </p>
         <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary mt-6 !px-4 !py-2 text-xs">Play STATIC on Roblox <span aria-hidden="true">→</span></a>
-        <p class="kicker mt-10">Guide</p>
+        <p class="kicker mt-10">Explore</p>
         <ul class="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
           {guideLinks.map((l) => (
             <li><a href={l.href} class="text-facility-300 hover:text-signal">{l.label}</a></li>

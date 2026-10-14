@@ -1,11 +1,24 @@
 ---
 import GuideLayout from '../layouts/GuideLayout.astro';
 import { LINKS } from '../site.config';
+
+/**
+ * "<game> codes" queries are searched month by month, so the title carries the
+ * current month — but it must be generated, not typed. A hardcoded month goes
+ * stale the moment it passes and nobody notices. Derived at build time, so every
+ * deploy refreshes it. `updated` below is a different thing: the date a human
+ * last checked these facts against the game build.
+ */
+const monthYear = new Date().toLocaleDateString('en-US', {
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
 ---
 
 <GuideLayout
-  title="STATIC Codes (October 2026) — Roblox"
-  description="Every working STATIC code on Roblox, checked by the developers. No codes are live in the October 2026 beta yet; launch codes will be listed here first."
+  title={`STATIC Codes (${monthYear}) — Roblox`}
+  description={`Every working STATIC code on Roblox, checked by the developers. No codes are live in the ${monthYear} beta yet; launch codes will be listed here first.`}
   path="/codes/"
   h1="STATIC codes"
   kicker="Official · Checked by the developers"

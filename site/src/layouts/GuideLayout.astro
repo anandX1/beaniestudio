@@ -18,11 +18,14 @@ interface Props {
   updated: string;
   crumb: string;
   ogImage?: string;
+  /** Real pixel size of `ogImage` when it is a raw screenshot instead of an /og card. */
+  ogImageWidth?: number;
+  ogImageHeight?: number;
   ogImageAlt?: string;
   jsonLd?: Record<string, unknown>[];
 }
 
-const { title, description, path, h1, kicker, updated, crumb, ogImage = '/og/guide.png', ogImageAlt, jsonLd = [] } = Astro.props;
+const { title, description, path, h1, kicker, updated, crumb, ogImage = '/og/guide.png', ogImageWidth, ogImageHeight, ogImageAlt, jsonLd = [] } = Astro.props;
 
 const GUIDE_PAGES = [
   { href: '/guide/', label: 'Beginner guide' },
@@ -60,7 +63,7 @@ const breadcrumb = isHub
     : [{ name: 'Home', path: '/' }, { name: 'Guide', path: '/guide/' }, { name: crumb, path: here }];
 ---
 
-<BaseLayout {title} {description} path={here} {ogImage} ogImageAlt={ogImageAlt ?? `${h1} — STATIC official guide`} ogType="article" jsonLd={[articleLd, ...jsonLd]} {breadcrumb}>
+<BaseLayout {title} {description} path={here} {ogImage} {ogImageWidth} {ogImageHeight} ogImageAlt={ogImageAlt ?? `${h1} — STATIC official guide`} ogType="article" jsonLd={[articleLd, ...jsonLd]} {breadcrumb}>
   <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
     <nav aria-label="Breadcrumb" class="font-mono text-xs tracking-[0.14em] text-facility-500">
       <ol class="flex flex-wrap items-center gap-2">

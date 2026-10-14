@@ -176,12 +176,16 @@ const videoGameLd = {
           <span data-launch-label>Free on Roblox · Beta out {GAME.launchLabel}</span>
         </p>
 
+        <!-- The H1 carries the game's full name, not just "Static": "STATIC"
+             alone collides with the generic word and with other games, so the
+             ownable term is the long form. The tagline was already rendered
+             directly under the wordmark, so this changes meaning, not layout. -->
         <h1 class="mt-6 font-display text-7xl font-bold uppercase leading-none tracking-tight sm:text-9xl">
-          <span class="flicker text-signal" data-decode>Static</span>
+          <span class="flicker block text-signal" data-decode>Static</span>
+          <span class="mt-2 block font-display text-2xl font-semibold uppercase leading-normal tracking-[0.14em] text-facility-100 sm:text-3xl">
+            {GAME.tagline}
+          </span>
         </h1>
-        <p class="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.14em] text-facility-100 sm:text-3xl">
-          {GAME.tagline}
-        </p>
 
         <p class="mt-7 max-w-xl text-lg leading-relaxed text-facility-100/85">
           A free co-op horror game on Roblox. Up to {GAME.scrappers.max} players search an abandoned
@@ -491,6 +495,11 @@ const videoGameLd = {
       <h2 id="videos-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
         Watch it in motion
       </h2>
+      <p class="beat mt-5">
+        <a href="/videos/" class="font-mono text-sm text-signal hover:text-signal-dim">
+          All {VIDEOS.length} videos, each on its own page <span aria-hidden="true">→</span>
+        </a>
+      </p>
 
       <div class="mt-12 grid gap-6 lg:grid-cols-5">
         <div class="beat lg:col-span-3">

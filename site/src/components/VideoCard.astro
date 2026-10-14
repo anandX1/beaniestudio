@@ -4,7 +4,7 @@
  * youtube-nocookie iframe only on click. Zero framework JS, no third-party
  * requests until the visitor actually wants to play.
  */
-import { type SiteVideo, watchUrl, embedUrl, thumbUrl } from '../data/videos';
+import { type SiteVideo, watchUrl, embedUrl, thumbUrl, thumbDims } from '../data/videos';
 
 interface Props {
   video: SiteVideo;
@@ -13,6 +13,7 @@ interface Props {
 }
 
 const { video, eager = false } = Astro.props;
+const dims = thumbDims(video.id);
 ---
 
 <figure class="video-card panel" data-video-card>
@@ -29,8 +30,8 @@ const { video, eager = false } = Astro.props;
       <img
         src={thumbUrl(video.id)}
         alt={`Video thumbnail: ${video.title}`}
-        width="1280"
-        height="720"
+        width={dims.w}
+        height={dims.h}
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
         class="h-full w-full object-cover opacity-90 transition duration-300 group-hover:scale-[1.03] group-hover:opacity-100"

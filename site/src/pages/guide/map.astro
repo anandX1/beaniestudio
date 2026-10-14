@@ -4,9 +4,13 @@ import ShotFigure from '../../components/ShotFigure.astro';
 import { ROOM_INFO } from '../../data/rooms';
 import { ROOMS, CRUSHERS, EXTRACTION, GAME } from '../../data/game';
 import { SITE } from '../../site.config';
-import { shot, shotsForRoom } from '../../data/media';
+import { shot, shotsForRoom, fullDims } from '../../data/media';
 
 const extras = (r: { name: string; shots: string[] }) => [...new Set([...r.shots.slice(1), ...shotsForRoom(r.name).map((x) => x.id)])].filter((id) => id !== r.shots[0]);
+
+/** og:image is a raw screenshot here, not a 1200×630 card — state its real size. */
+const ogShot = shot('map-topdown');
+const ogDims = fullDims(ogShot);
 
 const pictured = new Set(ROOM_INFO.map((r) => r.name));
 const unpictured = ROOMS.filter((r) => !pictured.has(r));
@@ -37,7 +41,9 @@ const galleryLd = {
   kicker="Official guide · Map"
   crumb="Map"
   updated="2026-10-08"
-  ogImage={shot('map-topdown').full}
+  ogImage={ogShot.full}
+  ogImageWidth={ogDims.w}
+  ogImageHeight={ogDims.h}
   ogImageAlt="Top-down view of the STATIC bunker map"
   jsonLd={[galleryLd]}
 >

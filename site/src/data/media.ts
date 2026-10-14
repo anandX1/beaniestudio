@@ -40,6 +40,19 @@ export function shot(id: string): Shot {
   return s;
 }
 
+/**
+ * True pixel size of the largest generated file — the one `Shot.full` points at.
+ * media.mjs caps the widest variant at 1920 without upscaling, so this is the
+ * source width clamped to 1920, with the height scaled to match. Use it for any
+ * declaration that must state real dimensions (og:image:width/height,
+ * ImageObject width/height); `Shot.w`/`Shot.h` are the *source* size and would
+ * overstate a wide shot.
+ */
+export function fullDims(s: Shot): { w: number; h: number } {
+  const w = Math.min(1920, s.w);
+  return { w, h: Math.round((w / s.w) * s.h) };
+}
+
 export const shotsBy = (group: Shot['group']) => SHOTS.filter((s) => s.group === group);
 export const shotsForRoom = (room: string) => SHOTS.filter((s) => s.room === room);
 export const pressJpg = (id: string) => `/media/press/static-${id}.jpg`;

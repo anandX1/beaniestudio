@@ -18,6 +18,15 @@ interface Props {
   path: string;
   /** Absolute path to the 1200×630 OG card (defaults to /og/home.png). */
   ogImage?: string;
+  /**
+   * Real pixel dimensions of `ogImage`. Only the generated `/og/*.png` cards are
+   * 1200×630; pages that point og:image at a raw screenshot (guide/map,
+   * /screenshots) MUST pass that shot's true width/height. Crawlers lay the card
+   * out from these numbers before the image finishes downloading, so a wrong
+   * ratio renders a cropped or letterboxed preview.
+   */
+  ogImageWidth?: number;
+  ogImageHeight?: number;
   /** Alt text describing the OG card for screen readers and crawlers. */
   ogImageAlt?: string;
   /** Extra JSON-LD blocks rendered on this page. */
@@ -35,6 +44,8 @@ const {
   description = SITE.description,
   path,
   ogImage = '/og/home.png',
+  ogImageWidth = 1200,
+  ogImageHeight = 630,
   ogImageAlt = 'STATIC — free Roblox horror game by Beanie Studios',
   jsonLd = [],
   breadcrumb,
@@ -167,8 +178,8 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImageAbs} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    <meta property="og:image:width" content={String(ogImageWidth)} />
+    <meta property="og:image:height" content={String(ogImageHeight)} />
     <meta property="og:image:alt" content={ogImageAlt} />
     <meta property="og:locale" content={SITE.locale} />
 

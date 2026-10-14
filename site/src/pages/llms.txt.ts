@@ -3,6 +3,7 @@
  * src/data/game.ts at build time so it can never drift from the game.
  */
 import { SITE, LINKS } from '../site.config';
+import { VIDEOS } from '../data/videos';
 import {
   GAME, MOVEMENT, JINGLES, POD, SCRAP, RARITY, CRUSHERS, MINIGAMES, EXTRACTION, WORM, TEAM, SCRAPPER,
 } from '../data/game';
@@ -54,7 +55,14 @@ Facts below are taken from the game's scripts (beta build, ${GAME.launchLabel}).
 - [Codes](${u('/codes/')}): official code list.
 - [FAQ](${u('/faq/')}): price, devices, players, round length, voice chat, age.
 - [Press kit](${u('/press/')}): fact sheet, descriptions, downloadable art, contact.
+- [Videos](${u('/videos/')}): every official gameplay video and devlog, newest first.
 - [Devlog](${u('/blog/')}) and [RSS](${u('/rss.xml')}).
+
+## Videos
+
+Official uploads from ${SITE.name}. Each has its own page with the player embedded.
+
+${VIDEOS.map((v) => `- [${v.title}](${u(`/videos/${v.slug}/`)}) — ${v.note} (${v.date})`).join('\n')}
 `;
   return new Response(body, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
 }

@@ -3,7 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Shot from '../components/Shot.astro';
 import Lightbox from '../components/Lightbox.astro';
 import { SITE, LINKS } from '../site.config';
-import { SHOTS, shot, type Shot as ShotT } from '../data/media';
+import { SHOTS, shot, fullDims, type Shot as ShotT } from '../data/media';
+
+/** og:image is a raw screenshot here, not a 1200×630 card — state its real size. */
+const ogShot = shot('cargo-dock-shuttle');
+const ogDims = fullDims(ogShot);
 
 const GROUPS: { key: ShotT['group'][]; title: string; intro: string }[] = [
   { key: ['jingles'], title: 'Jingles, the Hunter', intro: 'The clockwork jester every Scrapper is running from.' },
@@ -25,8 +29,8 @@ const galleryLd = {
     '@type': 'ImageObject',
     contentUrl: new URL(s.full, SITE.url).href,
     description: s.alt,
-    width: Math.min(1920, s.w),
-    height: Math.round((Math.min(1920, s.w) / s.w) * s.h),
+    width: fullDims(s).w,
+    height: fullDims(s).h,
     creator: { '@id': `${SITE.url}/#org` },
     copyrightHolder: { '@id': `${SITE.url}/#org` },
     acquireLicensePage: new URL('/press/', SITE.url).href,
@@ -38,7 +42,9 @@ const galleryLd = {
   title="STATIC Screenshots — Official Roblox Game Images"
   description={`${SHOTS.length} official screenshots of STATIC on Roblox: Jingles the Hunter, every room of the bunker, crushers, pods, the Worm and the end-of-round screens.`}
   path="/screenshots"
-  ogImage={shot('cargo-dock-shuttle').full}
+  ogImage={ogShot.full}
+  ogImageWidth={ogDims.w}
+  ogImageHeight={ogDims.h}
   ogImageAlt="The Cargo Dock in STATIC"
   jsonLd={[galleryLd]}
   breadcrumb={[{ name: 'Home', path: '/' }, { name: 'Screenshots', path: '/screenshots' }]}
