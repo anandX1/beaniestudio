@@ -7,10 +7,62 @@ Re-check the official pages before acting on a detail — these systems change.
 
 ## 0. Where we stand (honest)
 
-**On-site: done to a high standard.** Lighthouse 99–100 on every category, unique
-titles/descriptions, canonical URLs, VideoGame/Organization/Article/ImageGallery/FAQ/
-Breadcrumb JSON-LD, sitemap + image sitemap, IndexNow on every deploy, 80 original
-screenshots with descriptive alt text, fast WebP pipeline, no thin AI content.
+**On-site metadata: done to a high standard.** Unique titles/descriptions, canonical
+URLs, VideoGame/Organization/Article/ImageGallery/FAQ/VideoObject/Breadcrumb/AboutPage
+JSON-LD, sitemap + image sitemap, IndexNow on every deploy, 80 original screenshots
+with descriptive alt text, fast WebP pipeline, no thin AI content. `npm run audit:live`
+covers this end to end (294 checks, all passing as of 2026-10-14).
+
+**Corrected 2026-10-14 — the old claim here was "Lighthouse 99–100 on every category".
+That is not true, and it was never measured.** Actual Lighthouse run against production:
+
+| Category | Score |
+|---|---|
+| Accessibility | 100 |
+| Best practices | 100 |
+| SEO | 100 |
+| **Performance** | **72** (simulated throttling) / **51** (real device throttling) |
+
+Accessibility, best practices and SEO are genuinely perfect. Performance is not, and it
+never was. Do not repeat the 99–100 claim.
+
+### Core Web Vitals: measure with the right method
+
+Lighthouse's default `throttlingMethod: "simulate"` re-times resources through a model and
+**reports a false CLS here**. Same build, same URL, same minute:
+
+| Method | LCP | TBT | CLS |
+|---|---|---|---|
+| `simulate` (Lighthouse default, what `.lighthouserc.json` uses) | 2.4 s | 260 ms | **0.393** |
+| `devtools` (real throttling) | 5.2 s | 630 ms | **0.014** |
+| Independent local CDP harness, throttled | — | — | **0.0139** |
+
+The two real-throttling methods agree to three decimal places and blame the same single
+node (`p.mt-7`, an 18px move). **CLS is 0.014 — excellent. The 0.393 is an artifact.** The
+`minScore`/CLS assertions in `.lighthouserc.json` run under `simulate`, so they will keep
+warning about a CLS problem that does not exist in the field. Either switch that config to
+`throttlingMethod: "devtools"` or read the CLS assertion as advisory.
+
+Where the real problems are (production, real throttling, LCP 5.2 s):
+
+| LCP subpart | Duration |
+|---|---|
+| Time to first byte | 774 ms |
+| Resource load delay | 488 ms |
+| Resource load duration | 1164 ms |
+| **Element render delay** | **2730 ms** |
+
+The LCP element is the hero backdrop (`/media/central-room-globe-640.webp`, 22 KB), which
+finishes downloading at 2.4 s but is not painted until 5.2 s. So the cost is **main-thread
+and paint work, not bytes** — total page weight is only ~321 KB and main-thread breakdown is
+Style & Layout 1535 ms + Other 1241 ms. Byte-level optimisation is close to exhausted;
+this is a rendering-cost problem.
+
+Not yet attributed: a single-run A/B of `background-attachment: fixed` and
+`mix-blend-mode: screen` (the two paint-cost suspects in `global.css`) produced swings
+larger than the effect being measured — repeat runs on **one machine at a time** are needed
+before changing either. Field data is the authority here, not lab runs: GSC → Core Web
+Vitals and Cloudflare Web Analytics both report real-user values.
 
 **What's left is not on the site.** A 2-day-old domain with zero backlinks ranks for
 almost nothing no matter how good the HTML is. The levers that remain:
@@ -113,7 +165,7 @@ Earn, never buy. In order of value per hour:
 |---|---|
 | Google Search Console | Indexing, queries, CTR. Check Performance weekly. |
 | Bing Webmaster Tools | Same for Bing; URL submission; IndexNow log. |
-| Lighthouse / PageSpeed Insights | Speed + SEO basics (`node scripts/lh-run.mjs`, CI runs it). |
+| Lighthouse / PageSpeed Insights | Speed + SEO basics. `node scripts/lh-run.mjs <url> mobile --real` — the `--real` flag switches to devtools throttling, which is the only mode whose CLS/LCP/TBT can be trusted here (see §0). CI runs the `simulate` variant via `@lhci/cli`. |
 | Rich Results Test / Schema validator | Validate JSON-LD after page changes. |
 | Roblox Creator Analytics | qPTR, retention, Home Recommendations — the real growth dashboard. |
 | Cloudflare Web Analytics | Cookie-free traffic numbers (set `PUBLIC_CF_BEACON_TOKEN`). |
