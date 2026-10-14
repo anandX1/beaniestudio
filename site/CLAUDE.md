@@ -18,6 +18,7 @@ This file is the law for anyone (human or AI) editing `site/`. Read it before ge
 11. **SEO hygiene:** every page gets a unique title (≤60 chars), description (≤155 chars), canonical via `BaseLayout` props, and appropriate JSON-LD. FAQ claims must match the FAQPage schema on the same page. New pages: pass `breadcrumb` (emits BreadcrumbList), an `ogImageAlt`, and add the route to `src/pages/llms.txt.ts`. IndexNow key + pinger live in `scripts/ping-indexnow.mjs`; run `npm run ping:indexnow` after each deploy and `npm run seo` before it.
 12. **Accessibility:** focus-visible states everywhere, alt text on every image, semantic headings in order, contrast ≥ 4.5:1 for text (the facility palette is tuned for this — keep it).
 13. **Video embeds are facades** (on listing pages). Exception planned: dedicated `/videos/<slug>/` watch pages embed the iframe in HTML so Google can index the video (see SEO-PLAYBOOK §4). YouTube videos render as self-hosted thumbnails (`public/yt/<id>.jpg`) that swap to a `youtube-nocookie` iframe only on click (`VideoCard.astro`). Never ship a bare `<iframe>` at page load — it drags ~1 MB of third-party JS and leaks every visitor's IP to Google before they asked to play anything. The registry of real videos is `src/data/videos.ts`; to add a clip, save its `maxresdefault.jpg` as `public/yt/<id>.jpg` and add an entry there. Thumbnails are self-hosted so the page makes zero YouTube requests until the visitor clicks play.
+14. **Glass is a depth device for floating layers, never a surface for content.** `backdrop-filter` belongs on things that float over the page: the sticky header, the mobile menu, sticky rails, lightbox chrome. It does NOT go on ordinary content panels — blurring every surface is the generic look rule 1 exists to prevent, and a backdrop-filter over a large area is real paint cost on a phone. Use the `.glass` / `.site-header` classes; never hand-roll a blur. Content panels get their depth from a 1px inset top highlight plus one long soft shadow (`.panel`), not from a glow or a rounded corner.
 
 ## Page structure (2026-10-08 rebuild)
 
@@ -42,7 +43,7 @@ The current set: **decode scramble** (`data-decode`, BaseLayout, any page can op
 ## Build facts
 
 - Astro 5 static + Tailwind v4 (CSS-first config — the `@theme` block in `global.css` IS the Tailwind config).
-- OG images: `node scripts/og-cards.mjs` renders `public/og/*.png` and `public/press/static-key-art.png` in headless Chromium with the real fonts + Jingles art. Rerun after changing card copy.
+- OG images: `node scripts/og-cards.mjs` renders `public/og/*.jpg` (1200×630, re-encoded to q88 JPEG through sharp) and `public/press/static-key-art.png` in headless Chromium with the real fonts + Jingles art. Rerun after changing card copy.
 - `npm run check` = astro check (TS). `npm run build` must pass both before deploy.
 - Emails live in `src/site.config.ts` (`SITE.contact` = hello@, `SITE.press` = press@) and per-person in `TEAM` (`game.ts`): anand@, pawan@, jai@ — all @beaniestudio.site via Cloudflare Email Routing. Never put a personal or other-company address on the site — it made "picfomo.com" the site's top Google query.
 - `/llms.txt` is generated from `game.ts` by `src/pages/llms.txt.ts`.
@@ -51,4 +52,4 @@ The current set: **decode scramble** (`data-decode`, BaseLayout, any page can op
 
 ## Slop tells to never introduce
 
-Purple gradients · Inter/Roboto · rounded-2xl cards with soft shadows · glassmorphism · "3 identical cards" without content reason · emoji bullets · centered-everything · generic hero headline + subtitle + CTA stack with no real information · stock imagery.
+Purple gradients · Inter/Roboto · rounded-2xl cards with soft shadows · glassmorphism as a default surface treatment (glass is allowed ONLY on floating layers — see rule 14) · "3 identical cards" without content reason · emoji bullets · centered-everything · generic hero headline + subtitle + CTA stack with no real information · stock imagery.

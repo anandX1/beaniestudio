@@ -124,15 +124,8 @@ const videoGameLd = {
     (function () {
       if (!('IntersectionObserver' in window)) return;
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
       var io = null;
       var pending = [];
-
-      /** Reveal every armed element that has reached the viewport.
-       *  Every rect is read BEFORE any class is written. Interleaving the two made
-       *  each write dirty the element's style, so the next read forced a full style
-       *  recalculation of this ~19,000px document, once per element — Lighthouse
-       *  attributed 478ms of forced reflow to the unbatched version of this loop. */
       function sweep() {
         var stuck = document.querySelectorAll('.beat:not(.in)');
         if (!stuck.length) return;
@@ -146,10 +139,6 @@ const videoGameLd = {
 
       function ensureIo() {
         if (io) return;
-        // threshold 0 + a bottom inset reveals as soon as an element has crossed
-        // into view. The previous 0.12 threshold meant a 40px heading needed 5px
-        // visible while an 800px card needed 96px — inconsistent, and either could
-        // be skipped outright by a fast flick (see the sweep below).
         io = new IntersectionObserver(function (entries) {
           for (var i = 0; i < entries.length; i++) {
             if (entries[i].isIntersecting) entries[i].target.classList.add('in');
@@ -159,7 +148,6 @@ const videoGameLd = {
         for (var k = 0; k < pending.length; k++) io.observe(pending[k]);
         pending.length = 0;
       }
-
       function arm() {
         var els = document.querySelectorAll('.beat:not([data-armed])');
         for (var j = 0; j < els.length; j++) {
@@ -168,16 +156,15 @@ const videoGameLd = {
         }
         ensureIo();
       }
-
       arm();
       document.addEventListener('DOMContentLoaded', arm);
-
-      // Safety net. An IntersectionObserver is sampled once per frame, so a hard
-      // flick can carry an element from below the viewport to above it without it
-      // ever being reported as intersecting: measured 0–5 of 41 headings left
-      // permanently invisible, varying run to run. A trailing sweep after the
-      // scroll settles makes that impossible, at the cost of one batched rect pass.
-      // (This is a correctness fallback, not a scroll-driven animation.)
+      // Safety net: an IntersectionObserver is sampled once per frame, so a hard
+      // flick can carry an element past the viewport without it ever being reported
+      // as intersecting, leaving it permanently at opacity 0 (measured 0-5 of 41
+      // headings, varying run to run). A trailing sweep after the scroll settles
+      // makes that impossible. This is a correctness fallback, not a scroll-driven
+      // animation. Rects are read before any class is written: interleaving the two
+      // dirties style on every iteration and forces a full recalculation per element.
       var sweepTimer = 0;
       window.addEventListener('scroll', function () {
         if (sweepTimer) clearTimeout(sweepTimer);
@@ -201,7 +188,7 @@ const videoGameLd = {
     <div class="hero-cine-shade" aria-hidden="true"></div>
     <canvas id="staticNoise" class="static-noise" aria-hidden="true"></canvas>
 
-    <div class="relative mx-auto grid w-full max-w-6xl items-end gap-4 px-4 pt-24 pb-10 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:pt-16 lg:pb-0">
+    <div class="relative mx-auto grid w-full max-w-6xl items-end gap-4 px-4 pt-16 pb-10 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:pt-16 lg:pb-0">
       <div class="hero-cine-copy">
         <p id="launchStatus" data-launch={SITE.launchDate} class="kicker flex items-center gap-3">
           <span class="dot" aria-hidden="true"></span>
@@ -275,7 +262,7 @@ const videoGameLd = {
 
   <!-- ================= NUMBERS ================= -->
   <section aria-label="STATIC in numbers" class="atmo-amber">
-    <div class="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+    <div class="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
       <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((st) => (
           <li class="stat rise">
@@ -301,13 +288,13 @@ const videoGameLd = {
 
   <!-- ================= HOW A ROUND WORKS: sticky story ================= -->
   <section aria-labelledby="loop-h" id="how-to-play" class="border-t border-facility-800">
-    <div class="mx-auto w-full max-w-6xl px-4 pt-24 sm:px-6 sm:pt-32">
+    <div class="mx-auto w-full max-w-6xl px-4 pt-16 sm:px-6 sm:pt-24">
       <p class="kicker">How a round works</p>
       <h2 id="loop-h" class="beat mt-4 max-w-3xl font-display text-4xl font-bold uppercase tracking-wide sm:text-6xl" data-decode>
         Find it. Haul it. Crush it. Get out.
       </h2>
     </div>
-    <div class="story mx-auto grid w-full max-w-6xl gap-10 px-4 pb-24 sm:px-6 lg:grid-cols-[1.35fr_0.65fr] lg:gap-14">
+    <div class="story mx-auto grid w-full max-w-6xl gap-10 px-4 pb-16 sm:px-6 lg:grid-cols-[1.35fr_0.65fr] lg:gap-14">
       <div class="story-media" aria-hidden="true">
         {loop.map((st) => (
           <div class="shot-frame">
@@ -384,7 +371,7 @@ const videoGameLd = {
 
   <!-- ================= JINGLES ================= -->
   <section class="atmo-red relative overflow-hidden" aria-labelledby="jingles-h" id="jingles">
-    <div class="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 py-24 sm:px-6 sm:py-32 lg:grid-cols-[0.95fr_1.05fr]">
+    <div class="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[0.95fr_1.05fr]">
       <div class="order-2 grid gap-4 lg:order-1">
         <div class="reveal shot-frame aspect-[4/3]">
           <Shot id="jingles-closeup" sizes="(min-width: 1024px) 520px, 100vw" lightbox="jingles" imgClass="h-full w-full object-cover object-[50%_30%]" />
@@ -428,7 +415,7 @@ const videoGameLd = {
 
   <!-- ================= THE OTHER THREATS ================= -->
   <section class="atmo-amber border-t border-facility-800" aria-labelledby="threats-h">
-    <div class="relative mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
+    <div class="relative mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
       <svg class="pointer-events-none absolute right-4 top-16 hidden h-32 w-[min(46rem,60%)] sm:block" viewBox="0 0 600 120" aria-hidden="true">
         <path class="draw-path" pathLength="1" d="M0 90 C 60 90, 70 30, 130 30 S 200 100, 260 95 S 330 20, 400 28 S 470 105, 540 80 S 585 40, 600 42" />
         <circle cx="600" cy="42" r="5" fill="currentColor" class="text-signal" />
@@ -475,7 +462,7 @@ const videoGameLd = {
 
   <!-- ================= FOUR ENDINGS ================= -->
   <section class="border-t border-facility-800" aria-labelledby="endings-h">
-    <div class="mx-auto w-full max-w-6xl px-4 pt-24 sm:px-6 sm:pt-32">
+    <div class="mx-auto w-full max-w-6xl px-4 pt-16 sm:px-6 sm:pt-24">
       <p class="kicker">Every round ends on one of four screens</p>
       <h2 id="endings-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
         Escaped or consumed
@@ -484,7 +471,7 @@ const videoGameLd = {
         Win or lose, every round pays {PROGRESSION.currency} and XP.
       </p>
     </div>
-    <ul class="strip mt-12 pb-24 sm:pb-32" aria-label="End-of-round screens">
+    <ul class="strip mt-12 pb-16 sm:pb-24" aria-label="End-of-round screens">
       {RESULTS.map((r) => (
         <li class="w-[min(86vw,36rem)]">
           <div class="shot-frame aspect-[16/9]">
@@ -522,7 +509,7 @@ const videoGameLd = {
 
   <!-- ================= FOOTAGE ================= -->
   <section class="border-t border-facility-800" aria-labelledby="videos-h" id="videos">
-    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
+    <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
       <p class="kicker">Gameplay</p>
       <h2 id="videos-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
         Watch it in motion
@@ -566,7 +553,7 @@ const videoGameLd = {
 
   <!-- ================= WHAT'S DIFFERENT ================= -->
   <section class="border-t border-facility-800" aria-labelledby="diff-h">
-    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
+    <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
       <p class="kicker">Why we built it</p>
       <h2 id="diff-h" class="beat mt-4 max-w-3xl font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
         Not another generator game
@@ -608,7 +595,7 @@ const videoGameLd = {
 
   <!-- ================= ROADMAP ================= -->
   <section aria-labelledby="roadmap-h">
-    <div class="mx-auto grid w-full max-w-6xl gap-12 px-4 py-24 sm:px-6 sm:py-32 lg:grid-cols-[0.9fr_1.1fr]">
+    <div class="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[0.9fr_1.1fr]">
       <div>
         <p class="kicker">Planned — not in the beta yet</p>
         <h2 id="roadmap-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
@@ -633,7 +620,7 @@ const videoGameLd = {
 
   <!-- ================= TEAM ================= -->
   <section class="border-t border-facility-800" aria-labelledby="team-h">
-    <div class="mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
+    <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
       <p class="kicker">Who makes it</p>
       <h2 id="team-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
         Built by three people
@@ -665,7 +652,7 @@ const videoGameLd = {
   <section class="parallax relative overflow-hidden border-t border-facility-800" aria-labelledby="cta-h">
     <Shot id="control-room-hologram" sizes="100vw" imgClass="absolute inset-0 h-full w-full object-cover opacity-40" />
     <div class="absolute inset-0 bg-gradient-to-b from-facility-950 via-facility-950/60 to-facility-950" aria-hidden="true"></div>
-    <div class="relative mx-auto w-full max-w-6xl px-4 py-28 text-center sm:px-6 sm:py-40">
+    <div class="relative mx-auto w-full max-w-6xl px-4 py-20 text-center sm:px-6 sm:py-28">
       <p class="kicker">Free · {GAME.platforms.join(' + ')} · Roblox</p>
       <h2 id="cta-h" class="beat mt-4 font-display text-4xl font-bold uppercase tracking-wide sm:text-6xl" data-decode>
         The bunker is open

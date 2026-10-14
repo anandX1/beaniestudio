@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import VideoCard from '../components/VideoCard.astro';
 import { SITE, LINKS } from '../site.config';
@@ -8,7 +8,7 @@ import { PLAY_VIDEOS, watchUrl } from '../data/videos';
 const videoLd = PLAY_VIDEOS.map((v) => ({
   '@context': 'https://schema.org',
   '@type': 'VideoObject',
-  name: `${v.title} â€” STATIC`,
+  name: `${v.title} — STATIC`,
   description: v.note,
   thumbnailUrl: [new URL(`/yt/${v.id}.jpg`, SITE.url).href],
   uploadDate: v.date,
@@ -46,7 +46,7 @@ const steps = [
 ---
 
 <BaseLayout
-  title="Play STATIC â€” Free Roblox Horror Game (PC & Mobile)"
+  title="Play STATIC — Free Roblox Horror Game (PC & Mobile)"
   description="How to play STATIC on Roblox: free on PC and mobile, up to 7 players per server. Open the game, find a squad in the Discord, and learn the basics."
   path="/play"
   ogImage="/og/play.jpg"
@@ -56,7 +56,7 @@ const steps = [
   <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
     <p class="kicker flex items-center gap-3">
       <span class="dot" aria-hidden="true"></span>
-      {GAME.status} Â· free Â· {GAME.platforms.join(' + ')}
+      {GAME.status} · free · {GAME.platforms.join(' + ')}
     </p>
     <h1 class="mt-6 font-display text-4xl font-bold uppercase leading-tight tracking-tight sm:text-6xl">
       Play STATIC
@@ -65,7 +65,7 @@ const steps = [
       STATIC is free on Roblox. Play on PC or mobile, in the same servers, with up to
       {GAME.serverSize - 1} other players.
     </p>
-    <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary mt-9">Play free on Roblox <span aria-hidden="true">â†’</span></a>
+    <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary mt-9">Play free on Roblox <span aria-hidden="true">→</span></a>
 
     <ol class="mt-16 grid gap-5 md:grid-cols-3">
       {steps.map((s) => (
@@ -79,7 +79,7 @@ const steps = [
             target={s.external ? '_blank' : undefined}
             class="mt-6 font-mono text-sm text-signal hover:text-signal-dim"
           >
-            {s.cta} <span aria-hidden="true">â†’</span>
+            {s.cta} <span aria-hidden="true">→</span>
           </a>
         </li>
       ))}

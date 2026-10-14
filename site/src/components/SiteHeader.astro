@@ -20,7 +20,7 @@ function isActive(href: string): boolean {
 }
 ---
 
-<header class="sticky top-0 z-50 border-b border-facility-700 bg-facility-950/90 backdrop-blur">
+<header class="site-header sticky top-0 z-50">
   <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
     <a href="/" class="group flex items-center gap-3" aria-label={`${SITE.name} — home`}>
       <img
@@ -64,7 +64,7 @@ function isActive(href: string): boolean {
         <span class="font-mono text-lg leading-none">≡</span>
       </summary>
       <nav
-        class="absolute right-0 mt-2 flex w-52 flex-col border border-facility-700 bg-facility-900 p-2 font-mono text-xs tracking-[0.2em]"
+        class="glass absolute right-0 mt-2 flex w-52 flex-col p-2 font-mono text-xs tracking-[0.2em]"
         aria-label="Mobile"
       >
         {nav.map((item) => (

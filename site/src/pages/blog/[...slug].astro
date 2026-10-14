@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
 
@@ -10,10 +10,10 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 
-/** Share targets â€” canonical URL + UTM so analytics attributes every share. */
+/** Share targets — canonical URL + UTM so analytics attributes every share. */
 const postUrl = new URL(`/blog/${post.id}/`, Astro.site).href;
 const shareUrl = `${postUrl}?utm_source=shared&utm_medium=social&utm_campaign=blog`;
-const xIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${post.data.title} â€” STATIC devlog`)}&url=${encodeURIComponent(shareUrl)}`;
+const xIntent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${post.data.title} — STATIC devlog`)}&url=${encodeURIComponent(shareUrl)}`;
 
 const fmtDate = post.data.pubDate.toLocaleDateString('en-US', {
   year: 'numeric',
@@ -48,7 +48,7 @@ const postLd = {
   breadcrumb={[{ name: 'Home', path: '/' }, { name: 'Devlog', path: '/blog' }, { name: post.data.title, path: `/blog/${post.id}` }]}
 >
   <article class="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28">
-    <p class="kicker">Devlog â€” {post.data.tag}</p>
+    <p class="kicker">Devlog — {post.data.tag}</p>
     <h1 class="mt-6 font-display text-3xl font-bold uppercase leading-tight tracking-tight sm:text-5xl" data-decode>
       {post.data.title}
     </h1>
@@ -65,7 +65,7 @@ const postLd = {
 
     <div class="mt-16 border-t border-facility-700 pt-8">
       <!-- Transmit strip: native share sheet on phones, X intent + clipboard
-           fallback on desktop. No third-party buttons/scripts â€” just links. -->
+           fallback on desktop. No third-party buttons/scripts — just links. -->
       <div class="mb-8 flex flex-wrap items-center gap-4">
         <span class="font-mono text-xs tracking-[0.2em] text-facility-500">TRANSMIT THIS ENTRY</span>
         <button
@@ -74,20 +74,20 @@ const postLd = {
           class="btn-secondary px-4 py-1.5 font-mono text-xs uppercase tracking-widest"
           data-url={shareUrl}
           data-title={post.data.title}
-        >Share <span aria-hidden="true">â†’</span></button>
+        >Share <span aria-hidden="true">→</span></button>
         <a
           href={xIntent}
           target="_blank"
           rel="noopener"
           class="font-mono text-xs uppercase tracking-widest text-signal hover:text-signal-dim"
-        >Post on X <span aria-hidden="true">â†—</span></a>
+        >Post on X <span aria-hidden="true">↗</span></a>
         <span id="shareCopied" class="font-mono text-xs text-signal" role="status" aria-live="polite"></span>
       </div>
-      <a href="/blog/" class="font-mono text-sm text-signal hover:text-signal-dim">â† All posts</a>
+      <a href="/blog/" class="font-mono text-sm text-signal hover:text-signal-dim">← All posts</a>
     </div>
   </article>
 
-  <!-- Hunter proximity bar: article reading progress reframed as dread â€”
+  <!-- Hunter proximity bar: article reading progress reframed as dread —
        the deeper you read, the closer IT gets. Fixed to the bottom edge:
        rises from below, never collides with the sticky header. -->
   <div class="fixed inset-x-0 bottom-0 z-[60]">
@@ -146,7 +146,7 @@ const postLd = {
         const title = btn.getAttribute('data-title') || 'STATIC devlog';
         const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
         if (nav.share) {
-          nav.share({ title: title, text: 'STATIC: Salvage vs Hunter â€” devlog', url: url }).catch(function () {});
+          nav.share({ title: title, text: 'STATIC: Salvage vs Hunter — devlog', url: url }).catch(function () {});
           return;
         }
         navigator.clipboard.writeText(url).then(
@@ -160,7 +160,7 @@ const postLd = {
 </BaseLayout>
 
 <style>
-  /* Hand-rolled prose styling â€” typeset to the design system, no plugin. */
+  /* Hand-rolled prose styling — typeset to the design system, no plugin. */
   .prose-static :global(h2) {
     font-family: var(--font-display);
     font-size: 1.5rem;
@@ -201,10 +201,19 @@ const postLd = {
   .prose-static :global(strong) {
     color: var(--color-facility-100);
   }
+  /* Body links stay light so amber keeps meaning "the action"; amber is the hover. */
   .prose-static :global(a) {
-    color: var(--color-signal);
+    color: var(--color-facility-100);
     text-decoration: underline;
+    text-decoration-color: var(--color-facility-600);
     text-underline-offset: 3px;
+    transition:
+      color 0.18s var(--ease-terminal),
+      text-decoration-color 0.18s var(--ease-terminal);
+  }
+  .prose-static :global(a:hover) {
+    color: var(--color-signal);
+    text-decoration-color: var(--color-signal);
   }
   .prose-static :global(blockquote) {
     border-left: 2px solid var(--color-signal-dim);
