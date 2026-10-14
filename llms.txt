@@ -32,6 +32,7 @@ Facts below are taken from the game's scripts (beta build, 10 October 2026).
 ## Pages
 
 - [Home](https://beaniestudio.site/): what STATIC is, gameplay videos, how a round works, Jingles, roadmap, team.
+- [About](https://beaniestudio.site/about/): who Beanie Studios is, the three people behind the game, and official channels.
 - [Beginner guide](https://beaniestudio.site/guide/): roles, round flow, controls, health, tools, tips.
 - [Map](https://beaniestudio.site/guide/map/): every room of the bunker with screenshots.
 - [Screenshots](https://beaniestudio.site/screenshots/): official screenshot gallery.
