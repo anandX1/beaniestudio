@@ -22,7 +22,7 @@ const peopleLd = TEAM.map((m) => ({
   jobTitle: m.title,
   email: m.email,
   worksFor: { '@id': `${SITE.url}/#org` },
-  knowsAbout: m.role,
+  knowsAbout: m.knowsAbout,
 }));
 
 const aboutLd = {

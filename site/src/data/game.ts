@@ -188,9 +188,9 @@ export const ROADMAP = [
 ] as const;
 
 export const TEAM = [
-  { name: 'Anand Kumar', role: 'Scripting, systems, animation and lighting', title: 'Lead developer', email: 'anand@beaniestudio.site', roblox: 'anandxdev', discord: '._.anand._.' },
-  { name: 'Pawan Dahe', role: 'Map building, props, concept and community', title: 'Level designer & community lead', email: 'pawan@beaniestudio.site', roblox: 'SosukeAizen2404', discord: 'pawanxdev' },
-  { name: 'Jai Mishra', role: 'Content, editing, social media and sound effects', title: 'Content & audio lead', email: 'jai@beaniestudio.site', roblox: 'souljai12e43', discord: 'devil_jai2626' },
+  { name: 'Anand Kumar', title: 'Founder & lead developer', role: 'Scripting, gameplay systems, game AI, animation and lighting', knowsAbout: ['Roblox game development', 'Luau scripting', 'gameplay systems design', 'asymmetrical multiplayer design', 'game AI', 'character animation', 'lighting design'], email: 'anand@beaniestudio.site', roblox: 'anandxdev', discord: '._.anand._.' },
+  { name: 'Pawan Dahe', title: 'Founder & level designer', role: 'Level design, bunker maps, props, concept art and community', knowsAbout: ['level design', 'Roblox Studio', 'environment design', '3D prop modelling', 'game concept design', 'community management'], email: 'pawan@beaniestudio.site', roblox: 'SosukeAizen2404', discord: 'pawanxdev' },
+  { name: 'Jai Mishra', title: 'Content & audio lead', role: 'Content, video editing, social media and sound effects', knowsAbout: ['video editing', 'social media management', 'sound design', 'content creation'], email: 'jai@beaniestudio.site', roblox: 'souljai12e43', discord: 'devil_jai2626' },
 ] as const;
 
 /** Real, verifiable community numbers (8 Oct 2026). Update before quoting. */
