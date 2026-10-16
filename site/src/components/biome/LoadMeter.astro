@@ -1,0 +1,140 @@
+---
+/**
+ * Console load meter — the stepped, percussive instrument on /guide/crushers/.
+ *
+ * ── PAGE-SCOPED — PENDING CONSOLIDATION INTO global.css ──────────────────────
+ * CSS only, 0 KB JS, and ONE animated element: everything a compositor has to
+ * promote is `.load-fill`. The 13 cell dividers are a repeating gradient, so no
+ * mask-image and no per-cell element.
+ *
+ * ── WHY `steps()` AND NOT A SMOOTH EASE ──────────────────────────────────────
+ * docs/BIOMES.md gives `amber` the loudest, most mechanical motion on the site.
+ * A smooth fade would say "software"; a quantised one says "machine". The fill
+ * climbs through `MINIGAMES.length` discrete levels on `steps(N, end)`, so it
+ * lands on a cell boundary every time and never sits between two of them.
+ *
+ * ── NO NUMBER IS TYPED ───────────────────────────────────────────────────────
+ * The cell count is `MINIGAMES.length` and the resting level is the pool's mean
+ * expected solve time as a fraction of its slowest game — the meter is a
+ * decorative instrument, but even its idle reading comes out of game.ts rather
+ * than out of taste. The page's real figures live in the quota bar and the spec
+ * table, not here.
+ *
+ * ── REDUCED MOTION / NO-SUPPORT ──────────────────────────────────────────────
+ * With the animation off, the fill rests at its authored level, which is a
+ * complete and legible reading — never an empty bar and never a hidden one.
+ */
+import { MINIGAMES, MINIGAME_EXPECTED_MS, MINIGAME_EXPECTED_MS_RANGE } from '../../data/game';
+
+interface Props {
+  /** Mono field label above the meter. */
+  label?: string;
+}
+
+const { label = 'Console load' } = Astro.props;
+
+const seg = MINIGAMES.length;
+const maxMs = MINIGAME_EXPECTED_MS_RANGE.max;
+const meanMs = MINIGAMES.reduce((sum, m) => sum + MINIGAME_EXPECTED_MS[m], 0) / seg;
+/** Resting reading: mean expected solve time / slowest game. 8.6 s of 12 s. */
+const idle = meanMs / maxMs;
+const meanSec = (meanMs / 1000).toFixed(1);
+const maxSec = (maxMs / 1000).toFixed(1);
+---
+
+<div class="load">
+  <div class="load-head">
+    <p class="label">{label}</p>
+    <p class="readout">
+      <b>{meanSec}</b><u>s mean</u> <b>{maxSec}</b><u>s peak</u>
+    </p>
+  </div>
+
+  {/* Atmospheric, not informational — the numbers above are the information, so
+      this carries no ARIA role and is hidden from the accessibility tree rather
+      than given a label that would only narrate a decoration. */}
+  <div class="load-bar" style={`--seg: ${seg}; --load-idle: ${idle.toFixed(3)}`} aria-hidden="true">
+    <span class="load-fill"></span>
+    <span class="load-cells"></span>
+  </div>
+</div>
+
+<style>
+  /* PAGE-SCOPED — PENDING CONSOLIDATION INTO global.css. */
+  .load-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .load-head .readout > u + b {
+    margin-left: 1rem;
+  }
+
+  .load-bar {
+    position: relative;
+    height: 2.25rem;
+    background: var(--color-facility-900);
+    border: 1px solid var(--color-facility-700);
+    overflow: hidden;
+  }
+
+  .load-fill {
+    position: absolute;
+    inset: 0;
+    transform-origin: 0 50%;
+    /* Authored rest level. A complete reading on its own — with no animation,
+       with no scroll-timeline support and under reduced motion this IS the
+       meter, and it is never an empty bar. */
+    transform: scaleX(var(--load-idle, 0.72));
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--color-signal) 88%, transparent),
+      color-mix(in oklch, var(--color-signal) 46%, transparent)
+    );
+  }
+
+  /* 1px dividers, one per cell, cut out of the fill so the quantisation is
+     visible. `repeating-linear-gradient`'s period is its last stop, so the cell
+     width is `100% / var(--seg)` with no per-cell markup and no mask. */
+  .load-cells {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent calc(100% / var(--seg) - 1px),
+      var(--color-facility-950) calc(100% / var(--seg) - 1px),
+      var(--color-facility-950) calc(100% / var(--seg))
+    );
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .load-fill {
+      /* ONE animated element on this page's instrument. The fill climbs and
+         falls through `--seg` discrete levels; `alternate` turns the climb into
+         a level that keeps re-reading, which is what a VU meter does. */
+      animation: load-step 2.2s steps(var(--seg, 13), end) infinite alternate;
+    }
+    @keyframes load-step {
+      from {
+        transform: scaleX(0.08);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+  }
+
+  /* Mid-session OS flip: back to the authored resting level, not to an empty
+     bar, so the instrument still reads as a live panel. */
+  @media (prefers-reduced-motion: reduce) {
+    .load-fill {
+      animation: none;
+      transform: scaleX(var(--load-idle, 0.72));
+    }
+  }
+</style>

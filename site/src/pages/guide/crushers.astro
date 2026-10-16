@@ -1,7 +1,39 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import ShotFigure from '../../components/ShotFigure.astro';
-import { CRUSHERS, MINIGAMES, MINIGAME_EXPECTED_MS_RANGE, TRANSITION_TASKS, EXTRACTION } from '../../data/game';
+import BiomePrimitives from '../../components/biome/BiomePrimitives.astro';
+import LoadMeter from '../../components/biome/LoadMeter.astro';
+import { CRUSHERS, MINIGAMES, MINIGAME_EXPECTED_MS, MINIGAME_EXPECTED_MS_RANGE, TRANSITION_TASKS, EXTRACTION } from '../../data/game';
+
+/* ── biome: amber ─────────────────────────────────────────────────────────────
+   `/guide/crushers/` is the plant floor, and the loudest page on the site. The
+   motion language is the opposite of the other two biomes': nothing here eases.
+   Every instrument on this page is quantised, because a smooth fade says
+   "software" and a stepped one says "machine":
+
+     the boot sweep   `steps(12, end)`     — 12 discrete jumps, not a glide
+     the readout latch `steps(3, end)`     — hold, snap, hold, snap
+     the load meter   `steps(13, end)`     — 13 levels, one per pool entry
+     the quota fill   `steps(6, end)`      — the charge, in six stages
+     the console wake `steps(1, end)`      — a strip light finding its circuit
+
+   WIRED — `biome="amber"` is passed below, `GuideLayout` forwards it, and
+   `BaseLayout` writes `<body data-biome="amber">`, so the five atmosphere tokens
+   in global.css resolve here.
+
+   As on the other two biome pages, nothing here DEPENDS on that token block: it
+   all composes from the base `--color-facility-*` ramp and `--color-signal`, so
+   the page is correct and legible with or without it. */
+
+/** Per-crusher quota as a share of the round's total — drives the bar's cell
+ *  widths, so the bar encodes the real 120/130/150 split rather than a guess. */
+const quotaShares = CRUSHERS.quotasKg.map((q) => ({
+  kg: q,
+  pct: ((q / CRUSHERS.totalKg) * 100).toFixed(2),
+}));
+
+const minSec = MINIGAME_EXPECTED_MS_RANGE.min / 1000;
+const maxSec = MINIGAME_EXPECTED_MS_RANGE.max / 1000;
 ---
 
 <GuideLayout
@@ -11,13 +43,28 @@ import { CRUSHERS, MINIGAMES, MINIGAME_EXPECTED_MS_RANGE, TRANSITION_TASKS, EXTR
   h1="Crushers, console minigames and the escape"
   kicker="Official guide · Objectives"
   crumb="Crushers & minigames"
+  biome="amber"
   updated="2026-10-08"
 >
+  <BiomePrimitives />
+
   <p class="text-lg">
     To escape STATIC, Scrappers have to complete all <strong>{CRUSHERS.count} crushers</strong>.
     Each one takes two jobs: fill it with scrap, then calibrate its console through a run of
-    quick minigames. When all three are done, the exit opens.
+    quick minigames. When all {CRUSHERS.count} are done, the exit opens.
   </p>
+
+  {/* `.boot` — the plant coming up. The other two biome pages sweep evenly and
+      accelerate; this one lands in twelve discrete jumps. */}
+  <div class="boot-frame crushers-boot">
+    <span class="boot-scan" aria-hidden="true"></span>
+    <div class="strip-row">
+      <p class="readout boot-lock"><b>{CRUSHERS.count}</b><u>crushers</u></p>
+      <p class="readout">{CRUSHERS.quotasKg.join(' / ')}<u>kg each</u></p>
+      <p class="readout">{CRUSHERS.minigamesPerConsole}<u>of {MINIGAMES.length} games</u></p>
+      <p class="readout">{minSec}–{maxSec}<u>s per game</u></p>
+    </div>
+  </div>
 
   <ShotFigure ids={['crusher-console']} caption="A crusher (left) and its console (right), with the Feed crusher prompt." gallery="crushers" />
 
@@ -30,6 +77,50 @@ import { CRUSHERS, MINIGAMES, MINIGAME_EXPECTED_MS_RANGE, TRANSITION_TASKS, EXTR
     <li>The Hunter can't feed, operate or sabotage crushers.</li>
   </ul>
 
+  {/* ── The quota bar ────────────────────────────────────────────────────────
+      The three cells are laid out at the real 120/130/150 split of the 400 kg
+      total, so the bar IS the ratio rather than a picture of one. The fill is
+      one element on a `steps()` timeline, so it charges in six discrete stages
+      as the section enters instead of sliding up. */}
+  <div class="quota">
+    <div class="quota-head">
+      <p class="label">Quota per crusher</p>
+      <p class="readout"><b>{CRUSHERS.totalKg}</b><u>kg for the round</u></p>
+    </div>
+    <div class="quota-bar">
+      <span class="quota-fill" aria-hidden="true"></span>
+      <span class="quota-cells">
+        {quotaShares.map((q, i) => (
+          <span class="quota-cell" style={`--w: ${q.pct}%`}>
+            <span class="quota-cell-kg">{q.kg}<u>kg</u></span>
+            <span class="quota-cell-idx">C{i + 1}</span>
+          </span>
+        ))}
+      </span>
+    </div>
+  </div>
+
+  {/* ── The console, and what it runs ────────────────────────────────────────
+      The three slots are rendered from `CRUSHERS.minigameSlots` rather than
+      typed, so the prose below and the shipped build cannot drift apart. */}
+  <div class="console boot-wake">
+    <div class="console-head">
+      <p class="label">
+        <span class="dot" aria-hidden="true"></span>
+        Console · online
+      </p>
+      <p class="readout"><b>{CRUSHERS.minigamesPerConsole}</b><u>slots</u></p>
+    </div>
+    <ol class="console-slots">
+      {CRUSHERS.minigameSlots.map((slot, i) => (
+        <li>
+          <span class="console-slot-idx">{String(i + 1).padStart(2, '0')}</span>
+          {slot}
+        </li>
+      ))}
+    </ol>
+  </div>
+
   <h2 id="steps">Completing a crusher, step by step</h2>
   <ol>
     <li><strong>Fill the quota.</strong> Feed it scrap until the bar is full.</li>
@@ -41,14 +132,37 @@ import { CRUSHERS, MINIGAMES, MINIGAME_EXPECTED_MS_RANGE, TRANSITION_TASKS, EXTR
   <h2 id="minigames">All {MINIGAMES.length} console minigames</h2>
   <p>
     Each console picks {CRUSHERS.minigamesPerConsole} of these {MINIGAMES.length} every round, and
-    expects about {MINIGAME_EXPECTED_MS_RANGE.min / 1000}–{MINIGAME_EXPECTED_MS_RANGE.max / 1000} seconds
+    expects about {minSec}–{maxSec} seconds
     per game. The pool covers memory tasks, wiring and pipe routing, gauge and beam alignment, and
     timing tasks — learn them in a quiet moment rather than mid-chase.
   </p>
-  <ul class="grid grid-cols-2 gap-x-8 sm:grid-cols-3">
-    {MINIGAMES.map((m) => <li>{m}</li>)}
-  </ul>
+
+  {/* The pool as a spec table: every name is imported, and so is every expected
+      solve time, so this table cannot disagree with the registry comment in
+      game.ts. */}
+  <div class="overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Minigame</th>
+          <th scope="col" class="num">Expected solve</th>
+        </tr>
+      </thead>
+      <tbody>
+        {MINIGAMES.map((m) => (
+          <tr>
+            <td class="text-facility-100">{m}</td>
+            <td class="num text-facility-100">{MINIGAME_EXPECTED_MS[m] / 1000} s</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
   <p>Between minigames, you'll also get short transition tasks: {TRANSITION_TASKS.join(', ').toLowerCase()}.</p>
+
+  {/* The page's one stepped instrument. It reads the pool, not the clock. */}
+  <LoadMeter label="Console load" />
 
   <h3>What happens if you fail a minigame?</h3>
   <p>
@@ -66,7 +180,11 @@ import { CRUSHERS, MINIGAMES, MINIGAME_EXPECTED_MS_RANGE, TRANSITION_TASKS, EXTR
     <li>Winning is personal. Each Scrapper who escapes wins, whoever else made it.</li>
   </ul>
 
-  <ShotFigure ids={['result-escaped']} caption="Make it out and you get the Escaped screen: kg fed, feeds, revives, time alive, Fragments." gallery="crushers" />
+  {/* The one `.focus` node on this page — the last figure on the page, well
+      below the fold, so the `filter` is never in an above-the-fold paint path. */}
+  <div class="focus">
+    <ShotFigure ids={['result-escaped']} caption="Make it out and you get the Escaped screen: kg fed, feeds, revives, time alive, Fragments." gallery="crushers" />
+  </div>
 
   <h2 id="tips">Tips</h2>
   <ul>
@@ -75,3 +193,208 @@ import { CRUSHERS, MINIGAMES, MINIGAME_EXPECTED_MS_RANGE, TRANSITION_TASKS, EXTR
     <li><strong>Plan your exit early.</strong> {EXTRACTION.windowSec} seconds is not long if the last crusher is on the far side of the map.</li>
   </ul>
 </GuideLayout>
+
+<style>
+  /* ── PAGE-SCOPED — PENDING CONSOLIDATION INTO global.css ───────────────────
+     The primitives on this page are scoped to /guide/crushers/ for now. `.boot`
+     and `.focus` already live in components/biome/BiomePrimitives.astro, and the
+     stepped meter is its own component; what is left here is the boot rhythm,
+     the quota bar and the console panel. Nothing here redefines a token and
+     nothing here re-implements a primitive. */
+
+  /* ── The boot rhythm: the only one of the three that is quantised ───────── */
+  .crushers-boot {
+    --boot-dur: 360ms;
+    --boot-ease: steps(12, end);
+    --boot-lock-steps: 3;
+  }
+
+  .crushers-boot .strip-row {
+    border-top: 0;
+  }
+
+  /* ── The quota bar ──────────────────────────────────────────────────────── */
+  .quota {
+    margin: 2.5rem 0;
+  }
+
+  .quota-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .quota-bar {
+    position: relative;
+    height: 3.25rem;
+    background: var(--color-facility-900);
+    border: 1px solid var(--color-facility-700);
+    /* The bar's own height is the cell height, so nothing here can overflow. */
+    overflow: hidden;
+  }
+
+  .quota-fill {
+    position: absolute;
+    inset: 0;
+    transform-origin: 0 50%;
+    /* Authored rest state is FULL, not empty: with no scroll-timeline support
+       and under reduced motion the bar simply reads complete, which is the
+       honest static answer for a quota that is shown, not measured. The
+       animated range starts at 0.12 rather than 0 so that not even a decorative
+       meter ever has zero visible area. */
+    transform: scaleX(1);
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--color-signal) 34%, transparent),
+      color-mix(in oklch, var(--color-signal) 12%, transparent)
+    );
+  }
+
+  .quota-cells {
+    position: absolute;
+    inset: 0;
+    display: flex;
+  }
+
+  /* Cell width is the crusher's share of CRUSHERS.totalKg, written inline from
+     the imported quotas — so 120/130/150 is what the bar draws. */
+  .quota-cell {
+    flex: 0 0 var(--w);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.1rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--color-facility-700);
+  }
+
+  .quota-cell:first-child {
+    border-left: 0;
+  }
+
+  .quota-cell-kg {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-title);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-facility-100);
+  }
+
+  .quota-cell-kg > u {
+    margin-left: 0.25em;
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    letter-spacing: 0.12em;
+    color: var(--color-facility-500);
+  }
+
+  .quota-cell-idx {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    letter-spacing: 0.14em;
+    color: var(--color-facility-500);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .quota-fill {
+        animation: quota-charge linear both;
+        animation-timeline: view();
+        animation-range: entry 12% cover 48%;
+      }
+      /* Six discrete stages, never a smooth slide — and never from zero. */
+      @keyframes quota-charge {
+        from {
+          transform: scaleX(0.12);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quota-fill {
+      animation: none;
+      transform: scaleX(1);
+    }
+  }
+
+  /* ── The console panel — a machine, in the site's own vocabulary ────────── */
+  .console {
+    margin: 2.5rem 0;
+    padding: 1.25rem 1.25rem 1.5rem;
+    border: 1px solid var(--color-facility-700);
+    /* Depth is a 1px ring and an inset lip, never a glow (teardown §3.3). */
+    box-shadow: var(--edge-highlight), var(--shadow-lift);
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--color-facility-800) 70%, transparent),
+      color-mix(in oklch, var(--color-facility-950) 80%, transparent)
+    );
+  }
+
+  .console-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-facility-800);
+  }
+
+  /* The global `.dot` is the site's live-telemetry mark: amber, blinking in two
+     steps. It is reused here, not restyled. */
+  .console-head .label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .console-slots {
+    display: grid;
+    gap: 0.5rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+  }
+
+  @media (min-width: 640px) {
+    .console-slots {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .console-slots li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--color-facility-700);
+    background: color-mix(in oklch, var(--color-facility-950) 70%, transparent);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-facility-100);
+  }
+
+  .console-slot-idx {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: var(--text-caption);
+    letter-spacing: 0.14em;
+    color: var(--color-facility-500);
+  }
+</style>

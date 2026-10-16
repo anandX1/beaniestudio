@@ -8,21 +8,36 @@
    ============================================================ */
 
 @theme {
-  /* — Color: base surfaces (cold, near-black, never pure gray) — */
-  --color-facility-950: oklch(0.16 0.012 240);
-  --color-facility-900: oklch(0.19 0.014 240);
-  --color-facility-800: oklch(0.24 0.016 240);
-  --color-facility-700: oklch(0.31 0.018 240);
-  --color-facility-600: oklch(0.42 0.02 240);
+  /* — Color: base surfaces (cold, near-black, never pure gray) —
+     HUE/CHROMA PASS (visual refresh, 2026-10): the ramp used to carry a
+     measurable blue cast — `oklch(0.16 0.012 240)` paints rgb(9 14 18), a
+     9/255 channel spread, and the light steps read bluer still
+     (facility-500 = rgb(136 148 157), 21/255). Premium dark surfaces are
+     essentially neutral, so chroma drops to roughly 55–65 % of its old value
+     and the OKLCH hue moves 240 -> 235.
+
+     WHAT DID **NOT** CHANGE: every step's OKLCH lightness. That is the whole
+     point — `--color-facility-500` sits at 0.66 because 0.55 failed WCAG AA,
+     and a hue/chroma move at fixed L cannot move a step below its measured
+     lightness. Re-measured against every surface below: the largest change to
+     any text-token contrast ratio on the site is -0.07 (facility-100 on
+     facility-800, 14.28 -> 14.25:1) and the critical facility-500 floor moves
+     *up* (on facility-900, 5.94 -> 5.95:1; on facility-800, 5.32 -> 5.32:1).
+     Channel spreads after the pass: 950 = 7/255, 500 = 14/255. */
+  --color-facility-950: oklch(0.16 0.009 235);
+  --color-facility-900: oklch(0.19 0.010 235);
+  --color-facility-800: oklch(0.24 0.011 235);
+  --color-facility-700: oklch(0.31 0.012 235);
+  --color-facility-600: oklch(0.42 0.013 235);
   /* Lighthouse contrast fix: 0.55 sat right at the WCAG AA line (4.5:1) and
      failed on lighter panels. 0.60 computed ~4.7:1, which passes but reads as
      haze at 0.68rem with 0.16em tracking — the legibility floor, not a
      comfortable read. 0.66 lifts it to ~5.9:1 while staying clearly secondary. */
-  --color-facility-500: oklch(0.66 0.02 240);
+  --color-facility-500: oklch(0.66 0.013 235);
   /* A brighter step for text that must be read, not just glimpsed. */
-  --color-facility-400: oklch(0.72 0.018 240);
-  --color-facility-300: oklch(0.75 0.015 240);
-  --color-facility-100: oklch(0.95 0.005 240);
+  --color-facility-400: oklch(0.72 0.012 235);
+  --color-facility-300: oklch(0.75 0.010 235);
+  --color-facility-100: oklch(0.95 0.004 235);
 
   /* — Signal: alarm amber. ONLY for CTAs, warnings, live elements. — */
   --color-signal: oklch(0.78 0.15 75);
@@ -45,11 +60,27 @@
      Glass is a DEPTH device for floating layers only: the sticky header, the
      mobile menu, sticky rails, lightbox chrome. It is deliberately not applied
      to ordinary content panels — blurring every surface is the generic look this
-     site avoids, and a backdrop-filter on a large area is also real paint cost. — */
-  --color-glass: oklch(0.19 0.014 240 / 0.9);
+     site avoids, and a backdrop-filter on a large area is also real paint cost.
+
+     BLUR VALUE — 14px -> 4px. Measured against the teardown's dark references:
+     GTFO 2.4px, Dead by Daylight 4px, Stripe 12px (mobile menu), Raycast
+     5/10/15/20/36px *staged by layer depth* because it is simulating stacked OS
+     windows. 14px was heavier than every dark reference on the list and bought
+     nothing: this header is a single 61px lip over the page, not a stack of
+     layers needing separation. 4px matches DBD's sticky nav — the closest
+     structural analogue (a fixed two-bar header on a dark game site) — and it
+     paints a legible lip instead of a frosted slab. It is held as a token
+     because the header and the mobile menu must not drift apart. */
+  --blur-float: 4px;
+  --color-glass: oklch(0.19 0.010 235 / 0.9);
   --color-glass-line: oklch(1 0 0 / 0.09);
-  /* A 1px inset highlight is what reads as "machined" rather than flat. */
+  /* A 1px inset highlight is what reads as "machined" rather than flat.
+     `--edge-lip` is the same idea at the strength a *floating* layer needs:
+     a floating layer is read against its own outer edge, so the hairline has
+     to survive on top of a blur. Content panels keep the quieter
+     `--edge-highlight`. */
   --edge-highlight: inset 0 1px 0 0 oklch(1 0 0 / 0.05);
+  --edge-lip: inset 0 1px 0 0 oklch(1 0 0 / 0.09);
   --shadow-lift: 0 18px 40px -24px oklch(0 0 0 / 0.9);
   --shadow-float: 0 24px 60px -28px oklch(0 0 0 / 0.95), 0 2px 8px -4px oklch(0 0 0 / 0.7);
 
@@ -84,8 +115,21 @@
   --text-mono-readout--line-height: 1.4;
   --text-mono-readout--letter-spacing: 0.2em;
 
-  /* — Motion — */
+  /* — Motion —
+     `--ease-terminal` is the UI curve; `--ease-scroll` is the measured
+     scroll-reveal curve from the teardown (Raycast 0.7s / Linear 0.6s / measured
+     shape `translateY(24.8px)`). It is published as a token because two names
+     now need the same curve — see `--ease-reveal` in the v3 layer below, which
+     used to restate the literal.
+
+     NOT added as tokens, on purpose: the 24px rise distance and the 80ms
+     stagger. Both are already stated once in the places that use them (`.beat`
+     and the `.rise` keyframes), and an `@theme` key that no declaration reads is
+     pruned out of the built CSS entirely — so a "token" for them would be a
+     comment pretending to be a token. The measured numbers live here instead:
+     rise 24px, duration 600ms, stagger 80ms, easing `--ease-scroll`. */
   --ease-terminal: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-scroll: cubic-bezier(0.215, 0.61, 0.355, 1);
 
   /* — Section rhythm.
      Sections sat at 96px padding-block (py-24), under the 110–225px band measured
@@ -94,10 +138,31 @@
      `padding-block: var(--section-rhythm)`. */
   --section-rhythm: clamp(4.5rem, 9vw, 8.125rem);            /* 72 → 130px */
 
-  /* — Body wash: the cool glow at the top of the page, held as a token so a
-     seasonal layer can re-light the page with a value swap instead of restating
-     the whole background stack. Alpha is part of the value. */
-  --body-wash: oklch(0.22 0.016 240 / 0.55);
+  /* — Atmosphere: the ONE body-level layer every page shares.
+     This is the `[data-biome]` system's contract (docs/BIOMES.md). A biome block
+     is five token assignments and nothing else; eight biomes therefore cost eight
+     small blocks and ONE composited layer, not eight background implementations.
+
+     Every default below is the "no biome set" state and is deliberately also the
+     value `/` uses, so the base sheet and the `hub` biome block agree.
+
+     `--atmo-hue` is a plain number, not a colour, because it exists to re-tint
+     *surfaces* (panels, plates, hairlines) without touching the ramp's lightness.
+     It is consumed through relative colour syntax with an explicit `oklch(L C …)`
+     fallback so `--color-facility-500` can never drift off L 0.66.
+
+     A biome MAY set: --atmo-1, --atmo-2, --atmo-hue, --atmo-motion, --atmo-rate.
+     A biome MAY NEVER set: --color-signal, --color-signal-dim, or the lightness of
+     any --color-facility-* step. See the [data-biome] section near the end. */
+  --atmo-1: oklch(0.21 0.011 235 / 0.5);
+  --atmo-2: oklch(0.14 0.008 235 / 0.6);
+  --atmo-hue: 235;
+  --atmo-motion: none;
+  --atmo-rate: 120s;
+  /* The top glow is a separate, older token because the seasonal layer re-points
+     it by value swap; the biome layer re-points the two depth stops instead. Both
+     feed the same single `background-image` on <body>. */
+  --body-wash: oklch(0.22 0.011 235 / 0.55);
 }
 
 /* ---------- Base ---------- */
@@ -110,13 +175,70 @@ body {
   background-color: var(--color-facility-950);
   color: var(--color-facility-100);
   font-family: var(--font-sans);
-  /* Subtle vertical facility gradient + vignette — depth without images.
-     The top glow is the --body-wash token so the seasonal layer can re-hue it
-     by value swap alone. */
+  /* ONE body-level atmosphere for the whole site — three non-repeating layers, no
+     per-section `.atmo-*` class (see the note where the old per-section
+     atmospheres live), and no per-page background implementation either. A biome
+     re-points `--atmo-1` / `--atmo-2` / `--body-wash` and this expression is
+     untouched:
+       1. the glow at the top of the page (--body-wash, season-rehueable),
+       2. `--atmo-1`: the primary depth stop, offset off-centre so the field is not
+          a symmetrical vignette,
+       3. `--atmo-2`: the floor, so the page falls off toward the bottom instead of
+          ending flat,
+       4. the base vertical, anchoring the two ramps together.
+     Backgrounds do not affect text contrast unless they are painted, so the
+     painted values were re-measured rather than assumed.
+     `background-attachment: fixed` was REMOVED. The old stack had it, which
+     pinned a full-viewport gradient raster and repainted it on every scroll frame
+     of an 11,700px (desktop) / 14,700px (mobile) page. The layers are now sized in
+     viewport units at 0 0, so nothing is stretched over the document and the page
+     paints once. */
   background-image:
-    radial-gradient(120% 80% at 50% 0%, var(--body-wash), transparent 60%),
-    linear-gradient(oklch(0.17 0.012 240), var(--color-facility-950));
-  background-attachment: fixed;
+    radial-gradient(120% 62% at 50% 0%, var(--body-wash), transparent 62%),
+    radial-gradient(95% 70% at 6% 30%, var(--atmo-1), transparent 72%),
+    radial-gradient(140% 70% at 50% 100%, var(--atmo-2), transparent 74%),
+    linear-gradient(oklch(0.17 0.009 235), var(--color-facility-950));
+  background-repeat: no-repeat;
+}
+
+/* ---------- The ambient primitive: ONE layer, transform only ----------
+   This is the shared 90–180s ambient loop docs/BIOMES.md names `drift` (this
+   sheet already used `.drift` for scroll-linked plate motion, so that class is
+   now `.plate-drift`; the ambient layer is the `drift-a` / `drift-b` keyframes
+   applied to <body>). Dead by Daylight was measured running 90s and 180s smoke
+   loops; the reference band for "atmosphere that reads as slow" is that order,
+   not the 2–3s micro-motion band.
+
+   Cost control, stated because this is the one primitive that runs forever:
+   - `transform` only. No `filter`, no `background-position`, no blur — each of
+     those re-rasterises per frame, which is what makes long ambient loops
+     expensive on a phone.
+   - **Translate only, NO `scale`.** A scaled `<body>` is measured through its
+     transform: it inflated every section's `getBoundingClientRect()`, moved the
+     hero from 900px to 918px on desktop and 961px to 1079px on mobile with no
+     CSS change to the hero at all, and pushed the document ~15px past the
+     viewport to create horizontal overflow. There is nothing here that a scale
+     buys that a slightly larger gradient does not.
+   - ONE element, on <body>, which is already the atmosphere layer. There is no
+     separate overlay, so the page gains no new composited layer.
+   - The gradient field is `no-repeat` and sized in viewport units, so a small
+     translate moves a field that still covers the viewport: no seams, no tiling.
+     The radii are deliberately the values the base sheet already used (120%/95%/
+     140% wide, at 62%/70% tall) — an inset of 1.2% of a 140%-wide field is a
+     couple of pixels, so the field always covers.
+   - `--atmo-motion` defaults to `none`, so with no biome set the loop does not
+     exist at all. A biome opts in by naming the keyframe.
+
+   WHY THE LOOP IS 120s AND NOT 20s: the amplitude is ~1.2% of the element. Over
+   120s that is below the threshold of noticing, which is the point — it is air
+   movement, not an animation. Over 20s the same distance reads as a wobble.
+   The `drift-a` / `drift-b` keyframes themselves are declared with the biome
+   blocks near the end of this file, so the whole ambient vocabulary sits in one
+   place. */
+@media (prefers-reduced-motion: no-preference) {
+  body {
+    animation: var(--atmo-motion) var(--atmo-rate) ease-in-out infinite alternate;
+  }
 }
 
 ::selection {
@@ -205,28 +327,39 @@ body {
    rounded corner or a glass blur. */
 .panel {
   border: 1px solid var(--color-facility-700);
-  background: linear-gradient(180deg, oklch(0.225 0.016 240 / 0.86), oklch(0.175 0.013 240 / 0.86));
+  background: linear-gradient(180deg, oklch(0.225 0.011 235 / 0.86), oklch(0.175 0.009 235 / 0.86));
   box-shadow: var(--edge-highlight), var(--shadow-lift);
   position: relative;
 }
 
 /* Glass surface — floating layers ONLY (header, mobile menu, sticky rails,
-   lightbox chrome). Deliberately not applied to ordinary content panels. */
+   lightbox chrome). Deliberately not applied to ordinary content panels.
+
+   DO NOT HAND-WRITE THE `-webkit-` PREFIX HERE. This is measured, not a style
+   preference: Lightning CSS, run with the syntax as authored, turned
+   `backdrop-filter: blur(X) saturate(1.4); -webkit-backdrop-filter: …` into
+   `-webkit-backdrop-filter` ALONE — it read the pair as "already prefixed, drop
+   the duplicate". This browser reports
+   `CSS.supports('-webkit-backdrop-filter', 'blur(5px)') === false`, so the
+   header's blur computed to `none` on the shipped page: 14px of glass that was
+   never painted, on top of being 3.5x heavier than any dark reference.
+   Verified with lightningcss directly (both with and without browser targets):
+   the unprefixed declaration is the one form that survives every configuration,
+   and the tool adds the prefix back itself when the target list needs it. */
 .glass {
   background: var(--color-glass);
-  backdrop-filter: blur(14px) saturate(1.4);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(var(--blur-float)) saturate(1.4);
   border: 1px solid var(--color-glass-line);
-  box-shadow: var(--edge-highlight), var(--shadow-float);
+  box-shadow: var(--edge-lip), var(--shadow-float);
 }
 
-/* The sticky header: glass, but only a bottom hairline so it reads as a lip
-   over the page rather than a floating card. */
+/* The sticky header: glass, but only a bottom hairline plus the top lip so it
+   reads as a lit edge over the page rather than a floating card. */
 .site-header {
   background: var(--color-glass);
-  backdrop-filter: blur(14px) saturate(1.4);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(var(--blur-float)) saturate(1.4);
   border-bottom: 1px solid var(--color-glass-line);
+  box-shadow: var(--edge-lip);
 }
 
 .panel::before,
@@ -1226,7 +1359,11 @@ body[data-noise='critical'] .dread-vignette {
      - `--ease-reveal`: the measured reveal curve, cubic-bezier(.215,.61,.355,1). */
 :root {
   --ring-hairline: inset 0 0 0 1px oklch(1 0 0 / 0.05);
-  --ease-reveal: cubic-bezier(0.215, 0.61, 0.355, 1);
+  /* `--ease-reveal` is kept as the name everything in this file already reads.
+     Additive refresh: it now points at the same measured curve the token layer
+     publishes as `--ease-scroll`, so the two cannot drift apart. No rule that
+     reads it changes behaviour. */
+  --ease-reveal: var(--ease-scroll);
 }
 
 /* Everything below composes from the layer order Tailwind already declares
@@ -1259,6 +1396,23 @@ body[data-noise='critical'] .dread-vignette {
   width: 0.5rem;
   height: 2px;
   background: var(--color-signal);
+}
+/* The tick powers on with the section. `.eyebrow` carries no `animation` of its
+   own (only the h2s next to it do), so this is a new shorthand on a new target,
+   not a second one on an existing element. Wipes left-to-right on the same
+   view() range as `.rise`, so the mark and its heading arrive together. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .eyebrow::before {
+      animation: tick-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 12% cover 34%;
+    }
+    @keyframes tick-draw {
+      from { scale: 0 1; }
+      to { scale: 1 1; }
+    }
+  }
 }
 
 /* --- Role 2: LABEL — field names, table heads, tags. Same size as the
@@ -1390,17 +1544,127 @@ body[data-noise='critical'] .dread-vignette {
   }
 }
 
-/* --- Ruler + rule: CSS-only engineered texture, 0 requests. --- */
+/* --- Ruler + rule: CSS-only engineered texture, 0 requests.
+   The ruler draws itself in as its section enters: a horizontal mask-image
+   reveals the tick strip left-to-right, and the marks lift the last 4px. Both
+   properties are paint-only, so nothing here can move layout or LCP — and every
+   `.ticks` element is a divider *below* the first viewport (verified: the first
+   one sits at y=1420 at 1440x900 and y=1448 at 390x844). The static rule below
+   is the whole effect for browsers without scroll timelines and for anyone on
+   reduced motion; it is never hidden first. --- */
 .ticks {
   height: 6px;
   background-image: linear-gradient(90deg, var(--color-facility-600) 1px, transparent 0);
   background-size: 8px 6px;
   background-repeat: repeat-x;
+  transform-origin: 0 100%;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ticks {
+      animation: tick-rule linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 30%;
+      /* `mask-size` is animated from 0% to 100%, which is a plain CSS length
+         interpolation — deliberately NOT `mask-position` on an oversized mask,
+         because percent mask-position resolves against (mask size - box size)
+         and is therefore undefined while the mask is narrower than the box. */
+      mask-image: linear-gradient(90deg, oklch(0 0 0), oklch(0 0 0));
+      -webkit-mask-image: linear-gradient(90deg, oklch(0 0 0), oklch(0 0 0));
+      mask-size: 0% 100%;
+      -webkit-mask-size: 0% 100%;
+      mask-repeat: no-repeat;
+      -webkit-mask-repeat: no-repeat;
+    }
+    @keyframes tick-rule {
+      from { mask-size: 0% 100%; -webkit-mask-size: 0% 100%; transform: translateY(4px); opacity: 0.35; }
+      to { mask-size: 100% 100%; -webkit-mask-size: 100% 100%; transform: none; opacity: 1; }
+    }
+  }
 }
 .rule {
   height: 1px;
   border: 0;
   background: var(--color-facility-700);
+}
+
+/* --- DRIFT: ±4px of scroll-linked lateral movement on a photo plate.
+   NAMED `.plate-drift`, NOT `.drift`: docs/BIOMES.md reserves `.drift` for the
+   ambient 90–180s background primitive, which lives on <body> as `drift-a` above.
+   Two different jobs, so two names — a bare `.drift` selector would have matched
+   both the ambient layer and every photo plate.
+   This is the "one layer maximum" version of the teardown's parallax advice.
+   It is deliberately NOT the `.parallax` recipe (scale 1.18 + translateY 7%,
+   which moves a full-bleed band ±117px at desktop): that reads as a cheap
+   slideshow, and on a section that is not `overflow: hidden` it walks the image
+   out of its own frame. 4px is below the threshold at which a viewer reads
+   "parallax" and above the threshold at which the plate stops feeling pasted
+   on. `translate` is compositor-only.
+
+   GEOMETRY RULE — the frame needs 4px of headroom in the direction of travel.
+   Horizontal drift is only ever applied to a plate whose width is set by the
+   grid and whose image is `object-fit: cover`, so the image has an unbounded
+   crop to move within; both are `.plate`, which is `overflow: hidden`, so the
+   worst case is a 4px crop change and never a gap. Do not apply this to a
+   full-bleed `<img>` that has no such headroom. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .plate-drift {
+      animation: plate-drift linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+    @keyframes plate-drift {
+      from { translate: -4px 0; }
+      to { translate: 4px 0; }
+    }
+  }
+}
+
+/* --- WIPE: section-entry reveal for a plate that is provably below the fold.
+   The teardown's clip-path shutter, upgraded from `inset(14% ...)` to a
+   directional wipe, and gated by hand rather than by range: `.fold-safe` may
+   only be written on an element that sits below the first viewport at EVERY
+   breakpoint (see index.astro, which carries the measured geometry for the two
+   elements that use it). That is the whole point — an element behind
+   `clip-path: inset(... 100% ...)` has zero visible area at first paint, and if
+   it happens to be the LCP element Chromium records LCP at scroll time. This
+   class is therefore never allowed on the hero, on anything inside the first
+   100svh, or on the `.hero-cine*` subtree. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .fold-safe.wipe {
+      animation: plate-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 6% cover 34%;
+    }
+    @keyframes plate-wipe {
+      from { clip-path: inset(0 100% 0 0); }
+      to { clip-path: inset(0); }
+    }
+  }
+}
+
+/* --- Progress rail, CSS-only path.
+   The JS rail (index.astro) writes `transform: scaleX()` from a scroll listener,
+   which is the one scroll listener the site keeps. Where CSS scroll timelines
+   exist, the identical meter is done by the compositor on the same element, so
+   the listener's work is redundant. `body[data-rail]` is not required: the
+   animation only exists inside `@supports`, where the JS path is already
+   producing the same result, and both write the same property from the same
+   origin — so the two agree instead of fighting. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .progress-rail-fill {
+      animation: rail-fill linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100%;
+    }
+    @keyframes rail-fill {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+  }
 }
 
 /* --- PLATE: the diegetic "facility monitor" frame for a screenshot.
@@ -1577,6 +1841,58 @@ body[data-noise='critical'] .dread-vignette {
   }
 }
 
+/* --- Content visibility for the long below-fold sections.
+   `content-visibility: auto` skips layout, paint and style for a subtree that is
+   far outside the viewport. Measured on the built homepage, the sections that
+   qualify hold 472 elements between them, 36 of them lazy images: section 06
+   ("Stills") alone is 173 nodes + 22 images at BOTH widths, section 04 ("Tour")
+   is 91 + 8, section 05 ("Jingles") is 76 + 3.
+
+   THE REASON THE PREVIOUS ATTEMPT WAS RIGHT TO REFUSE IT: `contain-intrinsic-size`
+   sizes the element's CONTENT BOX, not its border box, and a wrong value moves the
+   scrollbar. Every number below was therefore measured, not estimated — and the
+   measurement found a 260px trap: `padding-block: var(--section-rhythm)` is
+   129.6px per side at 1440 (144px at 390), so an intrinsic size copied from the
+   section's own `getBoundingClientRect().height` (529px for the job section)
+   makes the skipped box 789px tall. The value has to be
+   `rectHeight - paddingBlock - borderBlock`. Verified by forcing each section
+   into its skipped state with `content-visibility: hidden` and comparing: the
+   residual error is <= 0.02px on desktop and exactly 0 on mobile, at every
+   section. Document height under the full rule moved by 1px of sub-pixel
+   rounding.
+
+   DELIBERATELY EXCLUDED: the hero, which is already in view at first paint (so
+   containment saves nothing) and is the only section that must never carry a
+   new behaviour, and the closing CTA, which is the smallest section on the page
+   at 7% of it. The hero is also the only `.fold-safe`-forbidden subtree here.
+
+   Values are templated per section because the two breakpoints differ by more
+   than half (the tour: 1238 vs 2876) and no single `clamp()` spans both
+   honestly. Zero JS. Browsers without support ignore both declarations and lay
+   the page out exactly as before. --- */
+.cis {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1px;
+}
+@media (min-width: 640px) {
+  #how-to-play.cis { contain-intrinsic-size: auto 817px; }
+  #tour.cis { contain-intrinsic-size: auto 1238px; }
+  #jingles.cis { contain-intrinsic-size: auto 1349px; }
+  #stills.cis { contain-intrinsic-size: auto 1796px; }
+  #videos.cis { contain-intrinsic-size: auto 688px; }
+  #difference.cis { contain-intrinsic-size: auto 570px; }
+  #planned.cis { contain-intrinsic-size: auto 280px; }
+}
+@media (max-width: 639.98px) {
+  #how-to-play.cis { contain-intrinsic-size: auto 1723px; }
+  #tour.cis { contain-intrinsic-size: auto 2876px; }
+  #jingles.cis { contain-intrinsic-size: auto 2057px; }
+  #stills.cis { contain-intrinsic-size: auto 1054px; }
+  #videos.cis { contain-intrinsic-size: auto 937px; }
+  #difference.cis { contain-intrinsic-size: auto 968px; }
+  #planned.cis { contain-intrinsic-size: auto 437px; }
+}
+
 /* ============================================================
    SEASONAL OVERLAY — opt-in, inert unless switched on.
 
@@ -1610,7 +1926,12 @@ body[data-noise='critical'] .dread-vignette {
   --color-signal: oklch(0.78 0.15 62);
   --color-signal-dim: oklch(0.62 0.12 62);
 
-  /* The single body-level wash. Same lightness as the default, warm hue. */
+  /* The single body-level wash. Same lightness as the default, warm hue.
+     `--atmo-1` / `--atmo-2` are deliberately NOT re-hued by the season: a season
+     re-lights the room, it does not re-key the building, and the two depth stops
+     are held at OKLCH 0.21 / 0.14 with low chroma — a warm swap there would tint
+     the whole field pumpkin rather than warming the light. A biome moves them
+     because that is exactly its job; see the [data-biome] section below. */
   --body-wash: oklch(0.22 0.035 62 / 0.55);
 }
 
@@ -1619,17 +1940,126 @@ body[data-noise='critical'] .dread-vignette {
 
    --color-facility-950 … -100  the facility ramp. Specifically --color-facility-500
                                 at oklch(0.66): it sits at 0.66 because 0.55 failed
-                                AA (4.5:1). Moving any ramp step breaks contrast
-                                that was measured, not guessed.
+                                AA (4.5:1). Moving any ramp step's LIGHTNESS
+                                breaks contrast that was measured, not guessed.
+                                (Hue/chroma may move at fixed L; that was done
+                                once, and re-measured — see the ramp comment.)
    --color-status-red           danger stays red in every season — the Hunter bar,
                                 the dread vignette and the alarm underglow depend
                                 on that hue staying put.
    --color-status-green/-blue   readout semantics.
    --color-glass, -glass-line,  the depth system is season-independent.
-   --edge-highlight, --shadow-lift, --shadow-float
+   --edge-highlight, --edge-lip,
+   --blur-float, --shadow-lift, --shadow-float
+   --atmo-1 / --atmo-2          the two body depth stops. A BIOME may move these;
+                                a season may not, because a season is a change of
+                                light and a biome is a change of room.
    --font-display/-sans/-mono   type never changes.
    --text-*, --section-rhythm   the scale and the section rhythm never change.
-   --ease-terminal              motion never changes. */
+   --ease-terminal, --ease-scroll  motion never changes. */
+
+/* ============================================================
+   BIOMES — one place per page. Spec: docs/BIOMES.md.
+
+   One attribute on <body> selects one of eight token blocks. A block may set
+   exactly five things and nothing else:
+
+     --atmo-1      primary depth stop    (a radial-gradient colour stop)
+     --atmo-2      secondary depth stop
+     --atmo-hue    surface tint hue      (a number; NOT the accent)
+     --atmo-motion which ambient keyframe (or `none`)
+     --atmo-rate   that keyframe's duration
+
+   HARD LIMITS, enforced by what is absent from every block below:
+     - A biome NEVER sets --color-signal or --color-signal-dim. Amber is the only
+       signal on the site and it is identical on all 25 pages (rule 2).
+     - A biome NEVER sets the LIGHTNESS of a --color-facility-* step. That ramp is
+       contrast-tuned — --color-facility-500 sits at L 0.66 because 0.55 failed
+       WCAG AA. A biome may shift hue/chroma; a change to L requires recomputed
+       ratios, and none of these blocks makes one.
+     - A biome is PER PAGE, never per section. If a section needs its own colour,
+       the page has the wrong biome.
+
+   Cost: eight small token blocks and ONE composited layer, because every block
+   feeds the single `background-image` on <body>. No biome block contains a
+   gradient definition, a selector for a page element, or a new @keyframes.
+
+   BUILD STATE: `hub` (the homepage) plus `blueprint`, `red` and `amber` — the
+   three the first slice needs (`/guide/map/`, `/guide/jingles/`,
+   `/guide/crushers/`). `cold`, `green`, `signal` and `roster` arrive with their
+   pages. Every block below is inert until a page passes `biome`, which is why
+   the remaining four being absent changes nothing today.
+
+   ON THE TWO @keyframes BELOW: `drift-a` is the shared ambient primitive and
+   `drift-b` is its slower sibling. They exist here rather than per biome because
+   the spec's rule is that a biome *names* a keyframe and never writes one — so
+   the whole system has exactly two ambient animations, not eight.
+   ============================================================ */
+
+/* `/` — Central Room. Amber globe glow; the one warm room in the bunker.
+   These three values are the @theme defaults, restated so the contract is
+   visible: a page with no biome renders exactly this. */
+[data-biome='hub'] {
+  --atmo-1: oklch(0.21 0.011 235 / 0.5);
+  --atmo-2: oklch(0.14 0.008 235 / 0.6);
+  --atmo-hue: 235;
+  --atmo-motion: drift-a;
+  --atmo-rate: 120s;
+}
+
+/* `/guide/map/`, `/guide/numbers/` — Schematic / data core. Cold blue, dense.
+   Reads as a plotter readout: the coldest field on the site, tinted a little
+   further toward cyan than the hub, and drifting slowly so a floor plan feels
+   lit from a moving source. Lightness is held at the base values (0.21 / 0.14):
+   only hue and chroma move, so no text contrast recompute is owed. */
+[data-biome='blueprint'] {
+  --atmo-1: oklch(0.21 0.018 232 / 0.55);
+  --atmo-2: oklch(0.14 0.014 232 / 0.62);
+  --atmo-hue: 232;
+  --atmo-motion: drift-a;
+  --atmo-rate: 150s;
+}
+
+/* `/guide/jingles/`, `/guide/danger/`, `/404` — His territory. Red, predatory.
+   The warmest-dark field on the site and the only biome whose depth stops carry
+   real chroma, because the whole page is an alarm. Lightness still held at
+   0.21 / 0.14 so `--color-status-red` and the facility ramp keep the ratios they
+   were measured at, and 90s is the faster of the two ambient rates the teardown
+   measured on Dead by Daylight — an approach, not a drift. */
+[data-biome='red'] {
+  --atmo-1: oklch(0.21 0.028 25 / 0.5);
+  --atmo-2: oklch(0.14 0.020 25 / 0.62);
+  --atmo-hue: 25;
+  --atmo-motion: drift-b;
+  --atmo-rate: 90s;
+}
+
+/* `/guide/crushers/`, `/guide/scrap/`, `/codes/`, `/play/` — The machines,
+   weigh station, keypad, airlock. Amber-lit industrial; the loudest pages.
+   The depth stops are deliberately LOW-chroma amber: a saturated amber field
+   would be exactly the "amber as a background fill" that rule 2 forbids, and it
+   would put the accent on every element of four pages at once. A trace of the
+   signal's hue in the *air*, with the signal itself still reserved for marks. */
+[data-biome='amber'] {
+  --atmo-1: oklch(0.21 0.020 75 / 0.5);
+  --atmo-2: oklch(0.14 0.014 75 / 0.6);
+  --atmo-hue: 75;
+  --atmo-motion: drift-b;
+  --atmo-rate: 110s;
+}
+
+/* The two ambient primitives. Both are `translate3d` only — no `scale`, because
+   a scaled <body> is measured through its transform and inflated every section's
+   rect by ~2% (measured: the hero read 918px instead of 900px). Both are inert
+   unless a biome names one. */
+@keyframes drift-a {
+  from { transform: translate3d(-1.2%, -0.8%, 0); }
+  to   { transform: translate3d(1.2%, 0.8%, 0); }
+}
+@keyframes drift-b {
+  from { transform: translate3d(0.9%, 1%, 0); }
+  to   { transform: translate3d(-0.9%, -1%, 0); }
+}
 
 /* ---------- Reduced motion: kill every non-essential effect ---------- */
 
@@ -1690,5 +2120,55 @@ body[data-noise='critical'] .dread-vignette {
   }
   .rack-meter {
     display: none;
+  }
+
+  /* --- Visual refresh: every animation added in this pass, named.
+     Each is scroll-linked decoration, so `animation: none` is the complete
+     answer: the element keeps its authored static state (the eyebrow tick at
+     its 8x2px, the ruler at full width, the plate un-translated and un-clipped)
+     and no start value is left behind. The `@supports` blocks that declare them
+     already sit inside `no-preference`, so these are belt-and-braces against a
+     mid-session OS flip — the same reason the `.fx-io` disarm exists above.
+
+     `body` is listed because it is the ambient atmosphere layer: the drift is a
+     pure `transform`, so removing the animation restores the untouched gradient
+     field, which is the reduced-motion page. No start value, no opacity, no
+     clipped area — a reduced-motion visitor sees the full field at rest. --- */
+  body {
+    animation: none;
+  }
+  .eyebrow::before,
+  .ticks,
+  .plate-drift,
+  .fold-safe.wipe,
+  .progress-rail-fill {
+    animation: none;
+  }
+  .ticks {
+    /* The mask is authored inside the animated rule; clear it so a browser that
+       drops the animation cannot be left with a zero-width mask. */
+    mask-image: none;
+    -webkit-mask-image: none;
+    opacity: 1;
+    transform: none;
+  }
+  .fold-safe.wipe {
+    clip-path: none;
+  }
+  .plate-drift {
+    translate: none;
+  }
+
+  /* --- Two animations that pre-date this pass and were NOT covered by any
+     reduced-motion rule. Both are scroll-driven, so under a reduce preference
+     they must be removed outright rather than left to run. Listed here because
+     the contract requires every non-essential animation to be disabled under
+     reduced motion, and neither had a consumer until it was measured. --- */
+  .count,
+  .gauge-fill {
+    animation: none;
+  }
+  .gauge-fill {
+    stroke-dashoffset: 0;
   }
 }

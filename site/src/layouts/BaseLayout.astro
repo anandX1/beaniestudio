@@ -9,6 +9,7 @@ import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { SITE, LINKS } from '../site.config';
 import { TEAM } from '../data/game';
+import type { Biome } from '../data/biomes';
 
 interface Props {
   /** Page title — rendered as "%page% — Beanie Studio" (or verbatim if it already contains the brand). */
@@ -37,6 +38,23 @@ interface Props {
   noindex?: boolean;
   /** Open Graph type — 'article' for devlog posts. */
   ogType?: 'website' | 'article';
+  /**
+   * Which bunker location this page is. Written to `<body data-biome="…">` and
+   * resolved by one token block per biome in global.css (spec: docs/BIOMES.md).
+   * A biome sets five atmosphere tokens — two depth stops, a surface-tint hue,
+   * and an ambient keyframe + rate — and may never touch the amber signal or the
+   * lightness of the facility ramp.
+   *
+   * Omitted means "no biome": the page renders the base sheet's default field,
+   * which is what every page did before this attribute existed. `hub` (the
+   * homepage) and the `blueprint` / `red` / `amber` blocks are wired; the rest
+   * arrive with their pages, and pages that do not pass this prop are unaffected
+   * either way.
+   *
+   * The union itself lives in `src/data/biomes.ts` so this layout and
+   * `GuideLayout` (which forwards it) cannot drift apart.
+   */
+  biome?: Biome;
 }
 
 const {
@@ -51,6 +69,7 @@ const {
   breadcrumb,
   noindex = false,
   ogType = 'website',
+  biome,
 } = Astro.props;
 
 /** Cloudflare Web Analytics token — injected only when the environment provides it, so nothing loads until the user opts in by setting the token in DEPLOY.md. */
@@ -325,7 +344,7 @@ const allLd = [organizationLd, websiteLd, breadcrumbLd, ...jsonLd].filter(Boolea
       <script is:inline set:html={beaconLoader} />
     )}
   </head>
-  <body>
+  <body data-biome={biome}>
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] focus:bg-signal focus:text-facility-950 focus:px-3 focus:py-2 focus:font-mono"

@@ -1,6 +1,8 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import ShotFigure from '../../components/ShotFigure.astro';
+import BiomePrimitives from '../../components/biome/BiomePrimitives.astro';
+import PlanSchematic from '../../components/biome/PlanSchematic.astro';
 import { ROOM_INFO } from '../../data/rooms';
 import { ROOMS, CRUSHERS, EXTRACTION, GAME } from '../../data/game';
 import { SITE, IMAGE_LICENSE } from '../../site.config';
@@ -14,6 +16,20 @@ const ogDims = fullDims(ogShot);
 
 const pictured = new Set(ROOM_INFO.map((r) => r.name));
 const unpictured = ROOMS.filter((r) => !pictured.has(r));
+
+/* ── biome: blueprint ─────────────────────────────────────────────────────────
+   `/guide/map/` is a drafting table. Cold, dense, and drawn rather than
+   decorated: the plan traces itself as you scroll and the node for the room you
+   are reading picks up the one signal colour on the page.
+
+   WIRED — `biome="blueprint"` is passed below, `GuideLayout` forwards it, and
+   `BaseLayout` writes `<body data-biome="blueprint">`, so the five atmosphere
+   tokens in global.css resolve on this page.
+
+   Nothing visual here DEPENDS on that token block: every element is built from
+   the base `--color-facility-*` ramp and the existing primitives, so the page is
+   correct and legible with or without it. The biome only deepens the field
+   behind the plan. */
 
 const galleryLd = {
   '@context': 'https://schema.org',
@@ -41,6 +57,7 @@ const galleryLd = {
   h1="The STATIC map: every room in the bunker"
   kicker="Official guide · Map"
   crumb="Map"
+  biome="blueprint"
   updated="2026-10-08"
   ogImage={ogShot.full}
   ogImageWidth={ogDims.w}
@@ -48,6 +65,8 @@ const galleryLd = {
   ogImageAlt="Top-down view of the STATIC bunker map"
   jsonLd={[galleryLd]}
 >
+  <BiomePrimitives />
+
   <p class="text-lg">
     The {GAME.status.toLowerCase()} of STATIC has one map: an abandoned underground bunker. This
     page shows every room we've captured so far, straight from the game. Use it to learn the
@@ -60,24 +79,90 @@ const galleryLd = {
     learning them pays off.
   </div>
 
+  {/* `.boot` — the page's own "survey open" beat. The frame holds no focusable
+      element, so its clip cannot swallow a focus outline; only the 1px sweep
+      moves, and it exits the box before it stops. Even, linear, slow: this is a
+      draughting table, not a machine. */}
+  <div class="boot-frame map-boot">
+    <span class="boot-scan" aria-hidden="true"></span>
+    <div class="strip-row">
+      <p class="readout boot-lock"><b>{ROOM_INFO.length}</b><u>rooms logged</u></p>
+      <p class="readout"><b>{ROOMS.length}</b><u>rooms built</u></p>
+      <p class="readout"><b>{CRUSHERS.count}</b><u>crushers</u></p>
+      <p class="readout"><b>{EXTRACTION.windowSec}</b><u>s to leave</u></p>
+    </div>
+  </div>
+
   <ShotFigure ids={['map-topdown']} caption="The whole bunker from above, roof removed (Studio capture)." gallery="map" />
 
-  <nav aria-label="Rooms" class="callout">
-    <p class="font-mono text-xs tracking-[0.16em] text-facility-500">ROOMS ON THIS PAGE</p>
-    <ol class="mt-2 grid gap-x-8 sm:grid-cols-2">
-      {ROOM_INFO.map((r) => <li><a href={`#${r.slug}`}>{r.name}</a></li>)}
-      <li><a href="#round">Lobby and Hunter reveal</a></li>
-    </ol>
-  </nav>
+  {/* `.count` — the pool's own reveal, reused from global.css verbatim. Each
+      value is the imported length, not a typed digit, and the real figure also
+      lives in the DOM for crawlers via `.count-real`. */}
+  <div class="strip-row rise map-counts">
+    <p class="readout">
+      <span class="count" style={`--to: ${ROOM_INFO.length}`}><span class="count-real">{ROOM_INFO.length}</span></span><u>photographed</u>
+    </p>
+    <p class="readout">
+      <span class="count" style={`--to: ${ROOMS.length}`}><span class="count-real">{ROOMS.length}</span></span><u>built in Studio</u>
+    </p>
+    <p class="readout">
+      <span class="count" style={`--to: ${unpictured.length}`}><span class="count-real">{unpictured.length}</span></span><u>not pictured</u>
+    </p>
+    <p class="readout">
+      <span class="count" style={`--to: ${CRUSHERS.count}`}><span class="count-real">{CRUSHERS.count}</span></span><u>crusher points per round</u>
+    </p>
+  </div>
 
-  {ROOM_INFO.map((r) => (
-    <section id={r.slug} class="scroll-mt-24">
-      <h2>{r.name}</h2>
-      <p>{r.blurb}</p>
-      <ShotFigure ids={r.shots.slice(0, 1)} gallery="map" />
-      {extras(r).length > 0 && <ShotFigure ids={extras(r)} gallery="map" aspect="16 / 10" />}
-    </section>
-  ))}
+  {/* ── The plan, and the rooms it is a plan OF ──────────────────────────────
+      Two columns above 1024px: the schematic rails on the left while the room
+      details scroll past it on the right. `timeline-scope` names the per-room
+      view timelines so a node inside the <svg> can read the timeline of a
+      <section> that is not its ancestor — the same mechanism global.css uses
+      for the homepage's sticky story, and gated the same way, so a browser
+      without it gets a fully drawn plan and no emphasis. */}
+  <div
+    class="map-plan"
+    style={`timeline-scope: ${ROOM_INFO.map((_, i) => `--rm-${i}`).join(', ')}`}
+  >
+    <div class="map-plan-rail">
+      {/* The one `.focus` node on this page. The images on this page all come
+          from Shot, and the top-down capture is the likeliest LCP element — a
+          `filter` is the last thing to spend paint on there. The plan is the
+          page's actual subject, so the grade lands on the plan. */}
+      <div class="focus">
+        <PlanSchematic rooms={ROOM_INFO} unpictured={unpictured} />
+      </div>
+    </div>
+
+    <div class="map-plan-body">
+      <nav aria-label="Rooms" class="callout map-nav">
+        <p class="label">Rooms on this page</p>
+        <ol class="map-nav-list">
+          {ROOM_INFO.map((r, i) => (
+            <li>
+              <a href={`#${r.slug}`}>
+                <span class="map-nav-idx">{String(i + 1).padStart(2, '0')}</span>
+                {r.name}
+              </a>
+            </li>
+          ))}
+          <li><a href="#round"><span class="map-nav-idx">—</span>Lobby and Hunter reveal</a></li>
+        </ol>
+      </nav>
+
+      {ROOM_INFO.map((r, i) => (
+        <section id={r.slug} class="scroll-mt-24 map-room" style={`view-timeline-name: --rm-${i}`}>
+          <p class="label map-room-idx">
+            Plate {String(i + 1).padStart(2, '0')} · {r.shots.length} capture{r.shots.length === 1 ? '' : 's'} logged
+          </p>
+          <h2>{r.name}</h2>
+          <p>{r.blurb}</p>
+          <ShotFigure ids={r.shots.slice(0, 1)} gallery="map" />
+          {extras(r).length > 0 && <ShotFigure ids={extras(r)} gallery="map" aspect="16 / 10" />}
+        </section>
+      ))}
+    </div>
+  </div>
 
   <h2 id="hallways">Hallways</h2>
   <p>
@@ -106,3 +191,125 @@ const galleryLd = {
     </p>
   )}
 </GuideLayout>
+
+<style>
+  /* ── PAGE-SCOPED — PENDING CONSOLIDATION INTO global.css ───────────────────
+     The primitives on this page are scoped to /guide/map/ for now. `.boot` and
+     `.focus` already live in components/biome/BiomePrimitives.astro; what
+     remains here is this page's own drafting-table layout and its room plate
+     styling. Nothing here redefines a token, and nothing here re-implements a
+     primitive: `.draw`, `.count`, `.rise` and `.reveal` are all composed from
+     global.css as shipped. */
+
+  /* Even and slow. The other two biome pages set their own --boot-ease; the
+     difference between the three boot beats is this one line. */
+  .map-boot {
+    --boot-dur: 460ms;
+    --boot-ease: linear;
+  }
+
+  .map-boot .strip-row {
+    border-top: 0;
+  }
+
+  .map-counts {
+    margin-bottom: 2.5rem;
+  }
+
+  .map-counts .readout > u {
+    display: block;
+    margin-top: 0.15rem;
+    margin-left: 0;
+    font-size: var(--text-caption);
+    letter-spacing: 0.14em;
+  }
+
+  /* ── The plan and its room column ──────────────────────────────────────── */
+  .map-plan {
+    display: grid;
+    gap: 2rem;
+    margin-top: 2.5rem;
+  }
+
+  .map-plan-rail {
+    align-self: start;
+  }
+
+  @media (min-width: 1024px) {
+    .map-plan {
+      grid-template-columns: minmax(0, 23rem) minmax(0, 1fr);
+      gap: 3rem;
+    }
+    /* Sticky, but never a floating layer: it is a rail, not a card, so it takes
+       no glass and no shadow — the schematic keeps its own 1px ring. `top`
+       clears the sticky header. */
+    .map-plan-rail {
+      position: sticky;
+      top: 5.5rem;
+    }
+  }
+
+  .map-plan-body > .map-room:first-of-type h2 {
+    margin-top: 0;
+  }
+
+  /* ── Room plates ───────────────────────────────────────────────────────── */
+  .map-nav {
+    margin-bottom: 2rem;
+  }
+
+  .map-nav-list {
+    margin-top: 0.75rem;
+    display: grid;
+    gap: 0.35rem 2rem;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 640px) {
+    .map-nav-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .map-nav-list li {
+    margin-top: 0;
+  }
+
+  .map-nav-list a {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    color: var(--color-facility-300);
+    text-decoration: none;
+    transition: color 0.18s var(--ease-terminal);
+  }
+
+  .map-nav-list a:hover {
+    color: var(--color-signal);
+  }
+
+  .map-nav-idx {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    letter-spacing: 0.14em;
+    color: var(--color-facility-500);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The plate stamp above each room: a survey sheet numbers its plates. */
+  .map-room-idx {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--color-facility-500);
+  }
+
+  .map-room {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-facility-800);
+  }
+
+  .map-room + .map-room {
+    padding-top: 1.5rem;
+  }
+</style>

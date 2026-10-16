@@ -28,6 +28,16 @@
  *   asserts that mirror still holds after a shot is added.
  *
  *   `Shot.full` deliberately stays WebP — see src/data/media.ts.
+ *
+ * PRIORITY NOTE — why a non-eager image declares `fetchpriority="low"`
+ *   `loading="lazy"` already keeps these images out of the initial load, but on
+ *   a long homepage the browser still discovers ~35 of them while the hero is
+ *   decoding. `fetchpriority="low"` demotes them below the hero image, the
+ *   fonts and the CSS in the fetch scheduler, which is exactly the ordering this
+ *   page wants: the LCP element is `central-room-globe` and nothing else should
+ *   compete with it. The attribute is ignored by browsers that do not implement
+ *   it, and for lazy images it can never raise priority — so it is a one-way
+ *   demotion with no failure mode. The hero passes `eager` and keeps `high`.
  */
 import { shot } from '../data/media';
 import Icon from './Icon.astro';
@@ -60,7 +70,7 @@ const img = {
   alt: alt ?? s.alt,
   loading: eager ? ('eager' as const) : ('lazy' as const),
   decoding: 'async' as const,
-  fetchpriority: eager ? ('high' as const) : undefined,
+  fetchpriority: eager ? ('high' as const) : ('low' as const),
   class: imgClass,
   style: imgStyle,
 };

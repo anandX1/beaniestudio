@@ -8,6 +8,7 @@ import BaseLayout from './BaseLayout.astro';
 import Lightbox from '../components/Lightbox.astro';
 import { SITE, LINKS } from '../site.config';
 import Icon from '../components/Icon.astro';
+import type { GuideBiome } from '../data/biomes';
 
 interface Props {
   title: string;
@@ -24,9 +25,19 @@ interface Props {
   ogImageHeight?: number;
   ogImageAlt?: string;
   jsonLd?: Record<string, unknown>[];
+  /**
+   * Which bunker location this guide page is (spec: docs/BIOMES.md). Forwarded
+   * straight to `BaseLayout`, which writes it to `<body data-biome>`.
+   *
+   * Typed as `GuideBiome` — the shared union minus `hub`, because a guide page is
+   * never the Central Room. Omitted means "no biome": the page renders the base
+   * sheet's default field, exactly as every page did before this prop existed,
+   * so the nine guide pages that have not been assigned one are unaffected.
+   */
+  biome?: GuideBiome;
 }
 
-const { title, description, path, h1, kicker, updated, crumb, ogImage = '/og/guide.jpg', ogImageWidth, ogImageHeight, ogImageAlt, jsonLd = [] } = Astro.props;
+const { title, description, path, h1, kicker, updated, crumb, ogImage = '/og/guide.jpg', ogImageWidth, ogImageHeight, ogImageAlt, jsonLd = [], biome } = Astro.props;
 
 const GUIDE_PAGES = [
   { href: '/guide/', label: 'Beginner guide' },
@@ -68,7 +79,7 @@ const breadcrumb = isHub
     : [{ name: 'Home', path: '/' }, { name: 'Guide', path: '/guide/' }, { name: crumb, path: here }];
 ---
 
-<BaseLayout {title} {description} path={here} {ogImage} {ogImageWidth} {ogImageHeight} ogImageAlt={ogImageAlt ?? `${h1} — STATIC official guide`} ogType="article" jsonLd={[articleLd, ...jsonLd]} {breadcrumb}>
+<BaseLayout {title} {description} path={here} {ogImage} {ogImageWidth} {ogImageHeight} ogImageAlt={ogImageAlt ?? `${h1} — STATIC official guide`} ogType="article" jsonLd={[articleLd, ...jsonLd]} {breadcrumb} {biome}>
   <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
     <nav aria-label="Breadcrumb" class="font-mono text-xs tracking-[0.14em] text-facility-500">
       <ol class="flex flex-wrap items-center gap-2">

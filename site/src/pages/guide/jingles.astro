@@ -1,7 +1,30 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import ShotFigure from '../../components/ShotFigure.astro';
+import BiomePrimitives from '../../components/biome/BiomePrimitives.astro';
 import { JINGLES, MOVEMENT, POD, SCRAPPER, EXTRACTION } from '../../data/game';
+
+/* ── biome: red ───────────────────────────────────────────────────────────────
+   `/guide/jingles/` is his territory. The page does not decorate itself red; it
+   CLOSES. Two things advance together as the reader scrolls and both of them are
+   opacity/transform only — nothing here animates font-size, width or padding,
+   because a per-frame layout is exactly what this page must not do:
+
+     1. the vignette closes in — one fixed layer, `opacity` and `scale` driven by
+        `animation-timeline: scroll(root block)`, so the two are guaranteed to
+        agree on the reading position and neither needs a scroll listener;
+     2. the distance bar advances — the site's existing hunter-bar machinery
+        (`.hunter-bar` / `.hunter-bar-fill` + the dread-label escalation from
+        blog/[...slug].astro), reframed so reading progress IS the approach.
+
+   WIRED — `biome="red"` is passed below, `GuideLayout` forwards it, and
+   `BaseLayout` writes `<body data-biome="red">`, so the five atmosphere tokens
+   in global.css resolve here, including the faster 90s `drift-b` ambient.
+
+   Like the other two biome pages, nothing visual here DEPENDS on that token
+   block: it is all built from the base `--color-facility-*` ramp,
+   `--color-status-red` and the existing primitives, so the page is correct and
+   legible with or without it. */
 
 const stats = [
   ['Movement speed', `${MOVEMENT.hunter} studs/s`, `Scrapper sprint is ${MOVEMENT.scrapperSprint}, walk is ${MOVEMENT.scrapperWalk}`],
@@ -12,6 +35,10 @@ const stats = [
   ['Finish a downed Scrapper', `${JINGLES.executeSec} s`, 'Or carry them to a pod instead'],
   ['Bloodlust', `every ${JINGLES.bloodlust.everySec} s`, `Reveals all Scrappers + ${JINGLES.bloodlust.speedMult}× speed for ${JINGLES.bloodlust.revealSec} s`],
 ];
+
+/** The one row that carries the accent. One amber value out of seven — the
+ *  attack wind-up is the only number on this page that is a live warning. */
+const WARN_ROW = 'Dash';
 ---
 
 <GuideLayout
@@ -21,10 +48,23 @@ const stats = [
   h1="Jingles: the Hunter in STATIC"
   kicker="Official guide · The Hunter"
   crumb="Jingles"
+  biome="red"
   updated="2026-10-08"
   ogImage="/og/jingles.jpg"
   ogImageAlt="Jingles, the clockwork jester Hunter from STATIC"
 >
+  <BiomePrimitives />
+
+  {/* The closing vignette. Fixed, pointer-events none, and never a surface for
+      content — it is a light, not a panel. Its resting opacity is 0.12 rather
+      than 0: the room is already red when you walk in, and no rule anywhere on
+      this page sets `opacity: 0` on anything.
+
+      It sits INSIDE the layout with the rest of the page, the way 404.astro's
+      `.dread-vignette` does: a sibling of a layout component renders outside
+      <html>, which is malformed. */}
+  <div class="jingles-vignette" aria-hidden="true"></div>
+
   <p class="text-lg">
     <strong>Jingles</strong> is the Hunter in STATIC: a clockwork jester with a grinning skull
     mask, a belled cap, brass-jointed limbs and hooked metal claws. It's not a bot. Every round,
@@ -35,20 +75,33 @@ const stats = [
     Jingles is the only Hunter in the beta. More Hunters are planned.
   </p>
 
+  {/* `.boot` — his arrival. The other two biome pages sweep linearly and in
+      twelve steps; this one is the only boot that ACCELERATES, because the only
+      thing this page is about is something closing the distance. */}
+  <div class="boot-frame jingles-boot">
+    <span class="boot-scan" aria-hidden="true"></span>
+    <div class="strip-row">
+      <p class="readout boot-lock">{MOVEMENT.hunter}<u>studs/s base</u></p>
+      <p class="readout">{JINGLES.dash.speed}<u>studs/s dash</u></p>
+      <p class="readout"><b>{JINGLES.attack.windupSec}</b><u>s tell</u></p>
+      <p class="readout">{JINGLES.bloodlust.everySec}<u>s between reveals</u></p>
+    </div>
+  </div>
+
   <ShotFigure ids={['jingles-closeup']} caption="Jingles in-game." gallery="jingles" />
 
   <h2 id="stats">Stats</h2>
   <p>Values from the beta build. Speeds are in studs per second.</p>
-  <div class="overflow-x-auto">
-    <table class="data-table">
-      <thead><tr><th scope="col">Stat</th><th scope="col">Value</th><th scope="col">Notes</th></tr></thead>
-      <tbody>
-        {stats.map(([k, v, n]) => (
-          <tr><td class="text-facility-100">{k}</td><td class="font-mono text-signal">{v}</td><td>{n}</td></tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
+
+  <dl class="spec">
+    {stats.map(([k, v, n]) => (
+      <div>
+        <dt class="label">{k}</dt>
+        <dd class:list={['v', k === WARN_ROW && 'v--warn']}>{v}</dd>
+        <dd class="n">{n}</dd>
+      </div>
+    ))}
+  </dl>
 
   <h2 id="abilities">Abilities</h2>
   <h3>Dash</h3>
@@ -79,7 +132,11 @@ const stats = [
     what happens next.
   </p>
 
-  <ShotFigure ids={['jingles-red', 'jingles-medbay', 'jingles-player']} caption="Jingles under the bunker's red lights, walking the Medbay, and closing in on a Scrapper." gallery="jingles" aspect="4 / 3" />
+  {/* The one `.focus` node on this page — below the fold, so the `filter` is
+      never in the LCP image's paint path. */}
+  <div class="focus">
+    <ShotFigure ids={['jingles-red', 'jingles-medbay', 'jingles-player']} caption="Jingles under the bunker's red lights, walking the Medbay, and closing in on a Scrapper." gallery="jingles" aspect="4 / 3" />
+  </div>
 
   <h2 id="senses">How Jingles finds you</h2>
   <p>
@@ -118,4 +175,220 @@ const stats = [
     <li>Crushers fill up over time. Patrolling between them keeps Scrappers nervous.</li>
     <li>Don't hover at a pod. Camping overloads it and hands the captive back to their team.</li>
   </ul>
+{/* ── The approach, read out ──────────────────────────────────────────────────
+    The REUSED machinery: the same `.hunter-bar` / `.hunter-bar-fill` classes and
+    the same escalating dread labels as blog/[...slug].astro, reframed for this
+    page. Two deliberate differences from that page, both stated rather than
+    inherited:
+      - no `backdrop-blur`: this rail is glass in the blog post, but glass on a
+        large fixed strip is real paint cost on a phone, and the rail does not
+        need it to read as chrome. A solid near-black plus a 1px top hairline
+        does the same job (CLAUDE.md rule 14 keeps blur for floating layers that
+        actually need depth; this one already floats).
+      - the fill is driven on the COMPOSITOR. The shipped rule animates `width`,
+        which forces layout every frame; see the page style block below. The
+        script still writes `--hunt` as well, so the shipped width rule remains a
+        working fallback if the override ever stops applying.
+    Fixed to the bottom edge: it rises from below and never collides with the
+    sticky header. */}
+<div class="fixed inset-x-0 bottom-0 z-[60] jingles-rail">
+  <div class="hunter-bar" id="huntBar">
+    <div class="hunter-bar-fill"></div>
+  </div>
+  <div class="jingles-rail-row">
+    <span class="jingles-rail-tag" id="huntTag">HUNTER DISTANCE: FAR</span>
+    <span class="jingles-rail-pct" id="huntPct" role="meter" aria-label="Hunter proximity" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">0%</span>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const bar = document.getElementById('huntBar');
+    const tag = document.getElementById('huntTag');
+    const pct = document.getElementById('huntPct');
+    if (!bar || !tag || !pct) return;
+
+    /* Reduced-motion early return, per the site's interaction contract. The
+       resting state — an empty bar reading FAR — is the state global.css already
+       documents for this component without JS ("the bar just reads EMPTY —
+       honest"), so nothing false is shown; the page's real numbers are all in
+       the spec block above. */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const DISTANCES = [
+      { at: 75, label: 'IN THE CORRIDOR' },
+      { at: 45, label: 'CLOSING IN' },
+      { at: 15, label: 'MOVING' },
+      { at: -1, label: 'FAR' },
+    ];
+    let ticking = false;
+    const update = function () {
+      ticking = false;
+      const doc = document.documentElement;
+      const total = doc.scrollHeight - window.innerHeight;
+      /* Document depth, so this and the vignette's `scroll(root block)` timeline
+         are reading the same axis and cannot disagree about where you are. */
+      const done = Math.min(1, Math.max(0, window.scrollY / (total > 0 ? total : 1)));
+      const p = done * 100;
+      bar.style.setProperty('--hunt', p.toFixed(1) + '%');
+      bar.style.setProperty('--hunt-f', done.toFixed(4));
+      pct.setAttribute('aria-valuenow', String(Math.round(p)));
+      pct.textContent = Math.round(p) + '%';
+      const d = DISTANCES.find((x) => p >= x.at) || DISTANCES[3];
+      const label = 'HUNTER DISTANCE: ' + d.label;
+      if (tag.textContent !== label) tag.textContent = label;
+    };
+    const onScroll = function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
+  })();
+</script>
 </GuideLayout>
+
+<style>
+  /* ── PAGE-SCOPED — PENDING CONSOLIDATION INTO global.css ───────────────────
+     The primitives on this page are scoped to /guide/jingles/ for now. `.boot`
+     and `.focus` already live in components/biome/BiomePrimitives.astro; what is
+     left here is the closing vignette, the bootbeat's own rhythm, and the
+     compositor-only correction to the shipped distance-bar fill. Nothing here
+     redefines a token. */
+
+  /* ── The boot rhythm: the only one of the three that accelerates ────────── */
+  .jingles-boot {
+    --boot-dur: 560ms;
+    /* ease-in. It does not sweep across the page, it arrives at it. */
+    --boot-ease: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  }
+
+  .jingles-boot .strip-row {
+    border-top: 0;
+  }
+
+  /* ── The closing vignette ────────────────────────────────────────────────── */
+  .jingles-vignette {
+    position: fixed;
+    inset: 0;
+    /* Under the site's own dread vignette (z 55) and its scanline plate (z 60),
+       over ordinary content. */
+    z-index: 30;
+    pointer-events: none;
+    /* Not 0. There is no zero-opacity rule anywhere on this page, and the room
+       is already lit red before you have scrolled at all. */
+    opacity: 0.12;
+    /* MEASURED, not eyeballed. Red is brighter than this page's near-black, so
+       a red overlay can only LOWER the contrast of the muted facility ramp, and
+       `--color-facility-500` is the binding case: it is the dimmest text the
+       site allows itself (6.25:1 on facility-950) and it is what every caption
+       and label on this page is set in. At the layer's 0.85 ceiling:
+          28% red edge  ->  500 4.84:1, 300 6.76:1, 100 12.99:1
+          14% red band  ->  500 5.65:1, 300 7.89:1, 100 15.16:1
+       so the vignette is exactly as strong as the site's own legibility floor
+       permits, and not one step stronger: 32% would put facility-500 at 4.59:1.
+
+       `in oklab`, NOT `in oklch`. oklch interpolates hue along the SHORTER arc,
+       and status-red (hue 25) to facility-950 (hue 235) runs the wrong way round
+       through ~334 — it mixes to magenta. oklab has no hue to interpolate, so
+       the same mix is a dark red-grey, which is the colour this wants.
+
+       The strongest stop is at the corners, past the text measure; the mid-edge
+       band where captions actually sit is the gentler 14%. */
+    background: radial-gradient(
+      ellipse 78% 78% at 50% 45%,
+      transparent 44%,
+      color-mix(in oklab, var(--color-status-red) 14%, var(--color-facility-950)) 74%,
+      color-mix(in oklab, var(--color-status-red) 28%, var(--color-facility-950)) 100%
+    );
+    /* Never a fourth `.atmo-*` and never a per-section colour: one layer for the
+       whole page, which is the biome contract in docs/BIOMES.md. */
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: scroll()) {
+      .jingles-vignette {
+        animation: vignette-close linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 100%;
+      }
+      /* `opacity` and `transform` only. The scale closes the clear centre of the
+         frame in, which is what reads as "tighter" — no font-size, no width, no
+         padding, so scrolling this page never triggers layout. */
+      @keyframes vignette-close {
+        from {
+          opacity: 0.12;
+          transform: scale(1);
+        }
+        to {
+          opacity: 0.85;
+          transform: scale(1.07);
+        }
+      }
+    }
+  }
+
+  /* ── The distance bar ───────────────────────────────────────────────────── */
+  /* The shipped `.hunter-bar-fill` sets `width: var(--hunt, 0%)`. That is a
+     layout-animating property, and this page's contract is opacity/transform
+     only, so the fill is re-pointed at a compositor-only scaleX of the SAME
+     scroll value. Same machinery, same custom property, same 4px bar — one
+     property moved off the layout path. The child combinator keeps this above
+     the shipped rule without an `!important` and without depending on which
+     stylesheet a build happens to emit first. */
+  .hunter-bar > .hunter-bar-fill {
+    width: 100%;
+    transform: scaleX(var(--hunt-f, 0));
+    transform-origin: 0 50%;
+    transition: transform 0.4s var(--ease-terminal);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hunter-bar > .hunter-bar-fill {
+      transition: none;
+    }
+    .jingles-vignette {
+      animation: none;
+    }
+  }
+
+  .jingles-rail {
+    background: color-mix(in oklch, var(--color-facility-950) 95%, transparent);
+    border-top: 1px solid var(--color-facility-800);
+  }
+
+  .jingles-rail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .jingles-rail-row {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  .jingles-rail-tag,
+  .jingles-rail-pct {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    font-variant-numeric: tabular-nums;
+    text-transform: uppercase;
+  }
+
+  .jingles-rail-tag {
+    color: var(--color-facility-500);
+  }
+
+  /* The percentage is the live number, so it is the one red thing in the rail —
+     the same token the fill uses, so state and value cannot drift apart. */
+  .jingles-rail-pct {
+    color: var(--color-status-red);
+  }
+
+  /* The spec block carries seven display-size values; the notes need to breathe
+     or the row reads as a wall. */
+  .spec .n {
+    align-self: center;
+  }
+</style>

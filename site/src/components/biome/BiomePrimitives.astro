@@ -1,0 +1,191 @@
+---
+/**
+ * Biome motion primitives — the two of the six in docs/BIOMES.md that
+ * global.css does not have yet: `.boot` and `.focus`.
+ *
+ * ── PAGE-SCOPED — PENDING CONSOLIDATION INTO global.css ──────────────────────
+ * The other four primitives are already shipped and are REUSED by the biome
+ * pages, never re-implemented here:
+ *   .draw  → global.css `.draw-path` (+ the `.fx-io .draw-path.in` Firefox path)
+ *   .count → global.css `.count` / `.count-real` + the `@property --n` counter
+ *   .rise  → global.css `.rise` (view-timeline path) and `.beat` (IO path)
+ *   .drift → global.css `drift-a` through `--atmo-motion` on <body>, and
+ *            `.plate-drift` for a photo plate
+ * This file defines no seventh primitive.
+ *
+ * `is:global` is deliberate. The three pages write these class names on their
+ * OWN elements, which a component-scoped selector cannot reach. The class names
+ * and the custom properties below are exactly the ones docs/BIOMES.md publishes,
+ * so this block lifts into global.css verbatim, with no token value touched.
+ *
+ * ── THE LCP CONTRACT, read before changing anything here ─────────────────────
+ * Nothing in this file applies `opacity: 0`, `clip-path`, or a start mask to
+ * anything. Specifically:
+ *   - `.boot-scan` is a decorative 1px line that rests one frame-height OUTSIDE
+ *     its own `overflow: hidden` frame. It is the animation, not content: it is
+ *     `pointer-events: none`, carries `aria-hidden` at every call site, and can
+ *     never be an LCP candidate. `.boot-frame` is only ever put around blocks
+ *     that contain no focusable element, so the clip cannot swallow an outline.
+ *   - `.boot-lock` is a 4px translate on a readout that is legible on every
+ *     frame of the animation. No opacity, no clip.
+ *   - `.boot-wake` bottoms out at `opacity: 0.32`, never 0.
+ *   - `.focus` is a static grade, not an entry animation.
+ * The hero, the h1 and the lead paragraph are not touched by any of it.
+ *
+ * ── WHY THREE PAGES CAN SHARE ONE PRIMITIVE AND STILL MOVE DIFFERENTLY ───────
+ * The rhythm is a per-page parameter, not a per-page primitive. Pages set
+ * `--boot-ease` / `--boot-dur` on their own `.boot-frame`:
+ *   blueprint  linear                    — a drafting-table sweep, even and slow
+ *   red        cubic-bezier(.55,.06,.68,.19) — ease-in, it accelerates at you
+ *   amber      steps(12, end)            — 12 discrete jumps, mechanical
+ * That is the whole difference between the three boot sequences.
+ */
+---
+<style is:global>
+  /* ═══════════ .boot — "system online" ═══════════ */
+
+  /* The frame the sweep travels inside. The clip is what lets the sweep END
+     outside the visible box, which is why the primitive needs no `opacity: 0`
+     and no mask anywhere. Contents must be non-focusable (see the note above). */
+  .boot-frame {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .boot-scan {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* ONE 1px line at the top of the element — the `0 0 / 100% 1px` layer — and
+       the gradient fades its own ends, so the primitive needs no mask-image.
+       Reusing the facility ramp, not the accent: a sweep is not a signal. */
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--color-facility-300) 18%,
+        var(--color-facility-100) 50%,
+        var(--color-facility-300) 82%,
+        transparent
+      )
+      no-repeat 0 0 / 100% 1px;
+    transform: translateY(-101%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .boot-scan {
+      animation: boot-scan var(--boot-dur, 420ms) var(--boot-ease, linear)
+        var(--boot-delay, 80ms) both;
+    }
+    @keyframes boot-scan {
+      from {
+        transform: translateY(-101%);
+      }
+      to {
+        transform: translateY(101%);
+      }
+    }
+
+    /* The page's first readout "locking in". A 4px settle, transform only, so
+       the value is legible on every frame. `steps(1, end)` reads as a latch:
+       hold, then snap. Keep this OFF anything that already owns an `animation`
+       (notably `.count`) — a second `animation` shorthand would cancel it. */
+    .boot-lock {
+      animation: boot-lock var(--boot-dur, 420ms)
+        steps(var(--boot-lock-steps, 1), end) var(--boot-delay, 80ms) both;
+    }
+    @keyframes boot-lock {
+      from {
+        transform: translateY(4px);
+      }
+      to {
+        transform: none;
+      }
+    }
+
+    /* The console wake. A one-shot flicker on a stepped timing function: each
+       keyframe interval holds then snaps, so it reads as a failing strip light
+       finding its circuit rather than as a fade. Diegetic — this is the same
+       vocabulary as `.flicker` and `.dot`, which global.css reserves for the
+       hero title and live telemetry; this is the console's version of it.
+       Floors at 0.32: the panel is never fully dark, so it never loses its
+       visible area and can sit anywhere on the page. */
+    .boot-wake {
+      animation: boot-wake var(--boot-wake-dur, 900ms) steps(1, end)
+        var(--boot-delay, 120ms) both;
+    }
+    @keyframes boot-wake {
+      0% {
+        opacity: 0.32;
+      }
+      7% {
+        opacity: 0.9;
+      }
+      11% {
+        opacity: 0.2;
+      }
+      16% {
+        opacity: 1;
+      }
+      21% {
+        opacity: 0.5;
+      }
+      27% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  }
+
+  /* ═══════════ .focus — the camera finding the subject ═══════════ */
+
+  /* Applied to a WRAPPER, never to the <img>. Two reasons, both structural:
+     the grade then COMPOSES with the `.shot-link:hover img` brightness the site
+     already ships instead of fighting it in the cascade, and the wrapper is a
+     plain <div>/<figure> whose descendants are all position: relative — so the
+     containing block a `filter` creates cannot strand anything. (GuideLayout
+     renders <Lightbox /> as a SIBLING of the page slot, so no <dialog> is ever
+     inside a `.focus` node.)
+     `filter` is NOT compositor-only → capped at 4 nodes per page, below the fold.
+     The graded state is the DEFAULT, so no-JS, no-hover and reduced-motion all
+     get the finished look and hover clears it. It is never animated on entry: a
+     filter animation would repaint a large image on every frame. */
+  .focus {
+    filter: saturate(0.84) contrast(1.05) brightness(0.95);
+    transition: filter 0.4s var(--ease-terminal);
+  }
+
+  @media (hover: hover) {
+    .focus:hover {
+      filter: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .focus {
+      transition: none;
+    }
+  }
+
+  /* ═══════════ Reduced motion: every animation in this file, named ═══════════
+     `.boot-scan` returns to its authored rest position (one frame-height above
+     the clip, i.e. out of the box) — the correct static answer for a sweep, and
+     nothing a reader needs is hidden. `.boot-lock` returns to `transform: none`,
+     so the readout simply sits where it belongs. `.boot-wake` returns to
+     `opacity: 1`, the fully-lit console. Every one of the three is a complete,
+     finished state; none is left half-applied. */
+  @media (prefers-reduced-motion: reduce) {
+    .boot-scan,
+    .boot-lock,
+    .boot-wake {
+      animation: none;
+    }
+    .boot-lock {
+      transform: none;
+    }
+    .boot-wake {
+      opacity: 1;
+    }
+  }
+</style>

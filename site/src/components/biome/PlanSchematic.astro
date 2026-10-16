@@ -1,0 +1,334 @@
+---
+/**
+ * The bunker's walkway schematic — the `.draw` primitive on /guide/map/.
+ *
+ * ── PAGE-SCOPED — PENDING CONSOLIDATION INTO global.css ──────────────────────
+ * The draw mechanic is NOT re-implemented here: the geometry group carries
+ * global.css's `.draw-path` class, so it inherits that primitive's
+ * `stroke-dasharray`/`stroke-dashoffset` and its `animation-timeline: view()`
+ * range, AND its `.fx-io .draw-path.in` Firefox fallback. The only thing this
+ * component changes is the STROKE COLOUR, because `.draw-path` paints the one
+ * signal colour, and a floor plan is line art — an all-amber schematic would put
+ * the site's single accent far past its ~10% budget (CLAUDE.md rule 2). The
+ * accent is kept for exactly one thing: the ring on the room you are reading.
+ *
+ * ── WHAT THIS DIAGRAM CLAIMS, AND WHY ────────────────────────────────────────
+ * It carries one real piece of information — which rooms connect. `rooms.ts`
+ * records walkways leading off the Central Room toward the rest of the bunker,
+ * so the plan is drawn hub-and-spoke from it, and says so in the caption. It is
+ * a connector schematic, not a survey: nothing here asserts a literal corridor
+ * layout, because no such data exists in `rooms.ts` or `game.ts`.
+ *
+ * ── NO ROOM NAME, NO COUNT, AND NO GEOMETRY IS TYPED ─────────────────────────
+ * The hub is `rooms[0]` and the ring is `rooms.slice(1)` plus the unpictured
+ * names. Angular spacing is `360 / ring.length`. Adding or removing a room in
+ * `rooms.ts` re-lays the whole plan with no edit to this file. Nothing but
+ * positions and font sizes is authored here.
+ */
+import type { Room } from '../../data/rooms';
+
+interface Props {
+  /** Pictured rooms in ROOM_INFO order. The FIRST entry is the hub. */
+  rooms: Room[];
+  /** Rooms built in Studio with no screenshot yet (ROOMS minus ROOM_INFO). */
+  unpictured: string[];
+}
+
+const { rooms, unpictured } = Astro.props;
+
+/* ── geometry ─────────────────────────────────────────────────────────────── */
+const VB = { w: 440, h: 340 };
+const CX = VB.w / 2;
+const CY = VB.h / 2;
+const RX = 152;
+const RY = 110;
+const NODE = { w: 104, h: 44 };
+const HUB = { w: 122, h: 46 };
+/** Longest line the node box can hold at 11px mono. */
+const MAX_CHARS = 13;
+
+/** The hub is the first entry — order, not a typed name. */
+const [hub, ...rest] = rooms;
+const ring = [...rest, ...unpictured];
+
+/**
+ * Even angular spacing from the top, clockwise. Derived from the two imported
+ * lengths, so the plan follows the data.
+ */
+const step = 360 / Math.max(ring.length, 1);
+const rad = (deg: number) => (deg * Math.PI) / 180;
+const at = (i: number) => {
+  const a = rad(-90 + i * step);
+  return { x: CX + RX * Math.cos(a), y: CY + RY * Math.sin(a) };
+};
+
+/** Greedy wrap, so a long room name breaks inside its box instead of overflowing. */
+const wrap = (s: string, max: number) => {
+  const lines: string[] = [];
+  let line = '';
+  for (const word of s.split(' ')) {
+    if (!line) line = word;
+    else if (`${line} ${word}`.length <= max) line += ` ${word}`;
+    else {
+      lines.push(line);
+      line = word;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+};
+
+/** `roomIndex` is the ROOM_INFO index that owns the matching <section> on the
+ *  page, and therefore the view-timeline name the page wires up. Unpictured
+ *  rooms have no section and no timeline. The narrowing is written with an
+ *  explicit cast rather than a `typeof` alias so it does not depend on TS's
+ *  aliased-condition inference. */
+const nodes = ring.map((entry, i) => {
+  const { x, y } = at(i);
+  const ghost = typeof entry === 'string';
+  const room = ghost ? null : (entry as Room);
+  const name = room ? room.name : (entry as string);
+  return {
+    name,
+    ghost,
+    x,
+    y,
+    lines: wrap(name, MAX_CHARS),
+    roomIndex: room ? rooms.findIndex((r) => r.name === room.name) : null,
+  };
+});
+
+const hubLines = wrap(hub.name, 15);
+
+const photographed = rooms.length;
+const built = rooms.length + unpictured.length;
+
+const desc =
+  `Walkway schematic, not a survey. ${hub.name} sits at the centre and every other room is drawn connected to it, because rooms.ts records that walkways lead off it toward the rest of the bunker. ` +
+  `${photographed} of the ${built} rooms built in Studio have a screenshot here.` +
+  (unpictured.length
+    ? ` ${unpictured.join(', ')} ${unpictured.length === 1 ? 'is' : 'are'} drawn as a dashed outline with no capture yet.`
+    : '');
+---
+
+<figure class="plan">
+  <svg
+    class="plan-svg"
+    viewBox={`0 0 ${VB.w} ${VB.h}`}
+    role="img"
+    aria-labelledby="plan-title"
+    aria-describedby="plan-desc"
+  >
+    <title id="plan-title">Walkway schematic of the {built} bunker rooms</title>
+    <desc id="plan-desc">{desc}</desc>
+
+    {/* Connectors and boxes, drawn by global.css's `.draw-path` primitive. The
+        group carries the class so ONE animation drives every child through the
+        inherited `stroke-dashoffset`; each child carries `pathLength="1"` so
+        `stroke-dasharray: 1` is that child's own full length. */}
+    <g class="draw-path plan-geometry">
+      {nodes
+        .filter((n) => !n.ghost)
+        .map((n) => (
+          <path d={`M ${CX} ${CY} L ${n.x} ${n.y}`} pathLength="1" />
+        ))}
+      <rect
+        x={CX - HUB.w / 2}
+        y={CY - HUB.h / 2}
+        width={HUB.w}
+        height={HUB.h}
+        pathLength="1"
+      />
+      {nodes
+        .filter((n) => !n.ghost)
+        .map((n) => (
+          <rect
+            x={n.x - NODE.w / 2}
+            y={n.y - NODE.h / 2}
+            width={NODE.w}
+            height={NODE.h}
+            pathLength="1"
+          />
+        ))}
+    </g>
+
+    {/* Rooms with no capture yet: deliberately OUTSIDE the drawing group. The
+        plan draws what it has, and a dashed box says "not surveyed" without
+        needing a colour of its own. */}
+    <g class="plan-ghosts">
+      {nodes
+        .filter((n) => n.ghost)
+        .map((n) => (
+          <rect
+            x={n.x - NODE.w / 2}
+            y={n.y - NODE.h / 2}
+            width={NODE.w}
+            height={NODE.h}
+          />
+        ))}
+    </g>
+
+    {/* The ring on the room currently being read. Its `animation-timeline` is
+        written inline per node and points at the view timeline the page puts on
+        that room's <section> (see map.astro). Inline, because the timeline name
+        is data-derived; an inline declaration also outranks the `animation`
+        shorthand in the class, which would otherwise reset it to `auto`.
+        Base opacity is 0.14, never 0 — the ring always has visible area. */}
+    <g class="plan-live">
+      {nodes
+        .filter((n) => n.roomIndex !== null)
+        .map((n) => (
+          <rect
+            class="plan-node-live plan-node-live--tracked"
+            x={n.x - NODE.w / 2}
+            y={n.y - NODE.h / 2}
+            width={NODE.w}
+            height={NODE.h}
+            style={`animation-timeline: --rm-${n.roomIndex}`}
+          />
+        ))}
+    </g>
+
+    <g class="plan-labels">
+      <text class="plan-label plan-label--hub" x={CX} text-anchor="middle">
+        {hubLines.map((line, i) => (
+          <tspan x={CX} y={CY + (i - (hubLines.length - 1) / 2) * 12 + 4}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+      {nodes.map((n) => (
+        <text
+          class:list={['plan-label', n.ghost && 'plan-label--ghost']}
+          x={n.x}
+          text-anchor="middle"
+        >
+          {n.lines.map((line, i) => (
+            <tspan x={n.x} y={n.y + (i - (n.lines.length - 1) / 2) * 12 + 4}>
+              {line}
+            </tspan>
+          ))}
+        </text>
+      ))}
+    </g>
+  </svg>
+
+  <figcaption>
+    Walkway schematic, not a survey: <strong>{hub.name}</strong> sits at the centre and the
+    other rooms are drawn connected to it, because {hub.name} is where walkways lead off
+    toward the rest of the bunker. A dashed box has no screenshot yet. The ring marks the
+    room you are reading.
+  </figcaption>
+</figure>
+
+<style>
+  /* PAGE-SCOPED — PENDING CONSOLIDATION INTO global.css. */
+  .plan {
+    margin: 0;
+  }
+
+  .plan-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* The plan is a diagram, so it reads as one surface rather than as a hole in
+       the page. Depth is a 1px ring, per the teardown's depth model. */
+    background: var(--color-facility-900);
+    border: 1px solid var(--color-facility-700);
+    box-shadow: var(--ring-hairline);
+  }
+
+  /* ── The ONE override of the shared `.draw` primitive, and why ──────────────
+     `.draw-path` paints `var(--color-signal)`. That is right for the homepage's
+     single worm path; it is wrong for a plan, where it would put the site's only
+     accent under ~17 elements at once. The mechanic is untouched — only the
+     stroke moves onto the facility ramp. */
+  .plan-geometry {
+    stroke: var(--color-facility-600);
+    stroke-width: 1.25;
+  }
+
+  .plan-ghosts rect {
+    fill: none;
+    stroke: var(--color-facility-700);
+    stroke-width: 1.25;
+    stroke-dasharray: 4 4;
+  }
+
+  .plan-live rect {
+    fill: none;
+    /* The accent, kept for exactly one thing: the room you are on. */
+    stroke: var(--color-signal);
+    stroke-width: 1.75;
+    opacity: 0.14;
+  }
+
+  .plan-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    fill: var(--color-facility-300);
+  }
+
+  .plan-label--hub {
+    fill: var(--color-facility-100);
+    letter-spacing: 0.06em;
+  }
+
+  .plan-label--ghost {
+    fill: var(--color-facility-500);
+  }
+
+  .plan figcaption {
+    margin-top: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    line-height: 1.6;
+    letter-spacing: 0.06em;
+    color: var(--color-facility-500);
+  }
+
+  .plan figcaption strong {
+    font-weight: 400;
+    color: var(--color-facility-300);
+  }
+
+  /* ── The room highlight ─────────────────────────────────────────────────────
+     Gated on `timeline-scope`, exactly like global.css's sticky story, because
+     the timeline the page names on a room <section> has to be hoisted to a
+     common ancestor before a node in this <svg> can read it. Browsers without
+     it — Firefox, for one — get the plan fully drawn with every ring at its
+     0.14 rest value: a complete, legible diagram, minus one emphasis. The
+     `.draw` stroke itself still animates there, through `.fx-io`. */
+  @supports (timeline-scope: --a) and (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .plan-node-live--tracked {
+        animation: plan-node-live linear both;
+        /* `animation-range`, never `animation-delay`: a time-valued delay on a
+           progress timeline consumes part of a range whose duration is `auto`
+           and is the documented way to make a scroll-linked animation never
+           fire. */
+        animation-range: cover 25% cover 75%;
+      }
+      @keyframes plan-node-live {
+        0%,
+        100% {
+          opacity: 0.14;
+        }
+        30%,
+        70% {
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  /* Mid-session OS flip: the ring returns to its authored rest value, so no
+     emphasis is left stuck on the wrong room. */
+  @media (prefers-reduced-motion: reduce) {
+    .plan-node-live--tracked {
+      animation: none;
+      opacity: 0.14;
+    }
+  }
+</style>

@@ -189,7 +189,7 @@ const videoGameLd = {
 };
 ---
 
-<BaseLayout title={SITE.title} path="/" ogImageAlt="Jingles, the clockwork jester Hunter from STATIC, next to the STATIC logo" jsonLd={[videoGameLd]}>
+<BaseLayout title={SITE.title} path="/" biome="hub" ogImageAlt="Jingles, the clockwork jester Hunter from STATIC, next to the STATIC logo" jsonLd={[videoGameLd]}>
   <Fragment slot="head">
     <!-- Unchanged on purpose: the hero image is the measured LCP element and
          `100vw` is correct for a full-bleed backdrop. Declaring 1280 here would
@@ -331,7 +331,12 @@ const videoGameLd = {
     <span class="scroll-cue absolute bottom-6 left-1/2 hidden -translate-x-1/2 lg:inline-flex" aria-hidden="true">SCROLL</span>
   </section>
 
-  <!-- ================= 02 · THE JOB — four numbers ================= -->
+  <!-- ================= 02 · THE JOB — four numbers =================
+       NOT opted into `.cis`. It is 529px tall at 1440 and 477px at 390 — both
+       under the viewport, so `content-visibility: auto` can never skip it (an
+       element that fits the viewport is always relevant to it). Adding the class
+       would only add a path where a wrong intrinsic size could bite, for zero
+       saved work. -->
   <section class="section-band border-t border-facility-800" aria-labelledby="job-h">
     <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
       <p class="eyebrow">The job</p>
@@ -354,7 +359,7 @@ const videoGameLd = {
        Un-pinned. Four cells on one hairline grid, one shared still at the foot.
        Previously: a 4-frame sticky crossfade plus 4 duplicate inline images on
        mobile, at 3.87 viewports. -->
-  <section class="section-band border-t border-facility-800" id="how-to-play" aria-labelledby="loop-h">
+  <section class="cis section-band border-t border-facility-800" id="how-to-play" aria-labelledby="loop-h">
     <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
       <p class="eyebrow">The round</p>
       <h2 id="loop-h" class="rise mt-4 max-w-3xl font-display text-title font-bold uppercase tracking-wide" data-decode>
@@ -400,8 +405,9 @@ const videoGameLd = {
   <!-- ================= 04 · THE MAP — was the pinned tour =================
        Un-pinned. Eight rooms as one grid at three columns, each tile a whole-tile
        link to its room on /guide/map/. Previously a pinned horizontal scroll-jack
-       at 4.84 viewports with a caption scrim covering 30% of every shot. -->
-  <section class="section-band border-t border-facility-800" id="tour" aria-labelledby="tour-h">
+       at 4.84 viewports with a caption scrim covering 30% of every shot.
+       Largest contained section on mobile (2876px content box). -->
+  <section class="cis section-band border-t border-facility-800" id="tour" aria-labelledby="tour-h">
     <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
       <p class="eyebrow">The map</p>
       <h2 id="tour-h" class="rise mt-4 max-w-3xl font-display text-title font-bold uppercase tracking-wide">
@@ -439,7 +445,7 @@ const videoGameLd = {
        Merged from "Meet Jingles" + "Two more ways to lose". Asymmetric on
        purpose (rule 7): a 3/5 close-up beside a 2/5 column of two half-height
        plates, then one spec table. One amber value out of five, not five. -->
-  <section class="section-band border-t border-facility-800" id="jingles" aria-labelledby="jingles-h">
+  <section class="cis section-band border-t border-facility-800" id="jingles" aria-labelledby="jingles-h">
     <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
       <p class="eyebrow label--warn">The Hunter — 1 per round</p>
       <h2 id="jingles-h" class="rise mt-4 max-w-3xl font-display text-title font-bold uppercase tracking-wide" data-decode>
@@ -519,8 +525,11 @@ const videoGameLd = {
        fades at its edges and reports its own position with a scroll-driven
        meter. All 20 shots survive, and every tile links to its gallery group,
        so the 8 that previously existed only at 288px inside an aria-hidden
-       marquee are now reachable content. Zero JS. -->
-  <section class="section-band border-t border-facility-800" aria-labelledby="stills-h">
+       marquee are now reachable content. Zero JS.
+       Heaviest contained section on the page: 173 elements, 22 lazy images,
+       1796px content box at >=640 and 1054px below it. The two closing plates
+       are the only `.fold-safe wipe` elements on the site. -->
+  <section class="cis section-band border-t border-facility-800" id="stills" aria-labelledby="stills-h">
     <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
       <p class="eyebrow">Stills</p>
       <h2 id="stills-h" class="rise mt-4 font-display text-title font-bold uppercase tracking-wide">
@@ -531,7 +540,14 @@ const videoGameLd = {
     <div class="mt-10">
       {closingStills.map((s, i) => (
         <figure class={`relative ${i > 0 ? 'mt-4' : ''}`}>
-          <div class="plate plate--scan aspect-[21/9] max-h-[62svh]">
+          {/* `fold-safe wipe drift` on this plate is geometry, not decoration:
+               it is the first element of section 06, measured at y=5674/desktop
+              (1440x900) and y=7969/mobile (390x844), i.e. more than 5 viewports
+               below the fold at both widths, so the clip-path start state can
+               never be the LCP paint. The hero at y=61 stays completely outside
+               this system. Drift is horizontal because a 21/9 full-bleed plate
+               is `object-fit: cover`: ±4px changes the crop, never the frame. */}
+          <div class="fold-safe wipe plate-drift plate plate--scan aspect-[21/9] max-h-[62svh]">
             <Shot id={s.id} sizes="100vw" imgClass="h-full w-full object-cover" />
           </div>
           <figcaption class:list={[
@@ -574,7 +590,7 @@ const videoGameLd = {
        The "84,000+ views" panel was a bordered box, four lines of copy and its
        own CTA to deliver one number. The number survives as a label; the prose
        moved to /videos/, which already carries all of it. -->
-  <section class="section-band border-t border-facility-800" aria-labelledby="videos-h" id="videos">
+  <section class="cis section-band border-t border-facility-800" aria-labelledby="videos-h" id="videos">
     <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
       <p class="eyebrow">Footage</p>
       <h2 id="videos-h" class="rise mt-4 font-display text-title font-bold uppercase tracking-wide" data-decode>
@@ -614,8 +630,11 @@ const videoGameLd = {
   <!-- ================= 08 · PROOF — comparison as spec rows =================
        Was a <table class="min-w-[40rem]"> inside overflow-x-auto: on a 390px
        phone that is a second scroll axis inside a vertically scrolling page.
-       Same five facts, one line each, no nested scroller. -->
-  <section class="section-band border-t border-facility-800" aria-labelledby="diff-h">
+       Same five facts, one line each, no nested scroller.
+       `.cis` opts this section into `content-visibility: auto`; the value lives
+       in the `#difference.cis` rules in global.css and was measured per
+       breakpoint (570px content-box at >=640, 968px below it). -->
+  <section class="cis section-band border-t border-facility-800" id="difference" aria-labelledby="diff-h">
     <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
       <p class="eyebrow">Why we built it</p>
       <h2 id="diff-h" class="rise mt-4 max-w-3xl font-display text-title font-bold uppercase tracking-wide" data-decode>
@@ -647,8 +666,10 @@ const videoGameLd = {
   <!-- ================= 09 · PLANNED — the roadmap as one strip =================
        Five headings and five 23-word paragraphs (113 words) to list five
        planned features. The titles carry it; the descriptions live on /about/
-       and in the Discord where the vote happens. -->
-  <section class="section-band border-t border-facility-800" aria-labelledby="roadmap-h">
+       and in the Discord where the vote happens.
+       `.cis` + `#planned.cis` contain-intrinsic-size: 280px at >=640, 437px
+       below it (measured, content box). -->
+  <section class="cis section-band border-t border-facility-800" id="planned" aria-labelledby="roadmap-h">
     <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
       <p class="eyebrow">Planned — not in the beta yet</p>
       <h2 id="roadmap-h" class="rise mt-4 font-display text-title font-bold uppercase tracking-wide" data-decode>
