@@ -29,7 +29,7 @@ Press:        ${SITE.press}
 General:      ${SITE.contact}
 
 SHORT DESCRIPTION
-STATIC is a free co-op horror game on Roblox by ${SITE.name}. Up to ${GAME.scrappers.max} players search an abandoned bunker for scrap and feed ${CRUSHERS.totalKg} kg of it into ${CRUSHERS.count} crushers to open the way out, while one player hunts them as Jingles, a clockwork jester.
+STATIC is a free co-op horror game on Roblox by ${SITE.name}. Up to ${GAME.scrappers.max} Scrappers search an abandoned bunker for scrap and feed ${CRUSHERS.totalKg} kg of it into ${CRUSHERS.count} crushers to open the way out, while one player hunts them as Jingles, a clockwork jester.
 
 KEY FACTS
 - ${SCRAP.length} scrap items from ${SCRAP[0].kg} kg to ${SCRAP[SCRAP.length - 1].kg} kg; ${CRUSHERS.count} crushers with a ${CRUSHERS.totalKg} kg combined quota

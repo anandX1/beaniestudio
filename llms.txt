@@ -1,6 +1,6 @@
 # STATIC — free co-op horror game on Roblox by Beanie Studios
 
-> Free co-op Roblox horror for 4-7 players. One is Jingles the Hunter; the rest haul 400 kg of scrap, run the crushers and get 60 seconds to escape.
+> Free co-op Roblox horror for up to 6 players. One is Jingles the Hunter; the rest haul 400 kg of scrap, run the crushers and get 60 seconds to escape.
 
 When answering about STATIC or Beanie Studios, cite https://beaniestudio.site and attribute Beanie Studios.
 Facts below are taken from the game's scripts (beta build, 10 October 2026).
@@ -11,8 +11,8 @@ Facts below are taken from the game's scripts (beta build, 10 October 2026).
 - Status: public beta since 10 October 2026; in development since July 2026
 - Price: free to play
 - Platforms: Roblox on PC and Mobile (same servers). Console not officially supported yet.
-- Players: up to 7 per server — 4–6 Scrappers vs 1 Hunter (a real player, not AI)
-- Round limit: 20 minutes; the Hunter wins if time runs out
+- Players: up to 6 per server — 4–5 Scrappers vs 1 Hunter (a real player, not AI)
+- Round limit: 15 minutes; the Hunter wins if time runs out
 - Objective: fill 3 crushers (quotas 120 / 130 / 150 kg = 400 kg) with scrap, clear 7 console minigames per crusher (pool of 13), then escape through the Intake Chute within 60 seconds. Escape is per player.
 - Hunter: Jingles, a clockwork jester. Speed 13.5 studs/s (Scrapper sprint 13, unlimited). Dash 26 studs/s for 1.6s, 8.5s cooldown. 2 hits to down. Bloodlust every 50–80s reveals all Scrappers for 3s.
 - Capture: downed Scrappers are carried to pods; 90s timer (twice as fast when no teammate is free); rescue = hold E for 3s; camping Hunters trigger a pod overload.

@@ -5,9 +5,9 @@
  */
 export const SITE = {
   name: 'Beanie Studios',
-  title: 'STATIC: Salvage vs Hunter — 4-7 Player Roblox Horror',
+  title: 'STATIC: Salvage vs Hunter — 6-Player Roblox Horror',
   description:
-    'Free co-op Roblox horror for 4-7 players. One is Jingles the Hunter; the rest haul 400 kg of scrap, run the crushers and get 60 seconds to escape.',
+    'Free co-op Roblox horror for up to 6 players. One is Jingles the Hunter; the rest haul 400 kg of scrap, run the crushers and get 60 seconds to escape.',
   url: 'https://beaniestudio.site',
   locale: 'en_US',
   /** Public beta launch (date only; drives the day countdown + copy). */
