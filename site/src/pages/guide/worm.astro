@@ -15,7 +15,8 @@ import { WORM, SCRAPPER } from '../../data/game';
 >
   <p class="text-lg">
     The <strong>Worm</strong> is the second threat in STATIC. It burrows under the bunker floor,
-    surfaces near a Scrapper, rears up, grabs them, and drains their health. It never attacks the
+    surfaces near a Scrapper, rears up, grabs them, and drains their health. Ring the bell and it
+    comes out right beside you, almost immediately. It never attacks the
     Hunter. The good news: it hates light.
   </p>
 
@@ -30,18 +31,26 @@ import { WORM, SCRAPPER } from '../../data/game';
   <h3>The bell (guaranteed)</h3>
   <p>
     Every Scrapper carries a bell that can't be dropped (key 4, {SCRAPPER.bellCooldownSec}-second
-    cooldown). Ringing it always spawns a Worm <strong>{WORM.bellSpawnDelaySec} seconds</strong>
-    later, {WORM.bellSpawnDistStuds} studs away.
+    cooldown). Ringing it always summons a Worm <strong>{WORM.bell.delaySec.min}–{WORM.bell.delaySec.max} seconds</strong>
+    later, right on top of the Scrapper nearest the bell: <strong>{WORM.bell.distStuds.min}–{WORM.bell.distStuds.max} studs</strong>
+    away. This is a close-range jumpscare, not a distant arrival — it erupts through the floor beside
+    you and you have almost no time to move. Ringing is also the loudest lure in the game, so it
+    multiplies the odds of a second, random Worm by <strong>×{WORM.lureMultipliers[0].mult}</strong>.
   </p>
   <h3>Random chance</h3>
   <p>
     Even if you do nothing, each Scrapper has a <strong>{WORM.baseChancePct}% chance every
-    {WORM.baseChanceEverySec} seconds</strong> of drawing a Worm. These things raise that chance
-    (×1.5 each, up to ×2 in total):
+    {WORM.baseChanceEverySec} seconds</strong> of drawing a Worm. These things multiply that chance,
+    for {WORM.lureMultipliers[0].durationSec} seconds and within {WORM.lureMultipliers[0].radiusStuds} studs:
   </p>
   <ul>
-    {WORM.lures.map((l) => <li>{l}</li>)}
+    {WORM.lureMultipliers.map((l) => <li>{l.trigger} — ×{l.mult}</li>)}
   </ul>
+  <p>
+    Lures multiply together and are <strong>not</strong> capped. Carrying heavy scrap — or standing
+    within {WORM.heavyScrap.radiusStuds} studs of a heavy pickup — is a separate factor of
+    ×{WORM.heavyScrap.mult}.
+  </p>
   <p>
     Some scrap isn't what it looks like. Rare <strong>mimic</strong> items scream, and the
     screaming draws Worms.

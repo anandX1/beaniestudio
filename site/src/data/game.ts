@@ -128,25 +128,117 @@ export const CRUSHERS = {
   count: 3,
   quotasKg: [120, 130, 150],
   totalKg: 400,
+  /**
+   * VERIFIED 7, not 3. CrusherStationService.GeneratePlan builds exactly seven
+   * games per console: three L/R pairs plus one solo finisher
+   * (src/ServerScriptService/STATIC_Server/CrusherStationService.luau:161 doc
+   * comment "a deterministic 7-game plan", :207-220 the seven inserts, :219
+   * "Game 7: Solo finisher"). Research/CRUSHER_CONSOLE_DESIGN.md §7.3 is titled
+   * "Picking 7 games per run" and §7.2 budgets "7 games × ~9 s".
+   * The registry holds 13 games, so 7 are drawn per console and 6 sit out.
+   */
   minigamesPerConsole: 7,
 } as const;
 
+/**
+ * The 13 console minigames from ConsoleGameRegistry.luau — one Register() call
+ * each, ids in file order: wires, pipes, waveform, matrix, fuelrods, sonar,
+ * logic, spectro, pressure, lasers, geiger, flux, piston.
+ *
+ * Each entry carries ExpectedMs (the designer's expected solve time, 7-12 s) and
+ * a MinMs anti-cheat floor (2.5-4 s) — see ConsoleGameRegistry.luau:12-14 for the
+ * type. There is no wheel game in the pool; the only wheel in the console system
+ * is the physical `valve` transition (Console/Transitions.luau:205-221), and
+ * "matrix" is the one memory game (Console/Games/matrix.luau:2 "watch the cells
+ * flash, then repeat the sequence").
+ */
 export const MINIGAMES = [
   'Wires', 'Pipes', 'Waveform', 'Matrix', 'Fuel Rods', 'Sonar', 'Logic',
   'Spectro', 'Pressure', 'Lasers', 'Geiger', 'Flux', 'Piston',
 ] as const;
 
+/**
+ * ExpectedMs from ConsoleGameRegistry.luau — the designer's expected solve time
+ * for each minigame, keyed by the registry id (same order as MINIGAMES). Every
+ * game carries the same value at tiers 1/2/3.
+ *
+ * Registry line per game: wires :65 = 7000, pipes :163 = 12000, waveform :265 =
+ * 8000, matrix :298 = 10000, fuelrods :333 = 7000, sonar :365 = 8000, logic :416
+ * = 10000, spectro :465 = 10000, pressure :502 = 8000, lasers :544 = 9000,
+ * geiger :615 = 10000, flux :650 = 7000, piston :677 = 8000.
+ *
+ * The registry's other timing field, MinMs (:12), is NOT a solve time — it is an
+ * anti-cheat floor that holds a too-fast answer until 75 % of the floor has
+ * elapsed (CrusherStationService.luau:950-961). It runs 2.5-4 s. Do not quote it
+ * as how long a minigame takes.
+ */
+export const MINIGAME_EXPECTED_MS: Record<string, number> = {
+  Wires: 7000,
+  Pipes: 12000,
+  Waveform: 8000,
+  Matrix: 10000,
+  'Fuel Rods': 7000,
+  Sonar: 8000,
+  Logic: 10000,
+  Spectro: 10000,
+  Pressure: 8000,
+  Lasers: 9000,
+  Geiger: 10000,
+  Flux: 7000,
+  Piston: 8000,
+};
+
+/** Range across the pool: 7–12 s. */
+export const MINIGAME_EXPECTED_MS_RANGE = { min: 7000, max: 12000 } as const;
+
 export const TRANSITION_TASKS = ['Switches', 'Buttons', 'Valve', 'Fuses'] as const;
 
 export const WORM = {
   maxAlive: 3,
-  bellSpawnDelaySec: '3–5',
-  bellSpawnDistStuds: '60–100',
+  /**
+   * Display strings for the bell spawn. These are DERIVED from `bell` below —
+   * keep the two in step. They exist because templates interpolate them inline.
+   */
+  bellSpawnDelaySec: '0.5–1',
+  bellSpawnDistStuds: '6–14',
+  /**
+   * Config.Worm.Bell (src/ReplicatedStorage/STATIC_Shared/Config/Worm.luau:115-127),
+   * consumed in WormService.luau:1192 (delay) and :1203 (distance). The bell is a
+   * close-range jumpscare: a worm erupts 6-14 studs from the target 0.5-1 s after
+   * the ring. The old 3-5 s / 60-100 studs was Travel's spawn ring (Worm.luau:24-38),
+   * which is the general random-spawn path, not the bell's.
+   */
+  bell: {
+    delaySec: { min: 0.5, max: 1 },
+    distStuds: { min: 6, max: 14 },
+    cooldownSec: 35,
+    alertRadiusStuds: 40,
+    /** Round states the bell works in (Worm.luau:126). */
+    states: ['GracePeriod', 'Hunt', 'Extraction'],
+  },
   baseChancePct: 3.5,
   baseChanceEverySec: 5,
   grabDamagePct: '8–20',
-  /** Triggers that multiply the base chance (×1.5 each, capped at ×2). */
-  lures: ['A missed or near-miss throw', 'A screaming mimic item nearby', 'Standing near or holding heavy scrap'],
+  /**
+   * Lure multipliers from Config.Worm.Lures (Worm.luau:90-94), applied to the base
+   * chance in WormService.luau:1237. There is NO cap on the combined lure product:
+   * a bell lure is ×3, not ×1.5, and misses/mimics are ×1.5 each.
+   */
+  lureMultipliers: [
+    { trigger: 'Ringing the bell', mult: 3, radiusStuds: 40, durationSec: 20 },
+    { trigger: 'A missed or near-miss throw', mult: 1.5, radiusStuds: 40, durationSec: 20 },
+    { trigger: 'A screaming mimic item nearby', mult: 1.5, radiusStuds: 40, durationSec: 20 },
+  ],
+  /**
+   * The heavy-scrap factor is separate from the lures and is the only *capped*
+   * factor: ×1.5 while carrying heavy scrap or standing within 20 studs of a heavy
+   * pickup, capped at ×2 (Worm.luau:105-111, WormService.luau:993-1001, applied
+   * at :1237). Because the base is ×1.5 and the cap is ×2 the cap never binds —
+   * do not describe it as a cap on the lures.
+   */
+  heavyScrap: { mult: 1.5, cap: 2, radiusStuds: 20 },
+  /** Rendered as prose lists on the guide pages. */
+  lures: ['Ringing the bell (×3)', 'A missed or near-miss throw (×1.5)', 'A screaming mimic item nearby (×1.5)'],
 } as const;
 
 export const EXTRACTION = {

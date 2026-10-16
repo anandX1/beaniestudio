@@ -1,9 +1,33 @@
 ---
 /**
- * A game screenshot from the registry: responsive WebP srcset, intrinsic
- * width/height (zero CLS), lazy by default. `lightbox` wraps it in a link
- * to the full-size file that Lightbox.astro opens in a <dialog>; without JS
- * the link simply opens the image.
+ * A game screenshot from the registry: responsive AVIF with a WebP fallback,
+ * intrinsic width/height (zero CLS), lazy by default. `lightbox` wraps it in
+ * a link to the full-size file that Lightbox.astro opens in a <dialog>;
+ * without JS the link simply opens the image.
+ *
+ * LAYOUT NOTE — why <picture> carries `display: contents`
+ *   As a bare <img>, this element's containing block was the `.shot-frame`,
+ *   the `.shot-link` or `.hero-cine-bg` that surrounds it, which is what makes
+ *   the existing `height: 100%` / `width: 100%` / intrinsic-ratio rules
+ *   resolve. A <picture> with its default `display: inline` would sit between
+ *   them and could change that resolution. `display: contents` removes the
+ *   <picture> box from the box tree entirely, so the <img>'s containing block
+ *   is byte-for-byte the same element it was before. CLS is unchanged.
+ *
+ * FORMAT NOTE — why there is only one <source>
+ *   The <img> keeps the WebP srcset it already had, so it *is* the WebP
+ *   fallback; a second `<source type="image/webp">` would repeat the same
+ *   srcset for no behavioural gain. The AVIF <source> comes first and is
+ *   guarded by `type="image/avif"`: a browser that cannot decode AVIF skips it
+ *   *without issuing a request* and falls through to the <img>. That guard —
+ *   not the element order — is what stops a double download.
+ *
+ *   The AVIF srcset is derived from the WebP srcset by extension because
+ *   scripts/media-avif.mjs mirrors scripts/media.mjs bucket for bucket (same
+ *   widths, same names, never upscaled). `node scripts/media-avif.mjs --check`
+ *   asserts that mirror still holds after a shot is added.
+ *
+ *   `Shot.full` deliberately stays WebP — see src/data/media.ts.
  */
 import { shot } from '../data/media';
 import Icon from './Icon.astro';
@@ -25,6 +49,8 @@ interface Props {
 
 const { id, sizes = '(min-width: 1280px) 1200px, 100vw', class: cls, imgClass, eager = false, lightbox, caption, alt, imgStyle } = Astro.props;
 const s = shot(id);
+/** Same widths and descriptors as s.srcset, AVIF instead of WebP. */
+const avifSrcset = s.srcset.replace(/\.webp/g, '.avif');
 const img = {
   src: s.w > 1280 ? `/media/${s.id}-1280.webp` : s.full,
   srcset: s.srcset,
@@ -42,9 +68,15 @@ const img = {
 
 {lightbox ? (
   <a href={s.full} class:list={['shot-link', cls]} data-lb={lightbox} data-caption={caption ?? s.alt}>
-    <img {...img} />
+    <picture style="display: contents">
+      <source type="image/avif" srcset={avifSrcset} sizes={sizes} />
+      <img {...img} />
+    </picture>
     <span class="shot-zoom" aria-hidden="true"><Icon name="expand" inline /></span>
   </a>
 ) : (
-  <img {...img} class:list={[cls, imgClass]} />
+  <picture style="display: contents">
+    <source type="image/avif" srcset={avifSrcset} sizes={sizes} />
+    <img {...img} class:list={[cls, imgClass]} />
+  </picture>
 )}

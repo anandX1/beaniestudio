@@ -13,8 +13,8 @@
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import { SITE } from '../../site.config';
 import {
-  GAME, MOVEMENT, JINGLES, POD, SCRAP, RARITY, CRUSHERS, MINIGAMES, TRANSITION_TASKS,
-  WORM, EXTRACTION, SCRAPPER, PROGRESSION, MOBILE_BUTTONS, CONTROLS, ROOMS, RESULTS, kg,
+  GAME, MOVEMENT, JINGLES, POD, SCRAP, RARITY, CRUSHERS, MINIGAMES, MINIGAME_EXPECTED_MS_RANGE,
+  TRANSITION_TASKS, WORM, EXTRACTION, SCRAPPER, PROGRESSION, MOBILE_BUTTONS, CONTROLS, ROOMS, RESULTS, kg,
 } from '../../data/game';
 
 const lightest = SCRAP[0];
@@ -139,8 +139,8 @@ const datasetLd = {
     <table class="data-table">
       <thead><tr><th scope="col">Value</th><th scope="col" class="num">Number</th></tr></thead>
       <tbody>
-        <tr><td>Minigames per console</td><td class="num text-facility-100">{CRUSHERS.minigamesPerConsole}</td></tr>
-        <tr><td>Minigame pool</td><td class="num text-facility-100">{MINIGAMES.length}</td></tr>
+        <tr><td>Minigames per console</td><td class="num text-facility-100">{CRUSHERS.minigamesPerConsole} of {MINIGAMES.length}</td></tr>
+        <tr><td>Expected solve time per minigame</td><td class="num">{MINIGAME_EXPECTED_MS_RANGE.min / 1000}–{MINIGAME_EXPECTED_MS_RANGE.max / 1000} s</td></tr>
         <tr><td>Transition tasks</td><td class="num text-facility-100">{TRANSITION_TASKS.length}</td></tr>
       </tbody>
     </table>
@@ -210,16 +210,21 @@ const datasetLd = {
       <thead><tr><th scope="col">Value</th><th scope="col" class="num">Number</th></tr></thead>
       <tbody>
         <tr><td>Maximum alive at once</td><td class="num text-facility-100">{WORM.maxAlive}</td></tr>
-        <tr><td>Delay after ringing the bell</td><td class="num">{WORM.bellSpawnDelaySec} s</td></tr>
-        <tr><td>Spawn distance from the bell</td><td class="num">{WORM.bellSpawnDistStuds} studs</td></tr>
+        <tr><td>Delay after ringing the bell</td><td class="num">{WORM.bell.delaySec.min}–{WORM.bell.delaySec.max} s</td></tr>
+        <tr><td>Spawn distance from the bell</td><td class="num">{WORM.bell.distStuds.min}–{WORM.bell.distStuds.max} studs</td></tr>
+        <tr><td>Bell cooldown (per ringer)</td><td class="num">{WORM.bell.cooldownSec} s</td></tr>
         <tr><td>Base spawn chance</td><td class="num">{WORM.baseChancePct}%</td></tr>
         <tr><td>Base chance checked every</td><td class="num">{WORM.baseChanceEverySec} s</td></tr>
         <tr><td>Grab damage</td><td class="num">{WORM.grabDamagePct}% health</td></tr>
       </tbody>
     </table>
   </div>
-  <p>Triggers that multiply the base chance (×1.5 each, capped at ×2):</p>
-  <ul>{WORM.lures.map((l) => <li>{l}</li>)}</ul>
+  <p>Lure multipliers on the base chance — these multiply together and are not capped:</p>
+  <ul>{WORM.lureMultipliers.map((l) => <li>{l.trigger} — ×{l.mult}, {l.durationSec} s</li>)}</ul>
+  <p>
+    Separately, carrying heavy scrap or standing within {WORM.heavyScrap.radiusStuds} studs of a heavy
+    pickup is ×{WORM.heavyScrap.mult} (the only capped factor; cap ×{WORM.heavyScrap.cap}).
+  </p>
 
   <h2 id="scrapper">Scrapper values</h2>
   <div class="overflow-x-auto">

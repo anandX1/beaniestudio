@@ -16,7 +16,7 @@ Facts below are taken from the game's scripts (beta build, 10 October 2026).
 - Objective: fill 3 crushers (quotas 120 / 130 / 150 kg = 400 kg) with scrap, clear 7 console minigames per crusher (pool of 13), then escape through the Intake Chute within 60 seconds. Escape is per player.
 - Hunter: Jingles, a clockwork jester. Speed 13.5 studs/s (Scrapper sprint 13, unlimited). Dash 26 studs/s for 1.6s, 8.5s cooldown. 2 hits to down. Bloodlust every 50–80s reveals all Scrappers for 3s.
 - Capture: downed Scrappers are carried to pods; 90s timer (twice as fast when no teammate is free); rescue = hold E for 3s; camping Hunters trigger a pod overload.
-- The Worm: second threat; ringing the bell always summons one 3–5s later; repelled by holding a flashlight on it; never targets the Hunter.
+- The Worm: second threat; ringing the bell always summons one within 0.5–1s, erupting 6–14 studs from whoever rang it; repelled by holding a flashlight on it; never targets the Hunter.
 - Scrap: 14 items, 3–140 kg; rarities Common ×1 (78%), Rare ×1.5 (17%), Charged ×3 (5%); 2 backpack slots plus one heavy item in hand.
 - Codes: none live yet (planned). Official list: https://beaniestudio.site/codes/
 - Developer: Beanie Studios — Anand Kumar (scripting, gameplay systems, game ai, animation and lighting); Pawan Dahe (level design, bunker maps, props, concept art and community); Jai Mishra (content, video editing, social media and sound effects)

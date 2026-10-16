@@ -1,7 +1,7 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import ShotFigure from '../../components/ShotFigure.astro';
-import { CRUSHERS, MINIGAMES, TRANSITION_TASKS, EXTRACTION } from '../../data/game';
+import { CRUSHERS, MINIGAMES, MINIGAME_EXPECTED_MS_RANGE, TRANSITION_TASKS, EXTRACTION } from '../../data/game';
 ---
 
 <GuideLayout
@@ -34,14 +34,18 @@ import { CRUSHERS, MINIGAMES, TRANSITION_TASKS, EXTRACTION } from '../../data/ga
   <ol>
     <li><strong>Fill the quota.</strong> Feed it scrap until the bar is full.</li>
     <li><strong>The console unlocks.</strong> Each crusher has its own console.</li>
-    <li><strong>Clear {CRUSHERS.minigamesPerConsole} minigames.</strong> They come in three pairs and one solo task. The console has a left and a right side, so two players can solve two minigames at the same time.</li>
+    <li><strong>Clear {CRUSHERS.minigamesPerConsole} minigames.</strong> They run as three pairs plus one
+    solo task: each pair is one game on the console's left panel and one on its right, and the last
+    game is a solo finisher. Two players can work the two panels at the same time.</li>
     <li><strong>Pull the lever</strong> to lock the crusher in.</li>
   </ol>
 
   <h2 id="minigames">All {MINIGAMES.length} console minigames</h2>
   <p>
-    Each console picks {CRUSHERS.minigamesPerConsole} minigames from this pool every round. Each one
-    takes about 2.5 to 4 seconds to solve when you know it.
+    Each console picks {CRUSHERS.minigamesPerConsole} of these {MINIGAMES.length} every round, and
+    expects about {MINIGAME_EXPECTED_MS_RANGE.min / 1000}–{MINIGAME_EXPECTED_MS_RANGE.max / 1000} seconds
+    per game. The pool covers memory tasks, wiring and pipe routing, gauge and beam alignment, and
+    timing tasks — learn them in a quiet moment rather than mid-chase.
   </p>
   <ul class="grid grid-cols-2 gap-x-8 sm:grid-cols-3">
     {MINIGAMES.map((m) => <li>{m}</li>)}

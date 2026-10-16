@@ -129,18 +129,18 @@ const dangerLd = {
       <tbody>
         <tr>
           <td>Ringing the bell</td>
-          <td class="num">Worm in {WORM.bellSpawnDelaySec} s, {WORM.bellSpawnDistStuds} studs away</td>
-          <td>Always summons one, wherever you are</td>
+          <td class="num">Worm in {WORM.bell.delaySec.min}–{WORM.bell.delaySec.max} s, {WORM.bell.distStuds.min}–{WORM.bell.distStuds.max} studs away</td>
+          <td>Always summons one on the nearest Scrapper — a close-range jumpscare</td>
         </tr>
         <tr>
           <td>Heavy scrap in hand</td>
           <td class="num">&minus;{SCRAPPER.heavyCarrySlowMaxPct}% speed, no flashlight</td>
-          <td>Slow, blind, and it attracts Worms</td>
+          <td>Slow, blind, and ×{WORM.heavyScrap.mult} on your Worm chance</td>
         </tr>
         <tr>
           <td>Noise</td>
           <td class="num">{WORM.baseChancePct}% base, checked every {WORM.baseChanceEverySec} s</td>
-          <td>Missed throws and screaming mimics multiply it</td>
+          <td>The bell is ×{WORM.lureMultipliers[0].mult}; missed throws and screaming mimics ×{WORM.lureMultipliers[1].mult} each</td>
         </tr>
         <tr>
           <td>Being the last one up</td>

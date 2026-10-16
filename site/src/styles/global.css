@@ -375,11 +375,18 @@ body::after {
 
 .js-beats .beat {
   opacity: 0;
-  transform: translateY(28px);
+  /* The measured reveal shape from the teardown: a 24px rise, never more.
+     40px + scale(0.98) was a large transform on a large block — texture, not
+     signal, and the most expensive part of the old reveal.
+     The stagger is derived from the same `--i` index as `.rise`, so the two
+     reveal paths cannot disagree; the old hand-written `--beat-delay` values
+     (110 / 120 / 100+200ms) are gone because `.beat` and `.rise` now share
+     one delay, and stacking both would have applied two reveals to one block. */
+  transform: translateY(24px);
   transition:
-    opacity 0.7s var(--ease-terminal),
-    transform 0.7s var(--ease-terminal);
-  transition-delay: var(--beat-delay, 0ms);
+    opacity 0.6s var(--ease-reveal),
+    transform 0.6s var(--ease-reveal);
+  transition-delay: calc(var(--i, 0) * 80ms);
 }
 
 .js-beats .beat.in {
@@ -802,13 +809,10 @@ body[data-noise='critical'] .dread-vignette {
   }
 }
 
-/* Tour card */
-.tour-card {
-  width: min(82vw, 44rem);
-}
-.tour-card .shot-frame {
-  aspect-ratio: 16 / 9;
-}
+/* `.tour-card` / `.tour-pin` / `.tour-progress` and the pinned-horizontal
+   @supports block were deleted with the pinned tour. `#tour` is now a plain
+   anchor target on a static room grid, so the hero's in-page link still lands
+   and there is no sticky box left for content-visibility to fight. */
 
 /* Lightbox */
 .lightbox {
@@ -909,52 +913,17 @@ body[data-noise='critical'] .dread-vignette {
     }
   }
 
-  /* Pinned horizontal tour — desktop only; touch keeps native swipe. */
-  @supports (animation-timeline: view()) {
-    @media (min-width: 1024px) {
-      .tour {
-        height: calc(var(--tour-count, 8) * 48svh + 100svh);
-        view-timeline-name: --tour;
-        view-timeline-axis: block;
-      }
-      .tour-pin {
-        position: sticky;
-        top: 0;
-        height: 100svh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        overflow: hidden;
-      }
-      .tour .strip {
-        overflow: visible;
-        scroll-snap-type: none;
-        width: max-content;
-        animation: tour-slide linear both;
-        animation-timeline: --tour;
-        animation-range: contain 4% contain 96%;
-      }
-      @keyframes tour-slide {
-        to { transform: translateX(calc(-100% + 100vw)); }
-      }
-      .tour-progress {
-        transform-origin: 0 50%;
-        animation: tour-progress linear both;
-        animation-timeline: --tour;
-        animation-range: contain 4% contain 96%;
-      }
-      @keyframes tour-progress {
-        from { transform: scaleX(0); }
-        to { transform: scaleX(1); }
-      }
-    }
-  }
+  /* Pinned horizontal tour, @keyframes tour-slide and @keyframes
+     tour-progress: DELETED. The tour is a static room grid now, so there is
+     no scroll-jacked axis left and nothing pinned for the scrollbar to fight. */
 }
 
 /* ============================================================
-   VISUAL LAYER v2 — numbers, story, ribbon, kinetic type.
+   VISUAL LAYER v2 — numbers, story, tour.
    Same contract: real content in the HTML, motion is a CSS
    enhancement behind @supports + no-preference.
+   (The ribbon and kinetic-type rules that lived here were removed
+   with their markup; see the note where they used to be.)
    ============================================================ */
 
 /* Typed custom properties so counters and gauges can animate. */
@@ -1023,42 +992,13 @@ body[data-noise='critical'] .dread-vignette {
   background: color-mix(in oklch, var(--color-signal) 6%, transparent);
 }
 
-/* --- Ribbon (infinite screenshot marquee) --- */
-.ribbon {
-  overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-}
-.ribbon-track {
-  display: flex;
-  gap: 0.75rem;
-  width: max-content;
-}
-.ribbon-track > * {
-  flex: 0 0 auto;
-  width: 18rem;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  border: 1px solid var(--color-facility-700);
-}
-.ribbon-track img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* --- Ribbon and kinetic type: DELETED with their markup.
+   The infinite marquee (`.ribbon*`, @keyframes ribbon) and the kinetic type
+   band (`.kinetic*`, @keyframes kin-l/kin-r) were removed from the homepage in
+   the 2026-10 redesign, and those classes were the only consumers anywhere in
+   src/. The marquee's job is now `.rack-scroller` in the v3 layer below. */
 
-/* --- Kinetic type --- */
-.kinetic {
-  overflow: hidden;
-  white-space: nowrap;
-  font-family: var(--font-display);
-  font-weight: 700;
-  text-transform: uppercase;
-  line-height: 0.95;
-  font-size: clamp(3rem, 11vw, 10rem);
-  letter-spacing: -0.01em;
-}
-.kinetic-line { display: inline-block; padding-right: 4rem; }
-.kinetic-outline { color: transparent; -webkit-text-stroke: 1px var(--color-facility-600); }
-.kinetic-solid { color: var(--color-facility-100); }
-.kinetic-signal { color: var(--color-signal); }
-
-/* --- Atmospheres: each section gets its own light --- */
+/* --- Atmospheres: each section gets its own light ---
 .atmo-red {
   background:
     radial-gradient(60% 70% at 15% 40%, color-mix(in oklch, var(--color-status-red) 16%, transparent), transparent 70%),
@@ -1107,11 +1047,7 @@ body[data-noise='critical'] .dread-vignette {
   .scroll-cue::after { animation: cue 1.8s var(--ease-terminal) infinite; transform-origin: top; }
   @keyframes cue { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
 
-  /* Ribbon drifts forever (pauses on hover). */
-  .ribbon-track { animation: ribbon 70s linear infinite; }
-  .ribbon-track.rev { animation-direction: reverse; animation-duration: 85s; }
-  .ribbon:hover .ribbon-track { animation-play-state: paused; }
-  @keyframes ribbon { to { transform: translateX(-50%); } }
+  /* Ribbon drift and kinetic-line travel: DELETED with their markup. */
 
   @supports (animation-timeline: view()) {
     /* Counters count up as they enter. Real number stays in the DOM. */
@@ -1122,12 +1058,6 @@ body[data-noise='critical'] .dread-vignette {
 
     .gauge-fill { animation: gauge linear both; animation-timeline: view(); animation-range: entry 20% cover 45%; }
     @keyframes gauge { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
-
-    /* Kinetic lines slide against the scroll. */
-    .kinetic-l { animation: kin-l linear both; animation-timeline: view(); animation-range: cover; }
-    .kinetic-r { animation: kin-r linear both; animation-timeline: view(); animation-range: cover; }
-    @keyframes kin-l { from { transform: translateX(5%); } to { transform: translateX(-35%); } }
-    @keyframes kin-r { from { transform: translateX(-35%); } to { transform: translateX(5%); } }
 
     /* Worm line draws itself. */
     .draw-path { stroke-dashoffset: 1; animation: draw linear both; animation-timeline: view(); animation-range: entry 10% cover 55%; }
@@ -1260,11 +1190,390 @@ body[data-noise='critical'] .dread-vignette {
     transform: translateY(calc(-7% + 14% * var(--fx-par, 0)));
     scale: 1.18;
   }
-  .fx-io .kinetic-l {
-    transform: translateX(calc(5% - 40% * var(--fx-kin, 0)));
+  /* `.fx-io .kinetic-l/.kinetic-r` deleted with the kinetic band. */
+}
+
+/* ============================================================
+   MONO READOUT SYSTEM v3 — the terminal vocabulary.
+
+   ADD-ONLY LAYER. Nothing above this block changes: .kicker,
+   .noise-label, .stat*, .panel, .atmo-* still resolve exactly as
+   they did, so /about, /guide/*, /community and /404 are untouched.
+   This block is opt-in by class name, and the homepage is the only
+   page that opts in.
+
+   Why it exists: the homepage rendered 21 distinct font sizes
+   (9.6 → 158.4px) with 7 mono sizes doing one job, at up to 0.30em
+   tracking (measured benchmark band: +0.08 to +0.12em). Every class
+   below composes from an existing @theme token — `--text-caption`
+   is the 11px mono step, `--section-rhythm` the 130px desktop
+   section padding — so no new type token is invented and
+   `--text-mono-label` / `--text-mono-readout` keep their published
+   values for the pages already using them.
+
+   Depth is a 1px ring, never a shadow: inset 0 0 0 1px white/5%.
+   Accent is a 8×2px tick, never 11px of uppercase amber text.
+   ============================================================ */
+
+/* — Depth + motion recipes, declared at :root rather than in @theme.
+     Tailwind prunes an unreferenced theme key out of the output entirely, and
+     an unresolved var() would delete the declaration that reads it. These two
+     are consumed by the rules immediately below and nowhere else, so they live
+     here as plain custom properties. Additive: no published @theme token
+     changes value in this layer.
+     - `--ring-hairline`: the teardown's depth model is a 1px inset ring, not a
+       shadow.
+     - `--ease-reveal`: the measured reveal curve, cubic-bezier(.215,.61,.355,1). */
+:root {
+  --ring-hairline: inset 0 0 0 1px oklch(1 0 0 / 0.05);
+  --ease-reveal: cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+/* Everything below composes from the layer order Tailwind already declares
+   (`@layer theme, base, components, utilities`). These are component classes,
+   so a Tailwind utility on the same element still wins — which is what lets
+   `class="eyebrow label--warn"` override the eyebrow's default colour without
+   an !important and without an unlayered rule that would beat every utility
+   (the trap that would silently kill `hover:text-signal` states). */
+@layer components {
+
+/* --- Role 1: EYEBROW — the section's own name.
+   Replaces `.kicker` on the homepage only. 11px of facility-500 (5.9:1,
+   no opacity) with an 8×2px amber tick as the ::before. The accent
+   survives as a mark; the 36 amber-dim text elements it replaces do not. */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  line-height: 1.1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-facility-500);
+}
+.eyebrow::before {
+  content: '';
+  flex: none;
+  width: 0.5rem;
+  height: 2px;
+  background: var(--color-signal);
+}
+
+/* --- Role 2: LABEL — field names, table heads, tags. Same size as the
+   eyebrow, tighter tracking, no mark. --- */
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-facility-500);
+}
+.label--warn {
+  color: var(--color-signal);
+}
+.label--dead {
+  color: var(--color-facility-600);
+}
+
+/* --- Role 3: READOUT — a mono value plus its unit. Only `b` is amber,
+   and only when the value is live. `u` is the unit, never underlined text. --- */
+.readout {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-readout);
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-facility-100);
+}
+.readout > u {
+  text-decoration: none;
+  margin-left: 0.375em;
+  letter-spacing: 0.08em;
+  color: var(--color-facility-500);
+}
+.readout > b {
+  font-weight: 400;
+  color: var(--color-signal);
+}
+/* The four-number band reuses the title step in the display face rather
+   than adding a sixth size. tabular-nums is mandatory: without it the
+   readouts jitter as digit widths change. */
+.readout--xl {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-title);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  color: var(--color-facility-100);
+}
+
+/* --- Role 4: SPEC — the dt / value / note row that replaces a <table> in
+   flowing page copy. `.data-table` stays for real data pages. --- */
+.spec {
+  border-top: 1px solid var(--color-facility-700);
+}
+.spec > div {
+  display: grid;
+  /* `auto` for the field name rather than a fixed 7.5rem: the same row shape
+     carries a one-word field label (`Speed`) and a comparison column head
+     (`Most asymmetrical horror`), and a fixed label column clips the second
+     one. `minmax(0, 1fr)` on the value columns lets long copy wrap instead of
+     forcing the row wider than its container on a phone. */
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.75rem 1rem;
+  align-items: baseline;
+  padding-block: 0.875rem;
+  border-bottom: 1px solid var(--color-facility-700);
+}
+/* A header legend row: one label spanning the whole row, so the two column
+   names read as a line of text instead of being squeezed into the value
+   column. */
+.spec > .spec-head {
+  grid-template-columns: minmax(0, 1fr);
+}
+.spec .v {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-title);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-facility-100);
+}
+/* One amber value out of five, not five out of five. */
+.spec .v--warn {
+  color: var(--color-signal);
+}
+.spec .n {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-facility-300);
+}
+@media (max-width: 480px) {
+  /* Two columns only: the value and its note stack instead of three narrow
+     columns. The comparison rows keep their two content columns so the
+     side-by-side reading survives on a phone. */
+  .spec > div:not(.spec-head) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
-  .fx-io .kinetic-r {
-    transform: translateX(calc(-35% + 40% * var(--fx-kin, 0)));
+  .spec > div:not(.spec-head) > *:first-child {
+    grid-column: 1 / -1;
+  }
+  .spec .n {
+    grid-column: auto;
+  }
+}
+/* --- Hairline readout strip: one row, N cells, divided by 1px rules.
+   Replaces the scrolling ticker, the stat-card grid and a card row. --- */
+.strip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  border-block: 1px solid var(--color-facility-800);
+}
+.strip-row > * {
+  padding: 0.75rem 1.25rem;
+  border-right: 1px solid var(--color-facility-800);
+}
+.strip-row > *:last-child {
+  border-right: 0;
+}
+@media (max-width: 639px) {
+  .strip-row > * {
+    flex: 1 1 50%;
+    border-bottom: 1px solid var(--color-facility-800);
+  }
+}
+
+/* --- Ruler + rule: CSS-only engineered texture, 0 requests. --- */
+.ticks {
+  height: 6px;
+  background-image: linear-gradient(90deg, var(--color-facility-600) 1px, transparent 0);
+  background-size: 8px 6px;
+  background-repeat: repeat-x;
+}
+.rule {
+  height: 1px;
+  border: 0;
+  background: var(--color-facility-700);
+}
+
+/* --- PLATE: the diegetic "facility monitor" frame for a screenshot.
+   1px ring at low signal alpha, zero radius, CSS corner brackets, and an
+   optional ::after scanline plate. All of it is gradients — no image, no JS.
+   Deliberately NOT applied to the hero background image, which is the LCP
+   element and must keep its paint path to itself. --- */
+.plate {
+  --plate-ring: color-mix(in oklch, var(--color-signal) 28%, transparent);
+  position: relative;
+  border: 1px solid var(--color-facility-700);
+  background: var(--color-facility-900);
+  /* Clips the image to the ring and keeps an absolutely positioned caption
+     inside the plate, so `.plate` works as a frame with or without
+     `.plate--scan`. */
+  overflow: hidden;
+}
+.plate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--plate-ring), var(--plate-ring)) 0 0 / 14px 1px no-repeat,
+    linear-gradient(var(--plate-ring), var(--plate-ring)) 0 0 / 1px 14px no-repeat,
+    linear-gradient(var(--plate-ring), var(--plate-ring)) 100% 0 / 14px 1px no-repeat,
+    linear-gradient(var(--plate-ring), var(--plate-ring)) 100% 0 / 1px 14px no-repeat,
+    linear-gradient(var(--plate-ring), var(--plate-ring)) 0 100% / 14px 1px no-repeat,
+    linear-gradient(var(--plate-ring), var(--plate-ring)) 0 100% / 1px 14px no-repeat,
+    linear-gradient(var(--plate-ring), var(--plate-ring)) 100% 100% / 14px 1px no-repeat,
+    linear-gradient(var(--plate-ring), var(--plate-ring)) 100% 100% / 1px 14px no-repeat;
+}
+/* The scanline plate. Only for framed screenshots with breathing room —
+   at rack size it is noise. */
+.plate--scan::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 3px,
+    color-mix(in oklch, var(--color-facility-950) 12%, transparent) 3px 4px
+  );
+}
+
+/* --- RACK: the labelled snap-rack that replaced the infinite marquee.
+   A marquee moves constantly, so it signals nothing; a rack that stops on
+   each tile and shows its position reads as a switcher. Zero JS: the
+   position indicator is driven by a scroll timeline, and with no support
+   for that (or with no JS at all) the rack still scrolls and snaps. --- */
+.rack-scroller {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-snap-stop: always;
+  scroll-timeline-name: --rack;
+  scroll-timeline-axis: inline;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-facility-600) transparent;
+  /* Plain padding, NOT the 100vw-centring calc the older `.strip` uses: this
+     scroller also carries a mask-image, and a 100vw inline padding makes the
+     masked scroller overflow the document by the scrollbar width. The 3%
+     mask fade is the edge affordance instead. */
+  padding-inline: 1rem;
+  padding-bottom: 0.75rem;
+  /* Edge fade = "there is more here", without a fade an overflow row just
+     looks cropped. `oklch(0 0 0)` on the CSS Color 4 syntax, NOT the `#000`
+     shorthand, because this file's colour convention is oklch throughout and
+     a hex here would be the one literal a grep for tokens could not clear. */
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    oklch(0 0 0) 3%,
+    oklch(0 0 0) 97%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    oklch(0 0 0) 3%,
+    oklch(0 0 0) 97%,
+    transparent 100%
+  );
+}
+.rack-scroller > * {
+  flex: 0 0 auto;
+  width: 17.5rem;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.rack-meter {
+  height: 2px;
+  background: var(--color-facility-800);
+}
+.rack-meter > i {
+  display: block;
+  height: 100%;
+  background: var(--color-signal);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+@supports (animation-timeline: scroll()) {
+  .rack-meter > i {
+    animation: rack-meter linear both;
+    animation-timeline: --rack;
+    animation-range: 0% 100%;
+  }
+  @keyframes rack-meter {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+}
+
+} /* end @layer components */
+
+/* --- LOADING: "the signal acquires".
+   Animates `filter` only, and only on the backdrop LAYER. The hero <img>
+   itself is untouched: opacity stays 1, clip-path stays none, and the image
+   keeps its visible area on every frame, because the measured LCP element on
+   this site is that image and a reveal that starts at zero visible area makes
+   Chromium record LCP at scroll time.
+   It is on the layer rather than on the image for a second reason: the image
+   already owns an `animation` shorthand for the hero-drift scroll timeline,
+   and two shorthands on one property would have silently cancelled whichever
+   lost the cascade. The filter does not conflict with anything on the layer.
+   `backwards` fill, not `both`: a forwards fill would hold this rule's
+   keyframe values and undo the image's existing `saturate(1.08) brightness(.8)`
+   grade. No `will-change` — it would pin a full-viewport layer for a 600ms
+   effect. --- */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-cine-bg {
+    animation: signal-acquire 600ms var(--ease-reveal) 60ms backwards;
+  }
+  @keyframes signal-acquire {
+    from {
+      filter: brightness(0.55);
+    }
+  }
+
+  /* --- RISE: the entry reveal on the CSS-only path, for browsers that have
+     scroll-driven animations. The IntersectionObserver path below is what
+     covers Firefox; this one never needs JS at all, so no-JS visitors on
+     Chrome get the reveal instead of nothing.
+     Same measured shape as `.beat`: a 24px rise, 600ms, var(--ease-reveal).
+     NO animation-delay here on purpose: on a progress timeline a time-valued
+     delay consumes part of a range whose duration is `auto`, which is the
+     documented way to make a scroll-linked animation never fire. The 80ms
+     stagger is carried by `.beat` (transition-delay) on the JS path instead,
+     where a delay is unambiguous. --- */
+  @supports (animation-timeline: view()) {
+    .rise {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 12% cover 34%;
+    }
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
   }
 }
 
@@ -1332,9 +1641,10 @@ body[data-noise='critical'] .dread-vignette {
   .dot {
     animation: none;
   }
-  .ticker-track {
-    animation: none;
-  }
+  /* Belt-and-braces: the `.ticker-track` rule that used to sit here went with
+     the ticker, which the redesigned homepage no longer renders. `.ticker` is
+     unused site-wide now, but its class rule is left in place above so nothing
+     else that might adopt it changes behaviour. */
   /* Hero never looks bare without motion: the canvas swaps to a still,
      non-animated depth wash instead of disappearing. */
   .static-noise {
@@ -1363,5 +1673,22 @@ body[data-noise='critical'] .dread-vignette {
   .dread-vignette,
   .hunter-bar-fill {
     transition: none;
+  }
+  /* --- v3 layer, each one stated rather than inherited:
+     `.rise` on the CSS-only path (announcement `rise`), the loading
+     `filter` fade (announcement `signal-acquire`), and the rack position
+     indicator, which is scroll-linked state and is removed outright under
+     reduced motion — the scroller keeps its scrollbar, its snap points and
+     its edge mask, so the affordance survives without the motion. --- */
+  .rise {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .hero-cine-bg {
+    animation: none;
+  }
+  .rack-meter {
+    display: none;
   }
 }

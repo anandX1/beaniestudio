@@ -1,7 +1,36 @@
 ---
+/**
+ * Homepage — the visual hook, then three visual doors, then the CTA.
+ *
+ * Rewritten 2026-10 round (visual redesign):
+ *
+ * DELETED, because each block's content already exists elsewhere on the site:
+ *   - kinetic type band   (aria-hidden, zero words, and the source of the
+ *                          158.4px / 9.9x display-size outlier)
+ *   - parallax band       (0 words, 1 image, no function; the image also
+ *                          appears in the stills rack below)
+ *   - endings block       (result-escaped is rendered inside step 04; the
+ *                          other three are UI screenshots, now reachable in
+ *                          the stills rack)
+ *   - team block          (SiteFooter says "three-person team"; /about/ lists
+ *                          all three with roles and emails)
+ *   - FollowSection       (duplicates SiteFooter's Discord / YouTube / Roblox
+ *                          links; its one unique affordance, the Share button,
+ *                          survives in the community strip)
+ *
+ * UN-PINNED, content kept: "How a round works" and "Tour the bunker" were a
+ * sticky scrollytelling column and a pinned horizontal scroll-jack. Measured
+ * together at 8.71 viewports — 42% of the page — for 325 words and 16 images.
+ * They are now a hairline column grid and a room grid: same content, no
+ * hijacked scroll axis, and no sticky boxes to break LCP or anchors.
+ *
+ * Type, colour and rhythm come from the v3 vocabulary in styles/global.css
+ * (.eyebrow / .label / .readout / .spec / .strip-row / .plate / .rack) and
+ * from the scale tokens (text-caption, text-body, text-lead, text-title,
+ * text-display). No new colour literal is written here.
+ */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import VideoCard from '../components/VideoCard.astro';
-import FollowSection from '../components/FollowSection.astro';
 import Shot from '../components/Shot.astro';
 import Lightbox from '../components/Lightbox.astro';
 import Icon from '../components/Icon.astro';
@@ -10,22 +39,22 @@ import { FEATURED_VIDEO, VIDEOS, watchUrl } from '../data/videos';
 import { shot, SHOTS } from '../data/media';
 import { ROOM_INFO } from '../data/rooms';
 import {
-  GAME, MOVEMENT, JINGLES, POD, SCRAP, CRUSHERS, MINIGAMES, EXTRACTION, WORM, ROADMAP, TEAM, COMMUNITY, SCRAPPER, RESULTS, PROGRESSION,
+  GAME, MOVEMENT, JINGLES, POD, SCRAP, CRUSHERS, MINIGAMES, EXTRACTION, WORM, ROADMAP, COMMUNITY, RESULTS,
 } from '../data/game';
 
 const lightest = SCRAP[0];
 const heaviest = SCRAP[SCRAP.length - 1];
 const heroShot = shot('central-room-globe');
 
-const tickerItems = [
-  `CRUSHER QUOTA: ${CRUSHERS.totalKg} KG`,
-  `HUNTER BLOODLUST: EVERY ${JINGLES.bloodlust.everySec} SECONDS`,
-  `POD TIMER: ${POD.timerSec} SECONDS`,
-  `EXTRACTION WINDOW: ${EXTRACTION.windowSec} SECONDS`,
-  'DO NOT RING THE BELL',
-  'THE WORM HATES LIGHT',
+/** The four hard numbers of the job, plus one line that places each of them. */
+const jobStats = [
+  { v: `${CRUSHERS.totalKg}`, u: 'kg', n: 'of scrap, crushed to clear the round' },
+  { v: `${CRUSHERS.count}`, u: '', n: 'crushers, in random spots. Crushing is loud' },
+  { v: `${MINIGAMES.length}`, u: '', n: 'console minigames; 7 per crusher' },
+  { v: `${GAME.roundLimitMin}`, u: 'min', n: 'is the longest a round runs' },
 ];
 
+/** 01–04. `pos` is the crop, not decoration: two steps share a console shot. */
 const loop = [
   {
     n: '01', t: 'Scavenge', icon: 'scrap' as const, shot: 'storage-bay', pos: '50% 50%',
@@ -49,20 +78,13 @@ const loop = [
   },
 ];
 
-const stats = [
-  { to: CRUSHERS.totalKg, unit: 'KG', label: 'of scrap to crush', icon: 'weight' as const, gauge: true },
-  { to: MINIGAMES.length, unit: '', label: 'console minigames', icon: 'console' as const },
-  { to: POD.timerSec, unit: 'SEC', label: 'to save a captured friend', icon: 'pod' as const },
-  { to: GAME.serverSize, unit: '', label: 'players per server', icon: 'users' as const },
-];
-
-const ribbonA = ['cargo-dock-shuttle', 'reactor-coils', 'medbay', 'control-room-hologram', 'storage-bay', 'jingles-red', 'central-room-globe', 'interrogation', 'cargo-dock-floor', 'security'];
-const ribbonB = ['jingles-medbay', 'reactor-tanks', 'storage-bay-forklift', 'control-room', 'worm-render', 'pod-active', 'medbay-red', 'hunter-reveal', 'cargo-dock-bay', 'reactor-door'];
+/** The shared section still: one framed plate, two steps of the sequence. */
+const roundStills = [loop[0], loop[2]];
 
 const jinglesStats = [
   { k: 'Speed', v: `${MOVEMENT.hunter}`, note: `You sprint at ${MOVEMENT.scrapperSprint}. It gains on you every second.` },
   { k: 'Dash', v: `${JINGLES.dash.speed}`, note: `For ${JINGLES.dash.durationSec} s, every ${JINGLES.dash.cooldownSec} s. No wind-up.` },
-  { k: 'Bloodlust', v: `${JINGLES.bloodlust.everySec} s`, note: `Sees every Scrapper for ${JINGLES.bloodlust.revealSec} s and moves ${JINGLES.bloodlust.speedMult}× faster.` },
+  { k: 'Bloodlust', v: `${JINGLES.bloodlust.everySec} s`, warn: true, note: `Sees every Scrapper for ${JINGLES.bloodlust.revealSec} s and moves ${JINGLES.bloodlust.speedMult}× faster.` },
   { k: 'Hits to down', v: `${JINGLES.attack.hitsToDown}`, note: `Then it's the pod, or a ${JINGLES.executeSec}-second finish.` },
   { k: 'Tell', v: `${JINGLES.attack.windupSec} s`, note: 'A red danger zone flashes before every swing.' },
 ];
@@ -74,6 +96,60 @@ const compare = [
   ['Teamwork', 'Mostly side by side', `Two players per console, ${POD.rescueHoldSec}-second pod rescues, one shared weight goal`],
   ['The escape', 'Open the gate', `A ${EXTRACTION.windowSec}-second window and a personal UFO beam-out`],
 ];
+
+/**
+ * The stills rack. These are the same 20 shots the deleted marquee carried —
+ * 8 of which appeared nowhere else on the homepage — so the rack keeps every
+ * one of them reachable rather than turning them into dead texture. Each tile
+ * links to the gallery group that holds it (the group indices are the same
+ * `GROUPS` order /screenshots/ renders, so the anchor is stable).
+ */
+const STILL_GROUPS: { key: string[]; slug: string }[] = [
+  { key: ['jingles'], slug: '#g0' },
+  { key: ['room', 'map'], slug: '#g1' },
+  { key: ['objective', 'pod', 'worm'], slug: '#g2' },
+  { key: ['ui'], slug: '#g3' },
+  { key: ['round', 'hallway'], slug: '#g4' },
+];
+const stillTile = (id: string) => {
+  const s = shot(id);
+  const g = STILL_GROUPS.find((x) => x.key.includes(s.group));
+  return {
+    id,
+    label: (s.room || s.id.replace(/-/g, ' ')).toUpperCase(),
+    href: `/screenshots/${g ? g.slug : ''}`,
+  };
+};
+const stills = [
+  'cargo-dock-shuttle', 'reactor-coils', 'medbay', 'control-room-hologram', 'storage-bay',
+  'jingles-red', 'central-room-globe', 'interrogation', 'cargo-dock-floor', 'security',
+  'jingles-medbay', 'reactor-tanks', 'storage-bay-forklift', 'control-room', 'worm-render',
+  'pod-active', 'medbay-red', 'hunter-reveal', 'cargo-dock-bay', 'reactor-door',
+].map(stillTile);
+
+/** The two full-bleed closing plates: one room, one corridor. */
+const closingStills = [
+  {
+    id: 'reactor-tanks',
+    room: 'Nuclear Reactor',
+    line: 'Red-glowing coils, then green tanks. The loudest room on the map.',
+    href: '/guide/map/',
+    link: 'The map, room by room',
+    side: 'left' as const,
+  },
+  {
+    id: 'security',
+    room: 'Security',
+    line: 'A wall of monitors over the only desk nobody watches.',
+    href: '/screenshots/',
+    link: `All ${SHOTS.length} screenshots`,
+    side: 'right' as const,
+  },
+];
+
+/** The three videos past the featured one, each reduced to a title row. */
+const moreVideos = VIDEOS.slice(1, 4);
+const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
 const videoGameLd = {
   '@context': 'https://schema.org',
@@ -115,11 +191,17 @@ const videoGameLd = {
 
 <BaseLayout title={SITE.title} path="/" ogImageAlt="Jingles, the clockwork jester Hunter from STATIC, next to the STATIC logo" jsonLd={[videoGameLd]}>
   <Fragment slot="head">
+    <!-- Unchanged on purpose: the hero image is the measured LCP element and
+         `100vw` is correct for a full-bleed backdrop. Declaring 1280 here would
+         upscale it above 1440. -->
     <link rel="preload" as="image" type="image/webp" imagesrcset={heroShot.srcset} imagesizes="(min-width: 768px) 100vw, 50vw" fetchpriority="high" />
   </Fragment>
 
   <!-- Beat reveals: armed inline so above-fold copy paints on first frame.
-       Fail-safe: no observer → nothing is hidden. -->
+       Fail-safe: no observer → nothing is hidden. The script bails on
+       prefers-reduced-motion, so reduced-motion users never get the class and
+       never see an armed element. Nothing inside the first 100svh carries
+       .beat — that is what keeps the hero out of the reveal system. -->
   <script is:inline>
     (function () {
       if (!('IntersectionObserver' in window)) return;
@@ -179,8 +261,11 @@ const videoGameLd = {
 
   <div class="progress-rail" aria-hidden="true"><div class="progress-rail-fill" id="progressFill"></div></div>
 
-  <!-- ================= HERO ================= -->
+  <!-- ================= 01 · HOOK — hero ================= -->
   <section class="hero-cine" aria-label="STATIC">
+    <!-- The LCP element. No opacity gate, no clip-path, no mask: it paints at
+         full visibility on the first frame and only its `filter` settles in
+         (global.css, `signal-acquire`). -->
     <div class="hero-cine-bg" aria-hidden="true">
       <!-- Phones see this backdrop under a heavy shade: 50vw picks the 640 file. -->
       <Shot id="central-room-globe" sizes="(min-width: 768px) 100vw, 50vw" eager />
@@ -190,23 +275,23 @@ const videoGameLd = {
 
     <div class="relative mx-auto grid w-full max-w-6xl items-end gap-4 px-4 pt-16 pb-10 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:pt-16 lg:pb-0">
       <div class="hero-cine-copy">
-        <p id="launchStatus" data-launch={SITE.launchDate} class="kicker flex items-center gap-3">
+        <p id="launchStatus" data-launch={SITE.launchDate} class="eyebrow">
           <span class="dot" aria-hidden="true"></span>
           <span data-launch-label>Free on Roblox · Beta out {GAME.launchLabel}</span>
         </p>
 
         <!-- The H1 carries the game's full name, not just "Static": "STATIC"
              alone collides with the generic word and with other games, so the
-             ownable term is the long form. The tagline was already rendered
-             directly under the wordmark, so this changes meaning, not layout. -->
-        <h1 class="mt-6 font-display text-7xl font-bold uppercase leading-none tracking-tight sm:text-9xl">
+             ownable term is the long form. Sized from the scale's display step
+             (44 → 96px) instead of a hand-written text-7xl/text-9xl pair. -->
+        <h1 class="mt-6 font-display text-display font-bold uppercase tracking-tight">
           <span class="flicker block text-signal" data-decode>Static</span>
-          <span class="mt-2 block font-display text-2xl font-semibold uppercase leading-normal tracking-[0.14em] text-facility-100 sm:text-3xl">
+          <span class="mt-2 block font-display text-title font-semibold uppercase tracking-[0.14em] text-facility-100">
             {GAME.tagline}
           </span>
         </h1>
 
-        <p class="mt-7 max-w-xl text-lg leading-relaxed text-facility-100/85">
+        <p class="mt-7 max-w-xl text-lead text-facility-100/85">
           A free co-op horror game on Roblox. Up to {GAME.scrappers.max} Scrappers search an abandoned
           bunker for scrap and haul {CRUSHERS.totalKg} kg of it to the crushers. One more player is
           <strong class="text-facility-100">Jingles</strong>, the Hunter, and Jingles is a little
@@ -217,15 +302,15 @@ const videoGameLd = {
           <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary">
             Play free on Roblox <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
           </a>
-          <a href="#tour" class="btn-secondary bg-facility-950/40">
-            Tour the bunker <span aria-hidden="true">↓</span>
-          </a>
         </div>
 
-        <ul class="mt-10 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs tracking-[0.16em] text-facility-300">
+        <!-- The four facts the 42s ticker used to scroll past. Static, readable,
+             above the fold, and no amber: the ticker painted 10 text elements
+             with text-signal-dim by inheritance. -->
+        <ul class="strip-row mt-10 label">
           <li>{GAME.scrappers.min}–{GAME.scrappers.max} SCRAPPERS VS {GAME.hunters} HUNTER</li>
           <li>ROUNDS UP TO {GAME.roundLimitMin} MIN</li>
-          <li>PC + MOBILE</li>
+          <li>{GAME.platforms.join(' + ').toUpperCase()}</li>
           <li>VOICE CHAT</li>
         </ul>
       </div>
@@ -246,423 +331,405 @@ const videoGameLd = {
     <span class="scroll-cue absolute bottom-6 left-1/2 hidden -translate-x-1/2 lg:inline-flex" aria-hidden="true">SCROLL</span>
   </section>
 
-  <!-- Facts band (true numbers only — every item comes from data/game.ts) -->
-  <div class="ticker border-y border-facility-700 bg-facility-900/80" aria-hidden="true">
-    <div class="ticker-track font-mono text-[0.7rem] tracking-[0.3em] text-signal-dim">
-      {[0, 1].map(() =>
-        tickerItems.map((item) => (
-          <span class="flex shrink-0 items-center gap-3 px-6 py-2.5">
-            <span class="inline-block h-1.5 w-1.5 bg-signal/70" aria-hidden="true"></span>
-            {item}
-          </span>
-        ))
-      )}
-    </div>
-  </div>
-
-  <!-- ================= NUMBERS ================= -->
-  <section aria-label="STATIC in numbers" class="atmo-amber">
-    <div class="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((st) => (
-          <li class="stat rise">
-            <div class="flex items-start justify-between">
-              <Icon name={st.icon} size={28} class="stat-icon" />
-              {st.gauge && (
-                <svg width="56" height="56" viewBox="0 0 40 40" aria-hidden="true">
-                  <circle cx="20" cy="20" r="16" fill="none" stroke-width="3" class="gauge-track" />
-                  <circle cx="20" cy="20" r="16" fill="none" stroke-width="3" class="gauge-fill" pathLength="100" transform="rotate(-90 20 20)" />
-                </svg>
-              )}
-            </div>
-            <p class="mt-6">
-              <span class="stat-num count" style={`--to: ${st.to}`}><span class="count-real">{st.to}</span></span>
-              {st.unit && <span class="stat-unit">{st.unit}</span>}
-            </p>
-            <p class="mt-2 font-mono text-xs uppercase tracking-[0.16em] text-facility-300">{st.label}</p>
+  <!-- ================= 02 · THE JOB — four numbers ================= -->
+  <section class="section-band border-t border-facility-800" aria-labelledby="job-h">
+    <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <p class="eyebrow">The job</p>
+      <h2 id="job-h" class="rise mt-4 max-w-3xl font-display text-title font-bold uppercase tracking-wide" data-decode>
+        Find {CRUSHERS.totalKg} kg of scrap. Crush it. Get out.
+      </h2>
+      <div class="mt-8 ticks" aria-hidden="true"></div>
+      <ul class="strip-row mt-8">
+        {jobStats.map((st) => (
+          <li class="flex flex-1 flex-col gap-1">
+            <span class="readout--xl">{st.v}{st.u && <u>{st.u}</u>}</span>
+            <span class="label">{st.n}</span>
           </li>
         ))}
       </ul>
     </div>
   </section>
 
-  <!-- ================= HOW A ROUND WORKS: sticky story ================= -->
-  <section aria-labelledby="loop-h" id="how-to-play" class="border-t border-facility-800">
-    <div class="mx-auto w-full max-w-6xl px-4 pt-16 sm:px-6 sm:pt-24">
-      <p class="kicker">How a round works</p>
-      <h2 id="loop-h" class="beat mt-4 max-w-3xl font-display text-4xl font-bold uppercase tracking-wide sm:text-6xl" data-decode>
+  <!-- ================= 03 · THE ROUND — was the sticky scrollytelling column =================
+       Un-pinned. Four cells on one hairline grid, one shared still at the foot.
+       Previously: a 4-frame sticky crossfade plus 4 duplicate inline images on
+       mobile, at 3.87 viewports. -->
+  <section class="section-band border-t border-facility-800" id="how-to-play" aria-labelledby="loop-h">
+    <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <p class="eyebrow">The round</p>
+      <h2 id="loop-h" class="rise mt-4 max-w-3xl font-display text-title font-bold uppercase tracking-wide" data-decode>
         Find it. Haul it. Crush it. Get out.
       </h2>
-    </div>
-    <div class="story mx-auto grid w-full max-w-6xl gap-10 px-4 pb-16 sm:px-6 lg:grid-cols-[1.35fr_0.65fr] lg:gap-14">
-      <div class="story-media" aria-hidden="true">
-        {loop.map((st) => (
-          <div class="shot-frame">
-            <Shot id={st.shot} sizes="(min-width: 1024px) 760px, 1px" imgClass="h-full w-full object-cover" imgStyle={`object-position: ${st.pos}`} />
-            <div class="shot-caption">
-              <p class="font-mono text-[0.68rem] tracking-[0.2em] text-signal">STEP {st.n}</p>
-              <p class="mt-1 font-display text-3xl font-bold uppercase tracking-wide text-facility-100">{st.t}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-      <ol class="pt-12 lg:pt-0">
-        {loop.map((st) => (
-          <li class="story-step py-10">
-            <div class="flex items-end gap-5">
-              <span class="step-num" aria-hidden="true">{st.n}</span>
-              <span class="step-icon"><Icon name={st.icon} size={26} /></span>
-            </div>
-            <h3 class="mt-5 font-display text-4xl font-bold uppercase tracking-wide sm:text-5xl">{st.t}</h3>
-            <p class="mt-4 max-w-md text-lg leading-relaxed text-facility-300">{st.b}</p>
-            <a href={st.link.href} class="mt-5 inline-block font-mono text-sm text-signal hover:text-signal-dim">{st.link.label} <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
-            <div class="step-inline reveal shot-frame aspect-[16/10]">
-              <Shot id={st.shot} sizes="(min-width: 640px) 600px, 100vw" imgClass="h-full w-full object-cover" imgStyle={`object-position: ${st.pos}`} />
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
+      <div class="mt-8 ticks" aria-hidden="true"></div>
 
-  <!-- ================= TOUR THE BUNKER (pinned horizontal on desktop) ================= -->
-  <section class="tour border-t border-facility-800" id="tour" aria-labelledby="tour-h" style={`--tour-count: ${ROOM_INFO.length}`}>
-    <div class="tour-pin py-20 lg:py-0">
-      <div class="mx-auto mb-8 flex w-full max-w-6xl flex-wrap items-end justify-between gap-6 px-4 sm:px-6">
-        <div>
-          <p class="kicker">The map</p>
-          <h2 id="tour-h" class="mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">Tour the bunker</h2>
-          <p class="mt-4 max-w-xl text-facility-300">
-            One map in the beta, {ROOM_INFO.length}+ rooms. Every screenshot is from the game.
-            <span class="lg:hidden">Swipe to look around.</span>
-          </p>
-        </div>
-        <a href="/guide/map/" class="btn-secondary">Full map guide <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
-      </div>
-
-      <ol class="strip" aria-label="Rooms of the bunker">
-        {ROOM_INFO.map((r, i) => (
-          <li class="tour-card">
-            <a href={`/guide/map/#${r.slug}`} class="group block">
-              <div class="shot-frame">
-                <Shot id={r.shots[0]} sizes="(min-width: 1024px) 704px, 82vw" imgClass="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
-                <div class="shot-caption">
-                  <p class="font-mono text-[0.68rem] tracking-[0.2em] text-signal">{String(i + 1).padStart(2, '0')} / {String(ROOM_INFO.length).padStart(2, '0')}</p>
-                  <p class="mt-1 font-display text-2xl font-bold uppercase tracking-wide text-facility-100 sm:text-3xl">{r.name}</p>
-                </div>
-              </div>
-              <p class="mt-3 max-w-xl text-sm leading-relaxed text-facility-300">{r.blurb}</p>
+      <ol class="mt-10 grid gap-x-6 gap-y-10 border-t border-facility-700 pt-8 sm:grid-cols-2 lg:grid-cols-4">
+        {loop.map((st, i) => (
+          <li class="rise flex flex-col border-l border-facility-800 pl-5" style={`--i: ${i}`}>
+            <span class="rule mb-4 w-6" style="background: var(--color-signal)" aria-hidden="true"></span>
+            <p class="flex items-center gap-3">
+              <span class="label">{st.n}</span>
+              <span class="step-icon" aria-hidden="true"><Icon name={st.icon} size={18} /></span>
+            </p>
+            <h3 class="mt-4 font-display text-2xl font-bold uppercase tracking-wide">{st.t}</h3>
+            <p class="mt-3 text-body text-facility-300">{st.b}</p>
+            <a href={st.link.href} class="link mt-auto pt-5 font-mono text-xs uppercase tracking-[0.08em]">
+              {st.link.label}
             </a>
           </li>
         ))}
       </ol>
 
-      <div class="mx-auto mt-8 hidden w-full max-w-6xl px-6 lg:block" aria-hidden="true">
-        <div class="h-px w-full bg-facility-700"><div class="tour-progress h-px w-full bg-signal"></div></div>
+      <!-- One shared still, framed as a monitor, instead of four images of which
+           two were the same file. -->
+      <div class="mt-12 grid gap-4 sm:grid-cols-2">
+        {roundStills.map((st, i) => (
+          <figure class="rise plate plate--scan aspect-[16/9]" style={`--i: ${i}`}>
+            <Shot id={st.shot} sizes="(min-width: 640px) 600px, 100vw" imgClass="h-full w-full object-cover" imgStyle={`object-position: ${st.pos}`} />
+            <figcaption class="absolute bottom-0 left-0 right-0 p-3 label">
+              {st.n} · {st.t}
+            </figcaption>
+          </figure>
+        ))}
       </div>
-    </div>
-  </section>
-
-  <!-- ================= KINETIC BAND ================= -->
-  <div class="border-y border-facility-800 py-10 sm:py-16" aria-hidden="true">
-    <div class="kinetic"><div class="kinetic-l"><span class="kinetic-line kinetic-outline">Jingles is</span><span class="kinetic-line kinetic-solid">faster</span><span class="kinetic-line kinetic-outline">than you</span><span class="kinetic-line kinetic-signal">13.5</span></div></div>
-    <div class="kinetic mt-2"><div class="kinetic-r"><span class="kinetic-line kinetic-signal">Don't</span><span class="kinetic-line kinetic-outline">ring the</span><span class="kinetic-line kinetic-solid">bell</span><span class="kinetic-line kinetic-outline">Don't ring the bell</span></div></div>
-  </div>
-
-  <!-- ================= JINGLES ================= -->
-  <section class="atmo-red relative overflow-hidden" aria-labelledby="jingles-h" id="jingles">
-    <div class="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[0.95fr_1.05fr]">
-      <div class="order-2 grid gap-4 lg:order-1">
-        <div class="reveal shot-frame aspect-[4/3]">
-          <Shot id="jingles-closeup" sizes="(min-width: 1024px) 520px, 100vw" lightbox="jingles" imgClass="h-full w-full object-cover object-[50%_30%]" />
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="reveal shot-frame aspect-[4/3]">
-            <Shot id="jingles-red" sizes="(min-width: 1024px) 260px, 50vw" lightbox="jingles" imgClass="h-full w-full object-cover object-[50%_35%]" />
-          </div>
-          <div class="reveal shot-frame aspect-[4/3]">
-            <Shot id="jingles-medbay" sizes="(min-width: 1024px) 260px, 50vw" lightbox="jingles" imgClass="h-full w-full object-cover object-[60%_50%]" />
-          </div>
-        </div>
-      </div>
-
-      <div class="order-1 lg:order-2">
-        <p class="noise-label text-status-red">The Hunter — 1 per round</p>
-        <h2 id="jingles-h" class="beat mt-4 font-display text-4xl font-bold uppercase tracking-wide sm:text-6xl" data-decode>
-          Meet Jingles
-        </h2>
-        <p class="beat mt-6 max-w-xl text-lg leading-relaxed text-facility-300">
-          Not an AI. One real player in your server, every round, hunting everyone else.
-        </p>
-
-        <dl class="beat mt-10 divide-y divide-facility-700 border-y border-facility-700">
-          {jinglesStats.map((s) => (
-            <div class="grid grid-cols-[6.5rem_5.5rem_1fr] items-baseline gap-3 py-4 sm:grid-cols-[9rem_7rem_1fr] sm:gap-4">
-              <dt class="font-mono text-xs uppercase tracking-widest text-facility-500">{s.k}</dt>
-              <dd class="whitespace-nowrap font-display text-xl font-bold text-signal sm:text-2xl">{s.v}</dd>
-              <dd class="text-sm leading-relaxed text-facility-300">{s.note}</dd>
-            </div>
-          ))}
-        </dl>
-        <p class="mt-3 font-mono text-[0.68rem] tracking-[0.14em] text-facility-500">SPEEDS IN STUDS PER SECOND. VALUES FROM THE BETA BUILD.</p>
-
-        <p class="beat mt-8">
-          <a href="/guide/jingles/" class="btn-secondary">Jingles: abilities and counterplay <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= THE OTHER THREATS ================= -->
-  <section class="atmo-amber border-t border-facility-800" aria-labelledby="threats-h">
-    <div class="relative mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-      <svg class="pointer-events-none absolute right-4 top-16 hidden h-32 w-[min(46rem,60%)] sm:block" viewBox="0 0 600 120" aria-hidden="true">
-        <path class="draw-path" pathLength="1" d="M0 90 C 60 90, 70 30, 130 30 S 200 100, 260 95 S 330 20, 400 28 S 470 105, 540 80 S 585 40, 600 42" />
-        <circle cx="600" cy="42" r="5" fill="currentColor" class="text-signal" />
-      </svg>
-      <p class="kicker">It's not only Jingles</p>
-      <h2 id="threats-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
-        Two more ways to lose
-      </h2>
-
-      <div class="mt-12 grid gap-6 lg:grid-cols-2">
-        <article class="panel flex flex-col">
-          <div class="reveal shot-frame aspect-[16/9] border-0 border-b">
-            <Shot id="worm-render" sizes="(min-width: 1024px) 560px, 100vw" lightbox="threats" imgClass="h-full w-full object-cover" />
-          </div>
-          <div class="flex flex-1 flex-col p-7">
-            <p class="noise-label text-signal">Under the floor</p>
-            <h3 class="mt-3 font-display text-3xl font-bold uppercase leading-tight tracking-wide">The Worm</h3>
-            <p class="mt-5 leading-relaxed text-facility-300">
-              Ring your bell and it surfaces {WORM.bellSpawnDelaySec} seconds later. It grabs, drains
-              {WORM.grabDamagePct}% health, and leaves.
-            </p>
-            <p class="mt-4 leading-relaxed text-facility-100">Hold your flashlight on it while it rears up and it backs off.</p>
-            <a href="/guide/worm/" class="mt-auto pt-6 font-mono text-sm text-signal hover:text-signal-dim">How to survive the Worm <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
-          </div>
-        </article>
-        <article class="panel flex flex-col">
-          <div class="reveal shot-frame aspect-[16/9] border-0 border-b">
-            <Shot id="pod-active" sizes="(min-width: 1024px) 560px, 100vw" lightbox="threats" imgClass="h-full w-full object-cover" />
-          </div>
-          <div class="flex flex-1 flex-col p-7">
-            <p class="noise-label text-status-red">After the second hit</p>
-            <h3 class="mt-3 font-display text-3xl font-bold uppercase leading-tight tracking-wide">The {POD.name}</h3>
-            <p class="mt-5 leading-relaxed text-facility-300">
-              Caught? {POD.timerSec} seconds. A teammate needs {POD.rescueHoldSec} to break you out.
-              Alone, the clock runs twice as fast.
-            </p>
-            <p class="mt-4 leading-relaxed text-facility-100">Camping a pod overloads it, stuns Jingles and sets you free.</p>
-            <a href="/guide/capture-and-rescue/" class="mt-auto pt-6 font-mono text-sm text-signal hover:text-signal-dim">Capture and rescue, explained <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= FOUR ENDINGS ================= -->
-  <section class="border-t border-facility-800" aria-labelledby="endings-h">
-    <div class="mx-auto w-full max-w-6xl px-4 pt-16 sm:px-6 sm:pt-24">
-      <p class="kicker">Every round ends on one of four screens</p>
-      <h2 id="endings-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
-        Escaped or consumed
-      </h2>
-      <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
-        Win or lose, every round pays {PROGRESSION.currency}.
+      <p class="mt-4 text-sm text-facility-500">
+        <a href="/guide/" class="link">The beginner guide covers all four steps in order</a>
       </p>
     </div>
-    <ul class="strip mt-12 pb-16 sm:pb-24" aria-label="End-of-round screens">
-      {RESULTS.map((r) => (
-        <li class="w-[min(86vw,36rem)]">
-          <div class="shot-frame aspect-[16/9]">
-            <Shot id={r.id} sizes="(min-width: 640px) 576px, 86vw" lightbox="endings" caption={`${r.title}: ${r.line}`} imgClass="h-full w-full object-cover" />
-          </div>
-          <p class="mt-3 flex items-baseline justify-between gap-4">
-            <span class:list={['font-display text-xl font-bold uppercase tracking-wide', r.win ? 'text-facility-100' : 'text-facility-300']}>{r.title}</span>
-            <span class="font-mono text-xs tracking-[0.14em] text-facility-500">{r.side.toUpperCase()} {r.win ? 'WIN' : 'LOSS'}</span>
-          </p>
-          <p class="mt-1 text-sm text-facility-300">“{r.line}”</p>
-        </li>
-      ))}
-    </ul>
   </section>
 
-  <!-- ================= RIBBON ================= -->
-  <section aria-label="Screenshots" class="border-t border-facility-800 py-16 sm:py-20">
-    <div class="mx-auto mb-8 flex w-full max-w-6xl flex-wrap items-end justify-between gap-4 px-4 sm:px-6">
-      <h2 class="font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl">{SHOTS.length} screenshots</h2>
+  <!-- ================= 04 · THE MAP — was the pinned tour =================
+       Un-pinned. Eight rooms as one grid at three columns, each tile a whole-tile
+       link to its room on /guide/map/. Previously a pinned horizontal scroll-jack
+       at 4.84 viewports with a caption scrim covering 30% of every shot. -->
+  <section class="section-band border-t border-facility-800" id="tour" aria-labelledby="tour-h">
+    <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <p class="eyebrow">The map</p>
+      <h2 id="tour-h" class="rise mt-4 max-w-3xl font-display text-title font-bold uppercase tracking-wide">
+        One map. {ROOM_INFO.length} rooms. No safe corners.
+      </h2>
+      <div class="mt-8 ticks" aria-hidden="true"></div>
+      <p class="mt-6 max-w-2xl text-body text-facility-300">
+        One map in the beta. Every screenshot on this page is captured in the game.
+      </p>
+
+      <ol class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Rooms of the bunker">
+        {ROOM_INFO.map((r, i) => (
+          <li class="rise" style={`--i: ${i}`}>
+            <a href={`/guide/map/#${r.slug}`} class="group block">
+              <div class="plate plate--scan aspect-[16/9]">
+                <Shot id={r.shots[0]} sizes="(min-width: 1024px) 440px, (min-width: 640px) 50vw, 100vw" imgClass="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+              </div>
+              <p class="mt-3 flex items-baseline gap-3">
+                <span class="label">{String(i + 1).padStart(2, '0')} / {String(ROOM_INFO.length).padStart(2, '0')}</span>
+                <span class="font-display text-xl font-bold uppercase tracking-wide text-facility-100 group-hover:text-signal">{r.name}</span>
+              </p>
+              <p class="mt-1.5 text-sm text-facility-300">{r.blurb}</p>
+            </a>
+          </li>
+        ))}
+      </ol>
+
+      <p class="mt-8">
+        <a href="/guide/map/" class="btn-secondary">Full map guide <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= 05 · THE HUNTER — Jingles, the Worm and the Pod =================
+       Merged from "Meet Jingles" + "Two more ways to lose". Asymmetric on
+       purpose (rule 7): a 3/5 close-up beside a 2/5 column of two half-height
+       plates, then one spec table. One amber value out of five, not five. -->
+  <section class="section-band border-t border-facility-800" id="jingles" aria-labelledby="jingles-h">
+    <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <p class="eyebrow label--warn">The Hunter — 1 per round</p>
+      <h2 id="jingles-h" class="rise mt-4 max-w-3xl font-display text-title font-bold uppercase tracking-wide" data-decode>
+        Meet Jingles
+      </h2>
+      <div class="mt-8 ticks" aria-hidden="true"></div>
+      <p class="rise mt-6 max-w-2xl text-lead text-facility-300">
+        Not an AI. One real player in your server, every round, hunting everyone else.
+      </p>
+
+      <div class="mt-10 grid gap-4 lg:grid-cols-[3fr_2fr]">
+        <figure class="rise plate plate--scan aspect-[16/10] lg:aspect-auto lg:min-h-[26rem]">
+          <Shot id="jingles-closeup" sizes="(min-width: 1024px) 720px, 100vw" lightbox="jingles" imgClass="h-full w-full object-cover object-[50%_30%]" />
+          <figcaption class="absolute bottom-0 left-0 right-0 p-3 label">Jingles · in the bunker</figcaption>
+        </figure>
+
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+          <figure class="rise plate plate--scan aspect-[16/9] lg:aspect-auto lg:min-h-0" style="--i: 1">
+            <Shot id="worm-render" sizes="(min-width: 1024px) 440px, 50vw" lightbox="threats" imgClass="h-full w-full object-cover" />
+            <figcaption class="absolute bottom-0 left-0 right-0 p-3 label">The Worm</figcaption>
+          </figure>
+          <figure class="rise plate plate--scan aspect-[16/9] lg:aspect-auto lg:min-h-0" style="--i: 2">
+            <Shot id="pod-active" sizes="(min-width: 1024px) 440px, 50vw" lightbox="threats" imgClass="h-full w-full object-cover" />
+            <figcaption class="absolute bottom-0 left-0 right-0 p-3 label">The {POD.name}</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="mt-14 grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
+        <div class="rise">
+          <p class="label">Threat profile</p>
+          <dl class="spec mt-4">
+            {jinglesStats.map((s) => (
+              <div>
+                <dt class="label">{s.k}</dt>
+                <dd class:list={['v', s.warn && 'v--warn']}>{s.v}</dd>
+                <dd class="n">{s.note}</dd>
+              </div>
+            ))}
+          </dl>
+          <p class="mt-3 label--dead label">Speeds in studs per second. Values from the beta build.</p>
+          <p class="mt-6">
+            <a href="/guide/jingles/" class="link">Jingles: abilities and counterplay</a>
+          </p>
+        </div>
+
+        <div class="rise" style="--i: 1">
+          <p class="label">Two more ways to lose</p>
+          <div class="mt-4 space-y-6">
+            <div>
+              <h3 class="font-display text-xl font-bold uppercase tracking-wide text-facility-100">The Worm</h3>
+              <p class="mt-2 text-body text-facility-300">
+                Ring your bell and it erupts {WORM.bellSpawnDistStuds} studs away within
+                {WORM.bellSpawnDelaySec} seconds. It grabs, drains {WORM.grabDamagePct}% health, and leaves.
+              </p>
+              <p class="mt-2 text-body text-facility-100">Hold your flashlight on it while it rears up and it backs off.</p>
+              <p class="mt-3"><a href="/guide/worm/" class="link">How to survive the Worm</a></p>
+            </div>
+            <div>
+              <h3 class="font-display text-xl font-bold uppercase tracking-wide text-facility-100">The {POD.name}</h3>
+              <p class="mt-2 text-body text-facility-300">
+                Caught? {POD.timerSec} seconds. A teammate needs {POD.rescueHoldSec} to break you out.
+                Alone, the clock runs twice as fast.
+              </p>
+              <p class="mt-2 text-body text-facility-100">Camping a pod overloads it, stuns Jingles and sets you free.</p>
+              <p class="mt-3"><a href="/guide/capture-and-rescue/" class="link">Capture and rescue, explained</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 06 · STILLS — two full-bleed plates + the rack =================
+       Replaces the infinite marquee AND the empty parallax band. The marquee
+       moved constantly so it signalled nothing; this rack stops on each tile,
+       fades at its edges and reports its own position with a scroll-driven
+       meter. All 20 shots survive, and every tile links to its gallery group,
+       so the 8 that previously existed only at 288px inside an aria-hidden
+       marquee are now reachable content. Zero JS. -->
+  <section class="section-band border-t border-facility-800" aria-labelledby="stills-h">
+    <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <p class="eyebrow">Stills</p>
+      <h2 id="stills-h" class="rise mt-4 font-display text-title font-bold uppercase tracking-wide">
+        {SHOTS.length} screenshots, no renders
+      </h2>
+    </div>
+
+    <div class="mt-10">
+      {closingStills.map((s, i) => (
+        <figure class={`relative ${i > 0 ? 'mt-4' : ''}`}>
+          <div class="plate plate--scan aspect-[21/9] max-h-[62svh]">
+            <Shot id={s.id} sizes="100vw" imgClass="h-full w-full object-cover" />
+          </div>
+          <figcaption class:list={[
+            'mx-auto mt-4 flex w-full max-w-6xl flex-col gap-2 px-4 sm:px-6',
+            s.side === 'right' && 'sm:items-end sm:text-right',
+          ]}>
+            <span class="label">{s.room}</span>
+            <span class="max-w-md text-body text-facility-300">{s.line}</span>
+            <a href={s.href} class="link self-start font-mono text-xs uppercase tracking-[0.08em]">{s.link}</a>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+
+    <div class="mx-auto mt-12 w-full max-w-6xl px-4 sm:px-6">
+      <p class="label" id="rack-h">More from the bunker — scroll for more</p>
+    </div>
+    <div class="relative mt-3">
+      <ul class="rack-scroller" aria-labelledby="rack-h">
+        {stills.map((s) => (
+          <li>
+            <a href={s.href} class="group block">
+              <span class="plate block aspect-[16/9]">
+                <Shot id={s.id} sizes="280px" />
+              </span>
+              <span class="mt-2 block label group-hover:text-signal">{s.label}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="rack-meter" aria-hidden="true"><i></i></div>
+    </div>
+
+    <div class="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6">
       <a href="/screenshots/" class="btn-secondary">See them all <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
     </div>
-    <a href="/screenshots/" class="block" tabindex="-1" aria-hidden="true">
-      <div class="ribbon">
-        <div class="ribbon-track">
-          {[...ribbonA, ...ribbonA].map((id) => (<div><Shot id={id} sizes="288px" /></div>))}
-        </div>
-      </div>
-      <div class="ribbon mt-3">
-        <div class="ribbon-track rev">
-          {[...ribbonB, ...ribbonB].map((id) => (<div><Shot id={id} sizes="288px" /></div>))}
-        </div>
-      </div>
-    </a>
   </section>
 
-  <!-- ================= FOOTAGE ================= -->
-  <section class="border-t border-facility-800" aria-labelledby="videos-h" id="videos">
-    <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-      <p class="kicker">Gameplay</p>
-      <h2 id="videos-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
+  <!-- ================= 07 · FOOTAGE — one featured card + three titles =================
+       The "84,000+ views" panel was a bordered box, four lines of copy and its
+       own CTA to deliver one number. The number survives as a label; the prose
+       moved to /videos/, which already carries all of it. -->
+  <section class="section-band border-t border-facility-800" aria-labelledby="videos-h" id="videos">
+    <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <p class="eyebrow">Footage</p>
+      <h2 id="videos-h" class="rise mt-4 font-display text-title font-bold uppercase tracking-wide" data-decode>
         Watch it in motion
       </h2>
-      <p class="beat mt-5">
-        <a href="/videos/" class="font-mono text-sm text-signal hover:text-signal-dim">
-          All {VIDEOS.length} videos, each on its own page <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
-        </a>
-      </p>
+      <div class="mt-8 ticks" aria-hidden="true"></div>
 
-      <div class="mt-12 grid gap-6 lg:grid-cols-5">
-        <div class="beat lg:col-span-3">
+      <div class="mt-10 grid gap-8 lg:grid-cols-5">
+        <div class="rise lg:col-span-3">
           <VideoCard video={FEATURED_VIDEO} />
         </div>
-        <div class="beat panel flex flex-col justify-between gap-6 p-7 lg:col-span-2" style="--beat-delay: 120ms">
-          <div>
-            <p class="kicker">From the team's channel</p>
-            <p class="mt-4 font-display text-2xl font-bold uppercase leading-snug tracking-wide text-facility-100">
-              {COMMUNITY.youtubeViews} views and counting
-            </p>
-            <p class="mt-4 text-sm leading-relaxed text-facility-300">
-              Shorts from playtests, chases and bad hiding spots, plus devlogs on how the game gets
-              built. New uploads every week.
-            </p>
-          </div>
-          <a href={LINKS.youtube} target="_blank" rel="noopener" class="btn-secondary self-start">
-            Watch on YouTube <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
-          </a>
-        </div>
+        <ul class="rise flex flex-col divide-y divide-facility-700 border-y border-facility-700 lg:col-span-2" style="--i: 1">
+          {moreVideos.map((v) => (
+            <li class="py-4">
+              <h3 class="font-display text-base font-bold uppercase tracking-wide text-facility-100">{v.title}</h3>
+              <p class="mt-1.5 flex items-center gap-4">
+                <span class="label">{v.tag}</span>
+                <span class="readout">{mmss(v.durationSec)}</span>
+              </p>
+              <a href={watchUrl(v.id)} target="_blank" rel="noopener" class="link mt-2 inline-block font-mono text-xs uppercase tracking-[0.08em]">
+                Open on YouTube <span aria-hidden="true"><Icon name="arrow-up-right" inline /></span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
 
-      <div class="mt-6 grid gap-6 md:grid-cols-3">
-        {VIDEOS.slice(1, 4).map((v, i) => (
-          <div class="beat" style={`--beat-delay: ${i * 110}ms`}>
-            <VideoCard video={v} />
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= WHAT'S DIFFERENT ================= -->
-  <section class="border-t border-facility-800" aria-labelledby="diff-h">
-    <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-      <p class="kicker">Why we built it</p>
-      <h2 id="diff-h" class="beat mt-4 max-w-3xl font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
-        Not another generator game
-      </h2>
-      <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
-        Survivors shouldn't just fix machines. In STATIC they explore, choose what to carry and
-        split the work.
-        <a href="/blog/why-static-is-not-a-generator-game/" class="text-signal underline decoration-signal-dim underline-offset-4 hover:text-signal-dim">Read why</a>.
-      </p>
-
-      <div class="beat mt-12 overflow-x-auto border border-facility-700">
-        <table class="w-full min-w-[40rem] text-left text-sm">
-          <thead class="bg-facility-900 font-mono text-xs uppercase tracking-widest text-facility-500">
-            <tr>
-              <th scope="col" class="w-36 px-5 py-4 font-normal"><span class="sr-only">Aspect</span></th>
-              <th scope="col" class="px-5 py-4 font-normal">Most asymmetrical horror</th>
-              <th scope="col" class="px-5 py-4 font-normal text-signal">STATIC</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-facility-700">
-            {compare.map(([k, them, us]) => (
-              <tr>
-                <th scope="row" class="px-5 py-4 font-mono text-xs uppercase tracking-widest text-facility-500">{k}</th>
-                <td class="px-5 py-4 text-facility-500">{them}</td>
-                <td class="px-5 py-4 text-facility-100">{us}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- Full-bleed parallax band -->
-  <div class="parallax relative h-[42svh] overflow-hidden border-y border-facility-800 sm:h-[60svh]" aria-hidden="true">
-    <Shot id="cargo-dock-shuttle" sizes="100vw" imgClass="absolute inset-0 h-full w-full object-cover" />
-    <div class="absolute inset-0 bg-gradient-to-b from-facility-950/70 via-transparent to-facility-950/80"></div>
-  </div>
-
-  <!-- ================= ROADMAP ================= -->
-  <section aria-labelledby="roadmap-h">
-    <div class="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[0.9fr_1.1fr]">
-      <div>
-        <p class="kicker">Planned — not in the beta yet</p>
-        <h2 id="roadmap-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
-          What's next
-        </h2>
-        <p class="beat mt-6 text-lg leading-relaxed text-facility-300">
-          The beta is one map and one Hunter. Here's what the team is building next. The
-          Discord votes on the order.
-        </p>
-        <a href={LINKS.discord} rel="noopener" target="_blank" class="beat btn-secondary mt-8">Vote in the Discord <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
-      </div>
-      <ul class="divide-y divide-facility-700 border-y border-facility-700">
-        {ROADMAP.map((r, i) => (
-          <li class="beat py-5" style={`--beat-delay: ${i * 60}ms`}>
-            <h3 class="font-display text-lg font-bold uppercase tracking-wide">{r.t}</h3>
-            <p class="mt-1.5 text-sm leading-relaxed text-facility-300">{r.b}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
-
-  <!-- ================= TEAM ================= -->
-  <section class="border-t border-facility-800" aria-labelledby="team-h">
-    <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-      <p class="kicker">Who makes it</p>
-      <h2 id="team-h" class="beat mt-4 font-display text-3xl font-bold uppercase tracking-wide sm:text-5xl" data-decode>
-        Built by three people
-      </h2>
-      <p class="beat mt-6 max-w-2xl text-lg leading-relaxed text-facility-300">
-        Started in {GAME.devStarted}. Rebuilt three times. No publisher, no outsourcing.
-      </p>
-      <p class="beat mt-5">
-        <a href="/about/" class="font-mono text-sm text-signal hover:text-signal-dim">
-          More about the studio <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
+      <p class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <span class="readout">{COMMUNITY.youtubeViews} views <u>since {COMMUNITY.asOf}</u></span>
+        <a href="/videos/" class="link font-mono text-xs uppercase tracking-[0.08em]">
+          All {VIDEOS.length} videos <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
         </a>
       </p>
-      <ul class="mt-12 grid gap-5 md:grid-cols-3">
-        {TEAM.map((m, i) => (
-          <li class="beat panel p-7" style={`--beat-delay: ${i * 100}ms`}>
-            <p class="font-mono text-xs uppercase tracking-widest text-signal-dim">{m.title}</p>
-            <p class="mt-2 font-display text-xl font-bold uppercase tracking-wide">{m.name}</p>
-            <p class="mt-2 text-sm leading-relaxed text-facility-300">{m.role}</p>
-            <a href={`mailto:${m.email}`} class="mt-4 inline-block font-mono text-xs text-facility-300 hover:text-signal">{m.email}</a>
-          </li>
-        ))}
-      </ul>
     </div>
   </section>
 
-  <FollowSection />
+  <!-- ================= 08 · PROOF — comparison as spec rows =================
+       Was a <table class="min-w-[40rem]"> inside overflow-x-auto: on a 390px
+       phone that is a second scroll axis inside a vertically scrolling page.
+       Same five facts, one line each, no nested scroller. -->
+  <section class="section-band border-t border-facility-800" aria-labelledby="diff-h">
+    <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <p class="eyebrow">Why we built it</p>
+      <h2 id="diff-h" class="rise mt-4 max-w-3xl font-display text-title font-bold uppercase tracking-wide" data-decode>
+        Not another generator game
+      </h2>
+      <div class="mt-8 ticks" aria-hidden="true"></div>
+      <p class="rise mt-6 max-w-2xl text-body text-facility-300">
+        Survivors shouldn't just fix machines. In STATIC they explore, choose what to carry and
+        split the work. <a href="/blog/why-static-is-not-a-generator-game/" class="link">Read why</a>.
+      </p>
 
-  <!-- ================= FINAL CTA ================= -->
-  <section class="parallax relative overflow-hidden border-t border-facility-800" aria-labelledby="cta-h">
+      <div class="mt-10 spec" role="table" aria-label="STATIC compared with other asymmetrical horror games">
+        <!-- One legend row spanning the full width, so the two column names read
+             as a line instead of being squeezed into a 6rem value column. -->
+        <div class="spec-head label" role="row">
+          <span role="columnheader">Aspect · Most asymmetrical horror · STATIC</span>
+        </div>
+        {compare.map(([k, them, us]) => (
+          <div role="row">
+            <span role="rowheader" class="label">{k}</span>
+            <span role="cell" class="label label--dead">{them}</span>
+            <span role="cell" class="text-body text-facility-100">{us}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 09 · PLANNED — the roadmap as one strip =================
+       Five headings and five 23-word paragraphs (113 words) to list five
+       planned features. The titles carry it; the descriptions live on /about/
+       and in the Discord where the vote happens. -->
+  <section class="section-band border-t border-facility-800" aria-labelledby="roadmap-h">
+    <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <p class="eyebrow">Planned — not in the beta yet</p>
+      <h2 id="roadmap-h" class="rise mt-4 font-display text-title font-bold uppercase tracking-wide" data-decode>
+        What's next
+      </h2>
+      <div class="mt-8 ticks" aria-hidden="true"></div>
+      <ul class="strip-row mt-8">
+        {ROADMAP.map((r) => (
+          <li class="flex flex-1 flex-col gap-1">
+            <span class="label label--dead">Planned</span>
+            <span class="font-display text-base font-bold uppercase tracking-wide text-facility-100">{r.t}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <span class="text-body text-facility-300">One map and one Hunter in the beta. The Discord votes on the order.</span>
+        <a href={LINKS.discord} rel="noopener" target="_blank" class="link font-mono text-xs uppercase tracking-[0.08em]">
+          Vote in the Discord <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= 10 · COMMUNITY — one row, not four panels =================
+       Replaces FollowSection (4 panels, 126 words, 2 more amber CTAs) which
+       duplicated SiteFooter's Discord / YouTube / Roblox links. The one thing
+       FollowSection had that nothing else does is the Share button, so it
+       survives here — as a real share link first (works with no JS at all) and
+       upgraded to the native share sheet only if a script is allowed to run. -->
+  <section class="section-band border-t border-facility-800" aria-label="Community">
+    <div class="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <!-- No <h2> here on purpose: the footer already names this section, and a
+           three-cell strip does not need a heading to be navigable. The section
+           carries an aria-label instead of pointing aria-labelledby at a <p>. -->
+      <p class="eyebrow">Community</p>
+      <ul class="strip-row mt-6">
+        <li class="flex flex-1 flex-col gap-1">
+          <span class="label">Discord</span>
+          <span class="readout">{COMMUNITY.discordMembers} members</span>
+          <a href={LINKS.discord} rel="noopener" target="_blank" class="link font-mono text-xs uppercase tracking-[0.08em]">Join</a>
+        </li>
+        <li class="flex flex-1 flex-col gap-1">
+          <span class="label">YouTube</span>
+          <span class="readout">{COMMUNITY.youtubeSubs} subs <u>{COMMUNITY.youtubeViews} views</u></span>
+          <a href={LINKS.youtube} rel="noopener" target="_blank" class="link font-mono text-xs uppercase tracking-[0.08em]">Subscribe</a>
+        </li>
+        <li class="flex flex-1 flex-col gap-1">
+          <span class="label">Roblox group</span>
+          <span class="readout">{COMMUNITY.playtesters} playtesters</span>
+          <a href={LINKS.roblox} rel="noopener" target="_blank" class="link font-mono text-xs uppercase tracking-[0.08em]">Join the group</a>
+        </li>
+        <li class="flex flex-1 flex-col gap-1">
+          <span class="label">Bring your squad</span>
+          <span class="readout">Rounds <u>with people you know</u></span>
+          <a
+            href={`mailto:?subject=${encodeURIComponent('STATIC — free co-op horror on Roblox')}&body=${encodeURIComponent('Free co-op horror on Roblox: haul scrap to the crushers while a jester called Jingles hunts you.\n\n' + SITE.url + '/?utm_source=shared&utm_medium=friend&utm_campaign=beta')}`}
+            id="shareStatic"
+            data-url={`${SITE.url}/?utm_source=shared&utm_medium=friend&utm_campaign=beta`}
+            class="link font-mono text-xs uppercase tracking-[0.08em]"
+          >Share STATIC</a>
+        </li>
+      </ul>
+      <p class="mt-3 label" id="shareStatus" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- ================= 11 · CTA ================= -->
+  <section class="relative overflow-hidden border-t border-facility-800" aria-labelledby="cta-h">
     <Shot id="control-room-hologram" sizes="100vw" imgClass="absolute inset-0 h-full w-full object-cover opacity-40" />
     <div class="absolute inset-0 bg-gradient-to-b from-facility-950 via-facility-950/60 to-facility-950" aria-hidden="true"></div>
-    <div class="relative mx-auto w-full max-w-6xl px-4 py-20 text-center sm:px-6 sm:py-28">
-      <p class="kicker">Free · {GAME.platforms.join(' + ')} · Roblox</p>
-      <h2 id="cta-h" class="beat mt-4 font-display text-4xl font-bold uppercase tracking-wide sm:text-6xl" data-decode>
+    <div class="relative mx-auto w-full max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
+      <p class="eyebrow">Free · {GAME.platforms.join(' + ')} · Roblox</p>
+      <h2 id="cta-h" class="rise mt-4 max-w-3xl font-display text-title font-bold uppercase tracking-wide" data-decode>
         The bunker is open
       </h2>
-      <p class="beat mx-auto mt-5 max-w-xl text-facility-300" style="--beat-delay: 100ms">
+      <p class="rise mt-5 max-w-xl text-lead text-facility-300">
         Grab your squad, pick up your flashlight, and leave the bell alone.
       </p>
-      <div class="beat mt-9 flex flex-wrap items-center justify-center gap-4" style="--beat-delay: 200ms">
+      <div class="rise mt-9 flex flex-wrap items-center gap-6">
         <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary">Play free on Roblox <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
-        <a href="/guide/" class="btn-secondary bg-facility-950/50">Read the guide first <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
+        <a href="/guide/" class="link font-mono text-xs uppercase tracking-[0.08em]">Read the guide first</a>
       </div>
     </div>
   </section>
@@ -700,6 +767,32 @@ const videoGameLd = {
         if (!ticking) { ticking = true; requestAnimationFrame(update); }
       }, { passive: true });
       update();
+    })();
+  </script>
+
+  <!-- Share: the anchor above already works with no JS (it opens a prefilled
+       mail draft). This only upgrades the gesture to the native share sheet or
+       the clipboard where the browser has one. Reduced motion is irrelevant to
+       it; it is a user-gesture action, not an animation. -->
+  <script>
+    (function () {
+      const btn = document.getElementById('shareStatic');
+      const status = document.getElementById('shareStatus');
+      if (!btn || !status) return;
+      const url = btn.getAttribute('data-url') || window.location.origin + '/';
+      btn.addEventListener('click', function (e) {
+        const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+        if (!nav.share) return; // let the mailto href do the work
+        e.preventDefault();
+        nav.share({
+          title: 'STATIC — free Roblox horror game',
+          text: 'Free co-op horror on Roblox: haul scrap to the crushers while a jester called Jingles hunts you. Play with me?',
+          url: url,
+        }).then(
+          function () { status.textContent = 'SENT — SEE YOU IN THE BUNKER'; },
+          function () { /* user canceled — stay quiet */ }
+        );
+      });
     })();
   </script>
 
@@ -753,7 +846,7 @@ const videoGameLd = {
       const stop = function () { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } };
       if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver(function (entries) {
-          for (const e of entries) { if (e.isIntersecting) start(); else stop(); }
+          for (const e of entries) if (e.isIntersecting) start(); else stop();
         });
         io.observe(canvas);
       } else {
