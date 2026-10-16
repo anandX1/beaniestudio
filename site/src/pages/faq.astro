@@ -76,6 +76,21 @@ const faqs: { q: string; a: string; link?: { href: string; label: string } }[] =
     q: 'Where do I report bugs or suggest features?',
     a: 'In the Discord. Bug reports there go straight to the three developers, and the community votes on what gets built next.',
   },
+  {
+    q: 'Does STATIC have a 60-second timer?',
+    a: `Yes — and it is the timer that decides rounds. The exit, the ${EXTRACTION.room}, stays open for ${EXTRACTION.windowSec} seconds, and escaping is per player, so a full squad has to get itself out in that window. The other countdown is the pod: a captured teammate has ${POD.timerSec} seconds, and that runs twice as fast when nobody is free to come for them.`,
+    link: { href: '/guide/crushers/', label: 'How extraction works' },
+  },
+  {
+    q: 'How do I play STATIC with friends?',
+    a: `One person joins first, then everyone else joins them from their Roblox friends list so you land in the same server — there is no separate lobby system. A server holds up to ${GAME.serverSize}: ${GAME.scrappers.min}–${GAME.scrappers.max} Scrappers and ${GAME.hunters} Hunter.`,
+    link: { href: '/guide/with-friends/', label: 'Playing with friends' },
+  },
+  {
+    q: 'What is an asymmetrical horror game?',
+    a: `One where the two sides are not playing the same game. In STATIC, ${GAME.scrappers.min}–${GAME.scrappers.max} Scrappers search the bunker together while ${GAME.hunters} player hunts them as ${JINGLES.name}: different abilities, different objectives and different win conditions on the same map.`,
+    link: { href: '/guide/', label: 'Beginner guide' },
+  },
 ];
 
 const faqLd = {
@@ -90,8 +105,8 @@ const faqLd = {
 ---
 
 <BaseLayout
-  title="STATIC FAQ — Price, Devices, Players, Jingles"
-  description="Answers about STATIC on Roblox: is it free, what devices it runs on, how many players, round length, Jingles, the Worm, voice chat and codes."
+  title="STATIC FAQ — Free, Players, Rounds & Codes"
+  description="Answers about STATIC on Roblox: free to play, up to 7 players, rounds up to 20 minutes, a 60-second escape window, PC and mobile, and no codes live yet."
   path="/faq"
   ogImage="/og/faq.jpg"
   jsonLd={[faqLd]}
