@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
+import Icon from '../../components/Icon.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('devlog', ({ data }) => !data.draft);
@@ -74,16 +75,16 @@ const postLd = {
           class="btn-secondary px-4 py-1.5 font-mono text-xs uppercase tracking-widest"
           data-url={shareUrl}
           data-title={post.data.title}
-        >Share <span aria-hidden="true">→</span></button>
+        >Share <span aria-hidden="true"><Icon name="arrow-right" inline /></span></button>
         <a
           href={xIntent}
           target="_blank"
           rel="noopener"
           class="font-mono text-xs uppercase tracking-widest text-signal hover:text-signal-dim"
-        >Post on X <span aria-hidden="true">↗</span></a>
+        >Post on X <span aria-hidden="true"><Icon name="arrow-up-right" inline /></span></a>
         <span id="shareCopied" class="font-mono text-xs text-signal" role="status" aria-live="polite"></span>
       </div>
-      <a href="/blog/" class="font-mono text-sm text-signal hover:text-signal-dim">← All posts</a>
+      <a href="/blog/" class="font-mono text-sm text-signal hover:text-signal-dim"><Icon name="arrow-left" inline /> All posts</a>
     </div>
   </article>
 

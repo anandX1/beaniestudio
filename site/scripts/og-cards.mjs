@@ -52,10 +52,10 @@ const font = (f) => pathToFileURL(path.join(PUB, 'fonts', f)).href;
 const jingles = pathToFileURL(path.join(PUB, 'press', 'jingles-render.png')).href;
 
 const html = (c) => `<!doctype html><html><head><meta charset="utf-8"><style>
-@font-face { font-family: Chakra; src: url(${font('chakra-petch-latin-700-normal.woff2')}); font-weight: 700; }
-@font-face { font-family: Chakra; src: url(${font('chakra-petch-latin-500-normal.woff2')}); font-weight: 500; }
-@font-face { font-family: Mono; src: url(${font('jetbrains-mono-latin-wght-normal.woff2')}); font-weight: 100 900; }
-@font-face { font-family: Sans; src: url(${font('public-sans-latin-wght-normal.woff2')}); font-weight: 100 900; }
+@font-face { font-family: Chakra; src: url(${font('chakra-petch-latin-700-normal.v2.woff2')}); font-weight: 700; }
+@font-face { font-family: Chakra; src: url(${font('chakra-petch-latin-500-normal.v2.woff2')}); font-weight: 500; }
+@font-face { font-family: Mono; src: url(${font('jetbrains-mono-latin-wght-normal.v2.woff2')}); font-weight: 400 700; }
+@font-face { font-family: Sans; src: url(${font('public-sans-latin-wght-normal.v2.woff2')}); font-weight: 100 900; }
 * { margin: 0; box-sizing: border-box; }
 body { width: 1200px; height: 630px; overflow: hidden; background: oklch(0.16 0.012 240); color: oklch(0.95 0.005 240); position: relative; }
 .bg { position: absolute; inset: 0;

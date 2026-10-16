@@ -1,5 +1,6 @@
 ---
 import { SITE, LINKS } from '../site.config';
+import Icon from './Icon.astro';
 
 // Link targets use the CANONICAL trailing-slash form. Pointing at /guide, /faq, …
 // made Cloudflare 307-redirect every nav click to the slash version — wasted
@@ -67,7 +68,7 @@ function isActive(href: string): boolean {
         class="grid h-9 w-9 cursor-pointer list-none place-items-center border border-facility-600 text-facility-100"
         aria-label="Toggle menu"
       >
-        <span class="font-mono text-lg leading-none">≡</span>
+        <span class="font-mono text-lg leading-none"><Icon name="menu" inline /></span>
       </summary>
       <nav
         class="glass absolute right-0 mt-2 flex w-52 flex-col p-2 font-mono text-xs tracking-[0.2em]"

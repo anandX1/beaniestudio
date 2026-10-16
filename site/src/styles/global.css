@@ -26,6 +26,14 @@
 
   /* — Signal: alarm amber. ONLY for CTAs, warnings, live elements. — */
   --color-signal: oklch(0.78 0.15 75);
+  /* LINE TOKEN — rules, hairlines, borders, underlines and list markers ONLY.
+     It is a non-text token on purpose. Measured: at oklch(0.62 0.12 75) it reaches
+     only 4.42:1 against a facility-800 surface, so it is not an AA-safe `color:`
+     and must never carry text — text that borrowed it composes from the facility
+     ramp instead. That is also what keeps the accent at signal strength: the two
+     ambers were being used interchangeably as text, which put ~25% of the
+     homepage's text in the accent. Seasonal layers may re-hue this token (it is
+     half of the signal pair) — see the Halloween layer near the end of the file. */
   --color-signal-dim: oklch(0.62 0.12 75);
 
   /* — Status hues (readouts, badges) — */
@@ -50,8 +58,46 @@
   --font-sans: 'Public Sans Variable', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', 'Courier New', monospace;
 
+  /* — Type scale: five text steps + two mono steps.
+     There was no scale: sizes were inline Tailwind, and the homepage rendered 21
+     distinct sizes between 9.6px and 158.4px. These steps are fluid, so a block
+     stops inventing a new size per breakpoint, and each carries its own
+     line-height — the mono steps also carry the tracking this site's readouts use
+     — so composing from the scale means composing the whole recipe, not just a
+     number. Naming is additive: no Tailwind default size is redefined, so
+     text-xs … text-9xl still resolve exactly as they did. */
+  --text-caption: 0.6875rem;                                 /* 11px   smallest label */
+  --text-caption--line-height: 1.45;
+  --text-body: 1rem;                                         /* 16px   body copy */
+  --text-body--line-height: 1.65;
+  --text-lead: clamp(1.0625rem, 0.35vw + 0.98rem, 1.25rem);  /* 17 → 20px  lead */
+  --text-lead--line-height: 1.6;
+  --text-title: clamp(1.5rem, 1.5vw + 1.15rem, 2.25rem);     /* 24 → 36px  section head */
+  --text-title--line-height: 1.15;
+  --text-display: clamp(2.75rem, 5.55vw + 1.5rem, 6rem);     /* 44 → 96px  hero / stat */
+  --text-display--line-height: 0.95;
+  /* Mono steps — the terminal register: labels above headings, units, readouts. */
+  --text-mono-label: 0.72rem;                                /* 11.5px  .kicker */
+  --text-mono-label--line-height: 1.4;
+  --text-mono-label--letter-spacing: 0.28em;
+  --text-mono-readout: 0.85rem;                              /* 13.6px  units, tables */
+  --text-mono-readout--line-height: 1.4;
+  --text-mono-readout--letter-spacing: 0.2em;
+
   /* — Motion — */
   --ease-terminal: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* — Section rhythm.
+     Sections sat at 96px padding-block (py-24), under the 110–225px band measured
+     on premium dark sites. This is that band's padding-block, ~130px at 1440.
+     Additive: nothing moves until a section opts in with
+     `padding-block: var(--section-rhythm)`. */
+  --section-rhythm: clamp(4.5rem, 9vw, 8.125rem);            /* 72 → 130px */
+
+  /* — Body wash: the cool glow at the top of the page, held as a token so a
+     seasonal layer can re-light the page with a value swap instead of restating
+     the whole background stack. Alpha is part of the value. */
+  --body-wash: oklch(0.22 0.016 240 / 0.55);
 }
 
 /* ---------- Base ---------- */
@@ -64,9 +110,11 @@ body {
   background-color: var(--color-facility-950);
   color: var(--color-facility-100);
   font-family: var(--font-sans);
-  /* Subtle vertical facility gradient + vignette — depth without images. */
+  /* Subtle vertical facility gradient + vignette — depth without images.
+     The top glow is the --body-wash token so the seasonal layer can re-hue it
+     by value swap alone. */
   background-image:
-    radial-gradient(120% 80% at 50% 0%, oklch(0.22 0.016 240 / 0.55), transparent 60%),
+    radial-gradient(120% 80% at 50% 0%, var(--body-wash), transparent 60%),
     linear-gradient(oklch(0.17 0.012 240), var(--color-facility-950));
   background-attachment: fixed;
 }
@@ -83,13 +131,28 @@ body {
 
 /* ---------- Components ---------- */
 
-/* Mono kicker — "TERMINAL LABEL" above every heading. */
+/* Opt-in section rhythm. Sections sat at 96px padding-block; the measured band on
+   premium dark sites is 110–225px, and --section-rhythm lands at ~130px by 1440.
+   Nothing uses this class, so no page moves. It exists (a) so the token has a
+   consumer and therefore survives Tailwind's theme pruning — an unreferenced
+   @theme key is dropped from the output entirely — and (b) because adopting the
+   rhythm should be a one-class change, not another per-page magic number. It
+   replaces the py-* utilities rather than stacking with them: swap them out. */
+.section-band {
+  padding-block: var(--section-rhythm);
+}
+
+/* Mono kicker — "TERMINAL LABEL" above every heading.
+   Not amber. A label is not a signal, and this is the most repeated piece of
+   small text on the site (every page, every section), so lending it the accent is
+   what pushed the homepage to ~25% accent text. It composes from the facility
+   ramp and from the mono step of the type scale instead. */
 .kicker {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: var(--text-mono-label);
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--color-signal-dim);
+  color: var(--color-facility-400);
 }
 
 /* Primary CTA — amber block, hard edges, terminal hover. */
@@ -109,7 +172,11 @@ body {
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 0 1px var(--color-signal), 0 6px 24px oklch(0.78 0.15 75 / 0.35);
+  /* Was `oklch(0.78 0.15 75 / 0.35)` — a literal copy of --color-signal, so the
+     minifier froze it to #efa83159 with no token behind it and it would have
+     stayed gold through a seasonal swap. color-mix keeps it on the token; the
+     35% alpha is the same number, so today's paint is unchanged. */
+  box-shadow: 0 0 0 1px var(--color-signal), 0 6px 24px color-mix(in oklch, var(--color-signal) 35%, transparent);
 }
 
 .btn-secondary {
@@ -128,7 +195,8 @@ body {
 
 .btn-secondary:hover {
   border-color: var(--color-signal);
-  background: oklch(0.78 0.15 75 / 0.08);
+  /* Was `oklch(0.78 0.15 75 / 0.08)` → shipped as #efa83114, frozen. */
+  background: color-mix(in oklch, var(--color-signal) 8%, transparent);
 }
 
 /* Framed panel — the basic content container.
@@ -913,9 +981,11 @@ body[data-noise='critical'] .dread-vignette {
 }
 .stat-unit {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: var(--text-mono-readout);
   letter-spacing: 0.2em;
-  color: var(--color-signal);
+  /* A unit label is an annotation, not a signal — it reads from the facility ramp
+     so the one amber thing in this panel stays the gauge. */
+  color: var(--color-facility-400);
   margin-left: 0.35rem;
 }
 .stat-icon {
@@ -948,7 +1018,9 @@ body[data-noise='critical'] .dread-vignette {
   height: 3.25rem;
   border: 1px solid var(--color-signal-dim);
   color: var(--color-signal);
-  background: oklch(0.78 0.15 75 / 0.06);
+  /* Was `oklch(0.78 0.15 75 / 0.06)` → shipped as #efa8310f, frozen to gold, and
+     would have sat on a pumpkin background under the seasonal flag. */
+  background: color-mix(in oklch, var(--color-signal) 6%, transparent);
 }
 
 /* --- Ribbon (infinite screenshot marquee) --- */
@@ -1195,6 +1267,60 @@ body[data-noise='critical'] .dread-vignette {
     transform: translateX(calc(-35% + 40% * var(--fx-kin, 0)));
   }
 }
+
+/* ============================================================
+   SEASONAL OVERLAY — opt-in, inert unless switched on.
+
+   Switch it on with one attribute on <html> or <body>:
+       <html data-season="halloween">
+   Nothing below matches without that attribute, and the block only re-points
+   tokens, so with the flag absent every value resolves exactly as before.
+
+   The shape is deliberately NOT a palette per section. A new background colour
+   per section is the "well-made template smell" — one measured reference site
+   ships 51 tokens and 8 hues and reads as a theme, not a design. So a season here
+   is a token swap plus one wash:
+
+   1. It REPLACES the amber instead of adding to it. The signal pair is re-hued
+      75° → 62° (alarm amber → pumpkin) at identical OKLCH lightness and chroma, so
+      every existing signal usage re-hues at once and nothing new turns orange.
+      Measured on the body backdrop: --color-signal 8.88:1 → 8.82:1, and
+      --color-signal-dim 4.89:1 → 4.86:1. AA holds.
+   2. --body-wash is re-hued at the same OKLCH lightness as the cool wash it
+      replaces, so the page warms without brightening: measured −3.9% backdrop
+      luminance, i.e. text contrast goes very slightly up, never down.
+   3. Zero new @keyframes. A season is a change of light; the existing
+      scanline / flicker / blink vocabulary is already season-neutral.
+
+   It adds no fourth .atmo-* — red/amber/blue stay the section vocabulary, and the
+   season re-hues the signal token they already compose from.
+   ============================================================ */
+
+[data-season='halloween'] {
+  /* The only two colour tokens a season may move. */
+  --color-signal: oklch(0.78 0.15 62);
+  --color-signal-dim: oklch(0.62 0.12 62);
+
+  /* The single body-level wash. Same lightness as the default, warm hue. */
+  --body-wash: oklch(0.22 0.035 62 / 0.55);
+}
+
+/* MUST NOT CHANGE — a season re-lights the room, it does not re-key the building.
+   Kept here so the next person does not have to reconstruct the reasoning:
+
+   --color-facility-950 … -100  the facility ramp. Specifically --color-facility-500
+                                at oklch(0.66): it sits at 0.66 because 0.55 failed
+                                AA (4.5:1). Moving any ramp step breaks contrast
+                                that was measured, not guessed.
+   --color-status-red           danger stays red in every season — the Hunter bar,
+                                the dread vignette and the alarm underglow depend
+                                on that hue staying put.
+   --color-status-green/-blue   readout semantics.
+   --color-glass, -glass-line,  the depth system is season-independent.
+   --edge-highlight, --shadow-lift, --shadow-float
+   --font-display/-sans/-mono   type never changes.
+   --text-*, --section-rhythm   the scale and the section rhythm never change.
+   --ease-terminal              motion never changes. */
 
 /* ---------- Reduced motion: kill every non-essential effect ---------- */
 

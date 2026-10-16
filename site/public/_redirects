@@ -1,5 +1,5 @@
-/devlog/*  /blog/:splat  301
-/devlog    /blog        301
+/devlog/*  /blog/:splat/  301
+/devlog  /blog/  301
 
 # 2026-10-08: retired posts that described the pre-beta design → closest real page
 /blog/asymmetrical-horror-1-blind-hunter-vs-5-scrappers/  /guide/jingles/  301
@@ -92,3 +92,8 @@
 /about  /about/  301
 /community  /community/  301
 /blog  /blog/  301
+
+# Blog posts are dynamic [...slug] routes, so they were missed by the first
+# trailing-slash pass above and were still answering 307. Same fix, same reason.
+/blog/static-public-beta-whats-in-the-first-build  /blog/static-public-beta-whats-in-the-first-build/  301
+/blog/why-static-is-not-a-generator-game  /blog/why-static-is-not-a-generator-game/  301

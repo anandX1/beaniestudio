@@ -1,14 +1,25 @@
-/* Self-hosted fonts, stable filenames — preloaded from BaseLayout <head>.
+/* Self-hosted fonts, preloaded from BaseLayout <head>.
    unicode-range scoping kept latin-only (matching the site language) so
    browsers never download what they won't render. font-display: swap keeps
-   text visible during load (no invisible-text period). */
+   text visible during load (no invisible-text period).
+
+   SUBSET BUILD (.v2): these four files are hand-subsetted to the 114
+   codepoints the rendered English site actually uses (95 ASCII + 19
+   non-ASCII dashes/quotes/arrows). 87,092 B -> 53,176 B (-38.9%), verified
+   glyph-for-glyph and advance-width-for-advance-width at wght 400/600/700.
+   The `.v2` suffix is MANDATORY: /fonts/* is served `immutable, max-age=1yr`
+   (see repo-root _headers), so a file can never be replaced in place.
+   Do NOT let scripts/copy-fonts.mjs write into public/fonts/ — it copies the
+   un-subsetted @fontsource originals and would silently revert this. It now
+   stages them in scripts/.fontsrc/ instead. To rebuild the subsets, see
+   _perf-lab/subset_fonts.py + verify-fonts-v2.py. */
 
 @font-face {
   font-family: 'Chakra Petch';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/chakra-petch-latin-500-normal.woff2') format('woff2');
+  src: url('/fonts/chakra-petch-latin-500-normal.v2.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
@@ -17,7 +28,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/fonts/chakra-petch-latin-700-normal.woff2') format('woff2');
+  src: url('/fonts/chakra-petch-latin-700-normal.v2.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
@@ -26,15 +37,18 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url('/fonts/public-sans-latin-wght-normal.woff2') format('woff2-variations');
+  src: url('/fonts/public-sans-latin-wght-normal.v2.woff2') format('woff2-variations');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
   font-family: 'JetBrains Mono Variable';
   font-style: normal;
-  font-weight: 100 800;
+  /* The subset's fvar is clamped to wght 400..700 (original declared 100..800
+     but the site only ever asks for 400-700), so the declared range must match
+     the file. Do NOT widen this back to 100 800. */
+  font-weight: 400 700;
   font-display: swap;
-  src: url('/fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2-variations');
+  src: url('/fonts/jetbrains-mono-latin-wght-normal.v2.woff2') format('woff2-variations');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }

@@ -5,6 +5,7 @@
  * gallery, Esc or a backdrop click closes. ~1 KB of JS, no dependencies.
  * Without JS the links open the full image directly.
  */
+import Icon from './Icon.astro';
 ---
 
 <dialog id="lightbox" class="lightbox" aria-label="Screenshot viewer">
@@ -12,9 +13,9 @@
     <img id="lbImg" alt="Full-size STATIC screenshot" class="max-h-[78svh] max-w-full object-contain" />
     <figcaption id="lbCap" class="max-w-3xl text-center font-mono text-xs leading-relaxed tracking-[0.12em] text-facility-300"></figcaption>
   </figure>
-  <button type="button" class="lb-btn lb-close" data-lb-close aria-label="Close viewer">✕</button>
-  <button type="button" class="lb-btn lb-prev" data-lb-step="-1" aria-label="Previous screenshot">←</button>
-  <button type="button" class="lb-btn lb-next" data-lb-step="1" aria-label="Next screenshot">→</button>
+  <button type="button" class="lb-btn lb-close" data-lb-close aria-label="Close viewer"><Icon name="close" inline /></button>
+  <button type="button" class="lb-btn lb-prev" data-lb-step="-1" aria-label="Previous screenshot"><Icon name="arrow-left" inline /></button>
+  <button type="button" class="lb-btn lb-next" data-lb-step="1" aria-label="Next screenshot"><Icon name="arrow-right" inline /></button>
 </dialog>
 
 <script>

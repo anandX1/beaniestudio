@@ -4,6 +4,7 @@ import Shot from '../components/Shot.astro';
 import Lightbox from '../components/Lightbox.astro';
 import { SITE, LINKS, IMAGE_LICENSE } from '../site.config';
 import { SHOTS, shot, fullDims, type Shot as ShotT } from '../data/media';
+import Icon from '../components/Icon.astro';
 
 /** og:image is a raw screenshot here, not a 1200×630 card — state its real size. */
 const ogShot = shot('cargo-dock-shuttle');
@@ -87,7 +88,7 @@ const galleryLd = {
         <p class="font-display text-xl font-bold uppercase tracking-wide">See it moving</p>
         <p class="mt-1 text-sm text-facility-300">STATIC is free on Roblox for PC and mobile.</p>
       </div>
-      <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary shrink-0">Play free on Roblox <span aria-hidden="true">→</span></a>
+      <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary shrink-0">Play free on Roblox <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
     </div>
   </section>
   <Lightbox />

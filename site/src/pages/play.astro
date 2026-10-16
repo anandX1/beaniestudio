@@ -4,6 +4,7 @@ import VideoCard from '../components/VideoCard.astro';
 import { SITE, LINKS } from '../site.config';
 import { GAME, CRUSHERS } from '../data/game';
 import { PLAY_VIDEOS, watchUrl } from '../data/videos';
+import Icon from '../components/Icon.astro';
 
 const videoLd = PLAY_VIDEOS.map((v) => ({
   '@context': 'https://schema.org',
@@ -65,7 +66,7 @@ const steps = [
       STATIC is free on Roblox. Play on PC or mobile, in the same servers, with up to
       {GAME.serverSize - 1} other players.
     </p>
-    <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary mt-9">Play free on Roblox <span aria-hidden="true">→</span></a>
+    <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary mt-9">Play free on Roblox <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
 
     <ol class="mt-16 grid gap-5 md:grid-cols-3">
       {steps.map((s) => (
@@ -79,7 +80,7 @@ const steps = [
             target={s.external ? '_blank' : undefined}
             class="mt-6 font-mono text-sm text-signal hover:text-signal-dim"
           >
-            {s.cta} <span aria-hidden="true">→</span>
+            {s.cta} <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
           </a>
         </li>
       ))}

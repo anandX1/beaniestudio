@@ -17,6 +17,7 @@ import VideoCard from '../../components/VideoCard.astro';
 import { SITE, LINKS } from '../../site.config';
 import { VIDEOS, CHANNEL_URL, watchUrl, embedUrlPlain, thumbUrl, thumbDims, isoDuration } from '../../data/videos';
 import { GAME, JINGLES, CRUSHERS } from '../../data/game';
+import Icon from '../../components/Icon.astro';
 
 const gameplay = VIDEOS.filter((v) => v.tag !== 'DEVLOG');
 const devlogs = VIDEOS.filter((v) => v.tag === 'DEVLOG');
@@ -85,10 +86,10 @@ const itemListLd = {
     </p>
     <p class="mt-8 flex flex-wrap items-center gap-4">
       <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary">
-        Play free on Roblox <span aria-hidden="true">→</span>
+        Play free on Roblox <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
       </a>
       <a href={CHANNEL_URL} rel="noopener" target="_blank" class="btn-secondary">
-        Subscribe on YouTube <span aria-hidden="true">↗</span>
+        Subscribe on YouTube <span aria-hidden="true"><Icon name="arrow-up-right" inline /></span>
       </a>
     </p>
   </section>
@@ -145,7 +146,7 @@ const itemListLd = {
         ].map((s) => (
           <li class="panel p-5">
             <a href={s.href} class="font-display text-lg font-bold uppercase tracking-wide hover:text-signal">
-              {s.label} <span aria-hidden="true">→</span>
+              {s.label} <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
             </a>
             <p class="mt-2 text-sm leading-relaxed text-facility-300">{s.blurb}</p>
           </li>

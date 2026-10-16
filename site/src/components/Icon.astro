@@ -2,13 +2,28 @@
 /**
  * Inline vector icons (24×24, 1.6 stroke, currentColor). Hand-drawn for
  * STATIC — no icon font, no library, ~200 bytes each, crisp at any size.
+ *
+ * The last seven exist so that arrows and control glyphs that used to be
+ * literal characters (→ ↗ ← ⤢ ▶ ✕ ≡) render identically on every OS instead
+ * of falling back to whatever system font has the codepoint. `play` is the one
+ * filled icon in the set, because the ▶ it replaces is a solid triangle and an
+ * outline at this stroke would read visibly lighter.
  */
 interface Props {
-  name: 'scrap' | 'crusher' | 'console' | 'exit' | 'bell' | 'flashlight' | 'skull' | 'pod' | 'worm' | 'clock' | 'users' | 'weight' | 'bolt' | 'eye';
+  name: 'scrap' | 'crusher' | 'console' | 'exit' | 'bell' | 'flashlight' | 'skull' | 'pod' | 'worm' | 'clock' | 'users' | 'weight' | 'bolt' | 'eye' | 'arrow-right' | 'arrow-left' | 'arrow-up-right' | 'expand' | 'play' | 'close' | 'menu';
   class?: string;
   size?: number;
+  /**
+   * Glyph-replacement mode: size to the surrounding font (1em square) and sit
+   * inline in text flow, exactly like the character this icon replaces.
+   * `inline-block` is not optional — Tailwind preflight sets `svg { display:
+   * block }`, which would drop the icon onto its own line inside a paragraph.
+   * When true this overrides `size`.
+   */
+  inline?: boolean;
 }
-const { name, class: cls, size = 24 } = Astro.props;
+const { name, class: cls, size = 24, inline = false } = Astro.props;
+const classes = [cls, inline && 'inline-block h-[1em] w-[1em] align-middle'].filter(Boolean).join(' ');
 
 const P: Record<Props['name'], string> = {
   scrap: '<path d="M4 15l5-9 6 3 5 8-7 3z"/><path d="M9 6l1 7 10 4M10 13l-6 2"/>',
@@ -25,11 +40,18 @@ const P: Record<Props['name'], string> = {
   weight: '<path d="M7 8h10l3 12H4z"/><circle cx="12" cy="5" r="2"/><path d="M10 14h4"/>',
   bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
   eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  'arrow-right': '<path d="M4 12h16M14 6l6 6-6 6"/>',
+  'arrow-left': '<path d="M20 12H4M10 6l-6 6 6 6"/>',
+  'arrow-up-right': '<path d="M5 19L19 5M8 5h11v11"/>',
+  expand: '<path d="M14 5h5v5M19 5l-6 6M10 19H5v-5M5 19l6-6"/>',
+  play: '<path d="M8 5l12 7-12 7z" fill="currentColor"/>',
+  close: '<path d="M5 5l14 14M19 5L5 19"/>',
+  menu: '<path d="M5 7h14M5 12h14M5 17h14"/>',
 };
 ---
 
 <svg
-  class={cls}
+  class={classes || undefined}
   width={size}
   height={size}
   viewBox="0 0 24 24"

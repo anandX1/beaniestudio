@@ -15,6 +15,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, LINKS, CHANNELS } from '../site.config';
 import { GAME, TEAM } from '../data/game';
+import Icon from '../components/Icon.astro';
 
 const peopleLd = TEAM.map((m) => ({
   '@type': 'Person',
@@ -137,11 +138,11 @@ const aboutLd = {
           </li>
           <li class="flex flex-wrap items-baseline justify-between gap-3 py-4">
             <span class="font-mono text-xs uppercase tracking-widest text-facility-500">Community</span>
-            <a href={LINKS.discord} rel="noopener" target="_blank" class="font-mono text-sm text-signal hover:text-signal-dim">Discord ↗</a>
+            <a href={LINKS.discord} rel="noopener" target="_blank" class="font-mono text-sm text-signal hover:text-signal-dim">Discord <Icon name="arrow-up-right" inline /></a>
           </li>
         </ul>
         <p class="mt-8">
-          <a href="/press/" class="btn-secondary">Press kit &amp; fact sheet <span aria-hidden="true">→</span></a>
+          <a href="/press/" class="btn-secondary">Press kit &amp; fact sheet <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
         </p>
       </div>
 
@@ -181,7 +182,7 @@ const aboutLd = {
         ].map((s) => (
           <li class="panel p-5">
             <a href={s.href} class="font-display text-lg font-bold uppercase tracking-wide hover:text-signal">
-              {s.label} <span aria-hidden="true">→</span>
+              {s.label} <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
             </a>
             <p class="mt-2 text-sm leading-relaxed text-facility-300">{s.blurb}</p>
           </li>

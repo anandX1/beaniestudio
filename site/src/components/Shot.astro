@@ -6,6 +6,7 @@
  * the link simply opens the image.
  */
 import { shot } from '../data/media';
+import Icon from './Icon.astro';
 
 interface Props {
   id: string;
@@ -42,7 +43,7 @@ const img = {
 {lightbox ? (
   <a href={s.full} class:list={['shot-link', cls]} data-lb={lightbox} data-caption={caption ?? s.alt}>
     <img {...img} />
-    <span class="shot-zoom" aria-hidden="true">⤢</span>
+    <span class="shot-zoom" aria-hidden="true"><Icon name="expand" inline /></span>
   </a>
 ) : (
   <img {...img} class:list={[cls, imgClass]} />

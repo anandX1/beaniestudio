@@ -6,6 +6,7 @@
  */
 import { SITE, LINKS } from '../site.config';
 import { GAME } from '../data/game';
+import Icon from './Icon.astro';
 
 const shareUrl = `${SITE.url}/?utm_source=shared&utm_medium=friend&utm_campaign=beta`;
 ---
@@ -29,7 +30,7 @@ const shareUrl = `${SITE.url}/?utm_source=shared&utm_medium=friend&utm_campaign=
           modes, rooms, Hunters.
         </p>
         <p class="mt-5">
-          <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-primary">Join the Discord <span aria-hidden="true">→</span></a>
+          <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-primary">Join the Discord <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
         </p>
       </div>
 
@@ -40,7 +41,7 @@ const shareUrl = `${SITE.url}/?utm_source=shared&utm_medium=friend&utm_campaign=
           channel.
         </p>
         <p class="mt-5">
-          <a href={LINKS.youtube} rel="noopener" target="_blank" class="btn-secondary">Subscribe on YouTube <span aria-hidden="true">→</span></a>
+          <a href={LINKS.youtube} rel="noopener" target="_blank" class="btn-secondary">Subscribe on YouTube <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
         </p>
       </div>
 
@@ -51,7 +52,7 @@ const shareUrl = `${SITE.url}/?utm_source=shared&utm_medium=friend&utm_campaign=
           play.
         </p>
         <p class="mt-5">
-          <a href={LINKS.roblox} rel="noopener" target="_blank" class="btn-secondary">Join the group <span aria-hidden="true">→</span></a>
+          <a href={LINKS.roblox} rel="noopener" target="_blank" class="btn-secondary">Join the group <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
         </p>
       </div>
 
@@ -63,7 +64,7 @@ const shareUrl = `${SITE.url}/?utm_source=shared&utm_medium=friend&utm_campaign=
         </p>
         <p class="mt-5">
           <button type="button" id="shareStatic" class="btn-primary" data-url={shareUrl}>
-            Share STATIC <span aria-hidden="true">→</span>
+            Share STATIC <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
           </button>
         </p>
         <p class="mt-3 font-mono text-[0.62rem] tracking-[0.18em] text-signal" id="shareStatus" role="status" aria-live="polite"></p>

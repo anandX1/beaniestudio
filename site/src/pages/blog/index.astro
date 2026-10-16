@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import Icon from '../../components/Icon.astro';
 
 const posts = (await getCollection('devlog', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -40,7 +41,7 @@ const fmt = (d: Date) =>
           </div>
           <p class="mt-4 leading-relaxed text-facility-300">{post.data.description}</p>
           <a href={`/blog/${post.id}/`} class="mt-5 inline-flex items-center gap-2 font-mono text-sm text-signal hover:text-signal-dim">
-            Read entry <span aria-hidden="true">→</span>
+            Read entry <span aria-hidden="true"><Icon name="arrow-right" inline /></span>
           </a>
         </article>
       ))}

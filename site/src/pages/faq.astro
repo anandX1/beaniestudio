@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, LINKS } from '../site.config';
 import { GAME, JINGLES, CRUSHERS, POD, EXTRACTION, MOVEMENT, TEAM } from '../data/game';
+import Icon from '../components/Icon.astro';
 
 /** Plain-text answers (they feed FAQPage JSON-LD verbatim); `link` adds a follow-up link on the page. */
 const faqs: { q: string; a: string; link?: { href: string; label: string } }[] = [
@@ -131,15 +132,15 @@ const faqLd = {
           </summary>
           <p class="mt-4 max-w-3xl leading-relaxed text-facility-300">{f.a}</p>
           {f.link && (
-            <a href={f.link.href} class="mt-3 inline-block font-mono text-sm text-signal hover:text-signal-dim">{f.link.label} <span aria-hidden="true">→</span></a>
+            <a href={f.link.href} class="mt-3 inline-block font-mono text-sm text-signal hover:text-signal-dim">{f.link.label} <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
           )}
         </details>
       ))}
     </div>
 
     <div class="mt-14 flex flex-wrap gap-4">
-      <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary">Play free on Roblox <span aria-hidden="true">→</span></a>
-      <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-secondary">Ask in the Discord <span aria-hidden="true">→</span></a>
+      <a href={LINKS.game} rel="noopener" target="_blank" class="btn-primary">Play free on Roblox <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
+      <a href={LINKS.discord} rel="noopener" target="_blank" class="btn-secondary">Ask in the Discord <span aria-hidden="true"><Icon name="arrow-right" inline /></span></a>
     </div>
   </section>
 </BaseLayout>

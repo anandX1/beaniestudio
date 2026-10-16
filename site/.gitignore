@@ -13,3 +13,7 @@ content/*
 !content/keywords-game.json
 tools/bin/
 reports/
+# copy-fonts.mjs stages the upstream fontsource files here. It deliberately does
+# NOT write to public/fonts, which holds the hand-built subsets (and is immutable
+# -cached in production, so those files must never be replaced in place).
+scripts/.fontsrc/
