@@ -65,3 +65,30 @@
 /videos/that-one-friend-who-leaves-you-in-the-dark  /videos/  301
 /videos/can-ai-make-a-scary-roblox-game/  /videos/  301
 /videos/can-ai-make-a-scary-roblox-game  /videos/  301
+
+# Trailing-slash consolidation (2026-10-16)
+# Cloudflare's asset server answers a bare /page with a 307 Temporary redirect to
+# /page/, and a 307 does not consolidate ranking signal: /guide/map and /guide/map/
+# were both indexed, with 7 and 16 impressions respectively. These explicit 301s
+# replace that 307 so the two forms merge.
+/guide  /guide/  301
+/guide/numbers  /guide/numbers/  301
+/guide/map  /guide/map/  301
+/guide/danger  /guide/danger/  301
+/guide/hiding  /guide/hiding/  301
+/guide/jingles  /guide/jingles/  301
+/guide/worm  /guide/worm/  301
+/guide/scrap  /guide/scrap/  301
+/guide/crushers  /guide/crushers/  301
+/guide/capture-and-rescue  /guide/capture-and-rescue/  301
+/guide/with-friends  /guide/with-friends/  301
+/codes  /codes/  301
+/screenshots  /screenshots/  301
+/videos  /videos/  301
+/faq  /faq/  301
+/press  /press/  301
+/creators  /creators/  301
+/play  /play/  301
+/about  /about/  301
+/community  /community/  301
+/blog  /blog/  301

@@ -1,6 +1,6 @@
 ---
 title: 'STATIC Public Beta: Launch Date and What’s Inside'
-description: 'STATIC’s free public beta opens on Roblox on 10 October 2026. Here is exactly what is in it: one bunker map, Jingles, the Worm, 3 crushers and 13 minigames.'
+description: 'STATIC’s free public beta opens on Roblox on 10 October 2026. Here is what is in it: one bunker map, Jingles, the Worm, 3 crushers and 13 minigames.'
 pubDate: 2026-10-08
 tag: production
 draft: false
