@@ -22,11 +22,16 @@ const gameplay = VIDEOS.filter((v) => v.tag !== 'DEVLOG');
 const devlogs = VIDEOS.filter((v) => v.tag === 'DEVLOG');
 const totalSeconds = VIDEOS.reduce((a, v) => a + v.durationSec, 0);
 
-/** One VideoObject per clip, so the clips are machine-described even without
- *  a dedicated page each. duration is the real length, in ISO 8601. */
+/** One VideoObject per clip, as a TOP-LEVEL node.
+ *
+ *  Search Console reported "Videos: 1 valid" after this page shipped. The cause: each
+ *  VideoObject was nested inside an ItemList item, and Google does not promote a nested
+ *  video to a video enhancement — it must be a top-level node on the page. The ItemList
+ *  now references them by @id instead of containing them, so the list semantics survive
+ *  without hiding the videos inside it. */
 const videoObjects = VIDEOS.map((v) => ({
   '@type': 'VideoObject',
-  '@id': `${new URL('/videos/', SITE.url).href}#${v.id}`,
+  '@id': `${new URL(`/videos/#${v.id}`, SITE.url).href}`,
   name: v.title,
   description: v.note,
   thumbnailUrl: [new URL(thumbUrl(v.id), SITE.url).href],
@@ -49,7 +54,7 @@ const itemListLd = {
   itemListElement: videoObjects.map((v, i) => ({
     '@type': 'ListItem',
     position: i + 1,
-    item: v,
+    item: { '@id': v['@id'] },
   })),
 };
 ---
@@ -59,7 +64,7 @@ const itemListLd = {
   description={`${VIDEOS.length} official STATIC clips: gameplay from inside the bunker and devlogs on how the Roblox horror game is built. Plus how a round actually works.`}
   path="/videos"
   ogImageAlt="STATIC gameplay clips and devlogs"
-  jsonLd={[itemListLd]}
+  jsonLd={[itemListLd, ...videoObjects]}
   breadcrumb={[{ name: 'Home', path: '/' }, { name: 'Videos', path: '/videos' }]}
 >
   <section class="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
