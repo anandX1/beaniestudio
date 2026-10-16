@@ -129,15 +129,22 @@ export const CRUSHERS = {
   quotasKg: [120, 130, 150],
   totalKg: 400,
   /**
-   * VERIFIED 7, not 3. CrusherStationService.GeneratePlan builds exactly seven
-   * games per console: three L/R pairs plus one solo finisher
-   * (src/ServerScriptService/STATIC_Server/CrusherStationService.luau:161 doc
-   * comment "a deterministic 7-game plan", :207-220 the seven inserts, :219
-   * "Game 7: Solo finisher"). Research/CRUSHER_CONSOLE_DESIGN.md §7.3 is titled
-   * "Picking 7 games per run" and §7.2 budgets "7 games × ~9 s".
-   * The registry holds 13 games, so 7 are drawn per console and 6 sit out.
-   */
-  minigamesPerConsole: 7,
+     * Games per console: 3.
+     *
+     * OWNER-CONFIRMED DESIGN CHANGE (2026-10-17): each console runs a memory game,
+     * one game drawn at random from the pool below, and a wheel game.
+     *
+     * The shipped code still generates a 7-game plan — three L/R pairs plus a solo
+     * finisher (CrusherStationService.luau:161 doc comment, :207-220 the seven
+     * inserts, :219 "Game 7: Solo finisher"; Research/CRUSHER_CONSOLE_DESIGN.md
+     * section 7.3). The owner is implementing the 3-game version. Per CLAUDE.md
+     * rule 9, game.ts leads: this value changed first and the code catches up.
+     * If the code still says 7 when you read this, check with the owner before
+     * reverting it back.
+     */
+    minigamesPerConsole: 3,
+    /** The three console slots, in order, as confirmed by the owner. */
+    minigameSlots: ['Memory game', 'Random from the pool', 'Wheel game'] as const,
 } as const;
 
 /**

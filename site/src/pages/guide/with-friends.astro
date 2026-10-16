@@ -9,7 +9,7 @@
  */
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import { SITE, LINKS } from '../../site.config';
-import { GAME, SCRAPPER, POD, CRUSHERS, JINGLES } from '../../data/game';
+import { GAME, SCRAPPER, POD, CRUSHERS, JINGLES, MINIGAMES } from '../../data/game';
 
 const friendLd = {
   '@context': 'https://schema.org',
@@ -99,7 +99,7 @@ const friendLd = {
   <p>
     You need <strong>{CRUSHERS.totalKg} kg</strong> crushed across {CRUSHERS.count} crushers
     ({CRUSHERS.quotasKg.join(' / ')} kg each), and each console holds{' '}
-    {CRUSHERS.minigamesPerConsole} of the {CRUSHERS.minigamesPerConsole + 6} minigames in the pool.
+    {CRUSHERS.minigamesPerConsole} of the {MINIGAMES.length} minigames in the pool.
     A split that works:
   </p>
   <ol>

@@ -50,7 +50,7 @@ const heroShot = shot('central-room-globe');
 const jobStats = [
   { v: `${CRUSHERS.totalKg}`, u: 'kg', n: 'of scrap, crushed to clear the round' },
   { v: `${CRUSHERS.count}`, u: '', n: 'crushers, in random spots. Crushing is loud' },
-  { v: `${MINIGAMES.length}`, u: '', n: 'console minigames; 7 per crusher' },
+  { v: `${MINIGAMES.length}`, u: '', n: `console minigames; ${CRUSHERS.minigamesPerConsole} per crusher` },
   { v: `${GAME.roundLimitMin}`, u: 'min', n: 'is the longest a round runs' },
 ];
 
@@ -194,7 +194,7 @@ const videoGameLd = {
     <!-- Unchanged on purpose: the hero image is the measured LCP element and
          `100vw` is correct for a full-bleed backdrop. Declaring 1280 here would
          upscale it above 1440. -->
-    <link rel="preload" as="image" type="image/webp" imagesrcset={heroShot.srcset} imagesizes="(min-width: 768px) 100vw, 50vw" fetchpriority="high" />
+    <link rel="preload" as="image" type="image/avif" imagesrcset={heroShot.srcset.replace(/\.webp/g, '.avif')} imagesizes="(min-width: 768px) 100vw, 50vw" fetchpriority="high" />
   </Fragment>
 
   <!-- Beat reveals: armed inline so above-fold copy paints on first frame.

@@ -149,7 +149,7 @@ if (invokedDirectly) {
       for (const b of bigger) console.log(`    ${b.file}  webp ${b.webp}  avif ${b.avif}  (+${b.avif - b.webp} B)`);
     }
     // Only a missing mirror can 404 an AVIF browser, so only that is fatal.
-    process.exit(missing.length ? 1 : 0);
+    if (!report) process.exit(missing.length ? 1 : 0);
     if (report) {
       const by = {};
       for (const r of rows) {
@@ -166,7 +166,7 @@ if (invokedDirectly) {
         );
       }
     }
-    process.exit(missing.length || bigger.length ? 1 : 0);
+    process.exit(missing.length ? 1 : 0);
   }
 
   let made = 0;
