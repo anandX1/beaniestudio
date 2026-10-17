@@ -1,0 +1,367 @@
+{
+  "label": "baseline-clean",
+  "base": "https://beaniestudio.site",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "at": "2026-10-17T07:38:07.751Z",
+  "chrome": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "pages": {
+    "/": {
+      "doc": {
+        "bytes": 35103,
+        "ttfb": 1996,
+        "dcl": 3832,
+        "load": 5602
+      },
+      "counts": {
+        "requests": 13,
+        "img": 6,
+        "css": 5,
+        "js": 2
+      },
+      "bytes": {
+        "total": 343499,
+        "img": 287470,
+        "js": 1353,
+        "css": 0,
+        "font": 54376
+      },
+      "imgFormats": {
+        "avif": 3,
+        "png": 2,
+        "webp": 1
+      },
+      "dom": {
+        "nodes": 794,
+        "depth": 13,
+        "sections": 11,
+        "imgs": 42,
+        "lazy": 38,
+        "eager": 4,
+        "withDims": 41
+      },
+      "blocking": 0,
+      "scripts": 2,
+      "perf": {
+        "lcp": 5156,
+        "lcpEl": "IMG",
+        "cls": 0.0446198688271605,
+        "shifts": [
+          {
+            "v": 0.0446,
+            "t": 3688
+          },
+          {
+            "v": 0,
+            "t": 4221
+          }
+        ],
+        "longtasks": [
+          52
+        ],
+        "fcp": 3468,
+        "lcpSize": 1234195
+      },
+      "styleSheets": 1,
+      "inlineCssBytes": 66338,
+      "biome": "hub",
+      "title": "STATIC: Salvage vs Hunter — 6-Player Roblox Horror"
+    },
+    "/guide/map/": {
+      "doc": {
+        "bytes": 33249,
+        "ttfb": 661,
+        "dcl": 1303,
+        "load": 1340
+      },
+      "counts": {
+        "requests": 21,
+        "img": 14,
+        "css": 5,
+        "js": 2
+      },
+      "bytes": {
+        "total": 361660,
+        "img": 307131,
+        "js": 1053,
+        "css": 0,
+        "font": 53176
+      },
+      "imgFormats": {
+        "avif": 13,
+        "png": 1
+      },
+      "dom": {
+        "nodes": 864,
+        "depth": 16,
+        "sections": 8,
+        "imgs": 57,
+        "lazy": 55,
+        "eager": 2,
+        "withDims": 56
+      },
+      "blocking": 0,
+      "scripts": 2,
+      "perf": {
+        "lcp": 2896,
+        "lcpEl": "IMG.h-auto.w-full",
+        "cls": 0,
+        "shifts": [],
+        "longtasks": [
+          81
+        ],
+        "fcp": 1868,
+        "lcpSize": 188203
+      },
+      "styleSheets": 1,
+      "inlineCssBytes": 71243,
+      "biome": "blueprint",
+      "title": "STATIC Bunker Map — Every Room, Top-Down (Roblox)"
+    },
+    "/guide/jingles/": {
+      "doc": {
+        "bytes": 27575,
+        "ttfb": 411,
+        "dcl": 499,
+        "load": 500
+      },
+      "counts": {
+        "requests": 12,
+        "img": 5,
+        "css": 4,
+        "js": 2
+      },
+      "bytes": {
+        "total": 107705,
+        "img": 53176,
+        "js": 1053,
+        "css": 0,
+        "font": 53176
+      },
+      "imgFormats": {
+        "png": 1,
+        "avif": 4
+      },
+      "dom": {
+        "nodes": 367,
+        "depth": 14,
+        "sections": 0,
+        "imgs": 7,
+        "lazy": 5,
+        "eager": 2,
+        "withDims": 6
+      },
+      "blocking": 0,
+      "scripts": 2,
+      "perf": {
+        "lcp": 2288,
+        "lcpEl": "IMG.h-auto.w-full",
+        "cls": 0,
+        "shifts": [],
+        "longtasks": [],
+        "fcp": 688,
+        "lcpSize": 128061
+      },
+      "styleSheets": 1,
+      "inlineCssBytes": 69612,
+      "biome": "red",
+      "title": "Jingles (STATIC Hunter) — Abilities, Stats & Counters"
+    },
+    "/guide/crushers/": {
+      "doc": {
+        "bytes": 27379,
+        "ttfb": 613,
+        "dcl": 1033,
+        "load": 1042
+      },
+      "counts": {
+        "requests": 8,
+        "img": 1,
+        "css": 4,
+        "js": 2
+      },
+      "bytes": {
+        "total": 58637,
+        "img": 4108,
+        "js": 1053,
+        "css": 0,
+        "font": 53176
+      },
+      "imgFormats": {
+        "png": 1
+      },
+      "dom": {
+        "nodes": 403,
+        "depth": 14,
+        "sections": 0,
+        "imgs": 5,
+        "lazy": 3,
+        "eager": 2,
+        "withDims": 4
+      },
+      "blocking": 0,
+      "scripts": 2,
+      "perf": {
+        "lcp": 1248,
+        "lcpEl": "H1.mt-4.font-display",
+        "cls": 0,
+        "shifts": [],
+        "longtasks": [],
+        "fcp": 1248,
+        "lcpSize": 90774
+      },
+      "styleSheets": 1,
+      "inlineCssBytes": 72502,
+      "biome": "amber",
+      "title": "STATIC Crushers, Minigames and Escape Guide (Roblox)"
+    },
+    "/guide/numbers/": {
+      "doc": {
+        "bytes": 26853,
+        "ttfb": 652,
+        "dcl": 694,
+        "load": 702
+      },
+      "counts": {
+        "requests": 8,
+        "img": 1,
+        "css": 4,
+        "js": 2
+      },
+      "bytes": {
+        "total": 58637,
+        "img": 4108,
+        "js": 1053,
+        "css": 0,
+        "font": 53176
+      },
+      "imgFormats": {
+        "png": 1
+      },
+      "dom": {
+        "nodes": 602,
+        "depth": 11,
+        "sections": 0,
+        "imgs": 3,
+        "lazy": 1,
+        "eager": 2,
+        "withDims": 2
+      },
+      "blocking": 0,
+      "scripts": 2,
+      "perf": {
+        "lcp": 916,
+        "lcpEl": "P.text-lg",
+        "cls": 0,
+        "shifts": [],
+        "longtasks": [],
+        "fcp": 916,
+        "lcpSize": 55132
+      },
+      "styleSheets": 1,
+      "inlineCssBytes": 66265,
+      "biome": null,
+      "title": "STATIC Numbers — Every Stat and Timer (Roblox)"
+    },
+    "/screenshots/": {
+      "doc": {
+        "bytes": 32450,
+        "ttfb": 735,
+        "dcl": 1748,
+        "load": 1749
+      },
+      "counts": {
+        "requests": 36,
+        "img": 29,
+        "css": 5,
+        "js": 2
+      },
+      "bytes": {
+        "total": 631830,
+        "img": 577301,
+        "js": 1053,
+        "css": 0,
+        "font": 53176
+      },
+      "imgFormats": {
+        "png": 1,
+        "avif": 28
+      },
+      "dom": {
+        "nodes": 857,
+        "depth": 11,
+        "sections": 6,
+        "imgs": 83,
+        "lazy": 81,
+        "eager": 2,
+        "withDims": 82
+      },
+      "blocking": 0,
+      "scripts": 2,
+      "perf": {
+        "lcp": 1868,
+        "lcpEl": "IMG.h-full.w-full",
+        "cls": 0,
+        "shifts": [],
+        "longtasks": [],
+        "fcp": 1868,
+        "lcpSize": 77009
+      },
+      "styleSheets": 1,
+      "inlineCssBytes": 66265,
+      "biome": null,
+      "title": "STATIC Screenshots — Official Roblox Game Images"
+    },
+    "/faq/": {
+      "doc": {
+        "bytes": 24433,
+        "ttfb": 909,
+        "dcl": 957,
+        "load": 961
+      },
+      "counts": {
+        "requests": 9,
+        "img": 2,
+        "css": 4,
+        "js": 2
+      },
+      "bytes": {
+        "total": 72479,
+        "img": 17950,
+        "js": 1053,
+        "css": 0,
+        "font": 53176
+      },
+      "imgFormats": {
+        "png": 1,
+        "webp": 1
+      },
+      "dom": {
+        "nodes": 308,
+        "depth": 11,
+        "sections": 1,
+        "imgs": 2,
+        "lazy": 1,
+        "eager": 1,
+        "withDims": 2
+      },
+      "blocking": 0,
+      "scripts": 2,
+      "perf": {
+        "lcp": 1092,
+        "lcpEl": "H1.mt-6.font-display",
+        "cls": 0,
+        "shifts": [],
+        "longtasks": [],
+        "fcp": 1092,
+        "lcpSize": 82467
+      },
+      "styleSheets": 1,
+      "inlineCssBytes": 66265,
+      "biome": null,
+      "title": "STATIC FAQ — Free, Players, Rounds & Codes"
+    }
+  }
+}
