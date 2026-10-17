@@ -5,3 +5,6 @@ site/node_modules/
 site/dist/
 site/.astro/
 *.log
+
+# perf snapshots live outside the repo; this guards against a recurrence
+_perf-runs/

@@ -36,6 +36,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { fileURLToPath } from 'node:url';
 
 // ---------------------------------------------------------------- args
 
@@ -46,7 +47,11 @@ const opt = (n, d) => { const i = argv.indexOf(`--${n}`); return i !== -1 ? argv
 const BASE = opt('url', 'https://beaniestudio.site');
 const LABEL = opt('label', new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19));
 const DIFF = opt('diff', null);
-const OUT = path.resolve(opt('out', path.join(process.cwd(), '..', '_perf-runs')));
+// Resolved from THIS FILE, not cwd. Using cwd put the snapshots inside the repo root,
+// which is the deployed site - they were publicly served at /_perf-runs/ until this was
+// fixed. Three levels up from site/scripts is the workspace dir, which is never deployed.
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const OUT = path.resolve(opt('out', path.join(HERE, '..', '..', '..', '_perf-runs')));
 const PAGES = opt('pages', '/,/guide/map/,/guide/jingles/,/guide/crushers/,/guide/numbers/,/screenshots/,/faq/').split(',').map((s) => s.trim());
 const VIEWPORT = { width: 1440, height: 900 };
 
